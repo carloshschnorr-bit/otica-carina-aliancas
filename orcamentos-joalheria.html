@@ -1,0 +1,1037 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Orçamentos de Alianças</title>
+<style>
+:root{
+  --ink:#0f172a; --charcoal:#1f2937; --gold:#2563eb; --gold-dark:#1d4ed8; --gold-light:#3b82f6;
+  --cream:#eef1f7; --ivory:#ffffff; --soft:#e5edff; --line:#e6e8f0; --muted:#64748b;
+}
+*{box-sizing:border-box}
+html,body{margin:0;min-height:100%;background:linear-gradient(170deg,#fbfcff 0%,#eaeefb 100%);background-attachment:fixed;color:var(--charcoal);font-family:'Inter',-apple-system,Segoe UI,Roboto,Arial,sans-serif;font-size:15px}
+h1,h2,h3,.serif{font-family:inherit;font-weight:700;color:var(--ink);margin:0;letter-spacing:-.01em}
+a{color:inherit}
+button{font-family:inherit;cursor:pointer}
+em{font-style:normal;color:var(--gold)}
+.muted{color:var(--muted)}
+.fade{animation:fade .25s ease}
+@keyframes fade{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+.container{max-width:1120px;margin:0 auto;padding:22px 20px}
+.gold-grad{background:linear-gradient(135deg,#3b82f6,#2563eb 90%)}
+.card{background:var(--ivory);border:1px solid var(--line);border-radius:18px;box-shadow:0 8px 24px -14px rgba(30,41,59,.18)}
+.pad{padding:20px}
+.center{text-align:center}
+.row{display:flex;align-items:center}
+.between{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap}
+.gap{gap:10px}
+.mt{margin-top:14px}.mt2{margin-top:22px}
+.grid{display:grid;gap:16px}
+.g2{grid-template-columns:1fr 1fr}.g3{grid-template-columns:repeat(3,1fr)}.g4{grid-template-columns:repeat(4,1fr)}
+@media(max-width:900px){.g4{grid-template-columns:repeat(2,1fr)}.g3{grid-template-columns:1fr}.prodwrap{grid-template-columns:1fr!important}.quotewrap{grid-template-columns:1fr!important}}
+@media(max-width:620px){.g2{grid-template-columns:1fr}.nav{display:none!important}}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;border:0;border-radius:12px;padding:11px 16px;font-weight:600;font-size:14px;transition:.15s;text-decoration:none}
+.btn:active{transform:scale(.98)}
+.btn-primary{color:#fff;box-shadow:0 8px 20px -10px rgba(37,99,235,.6)}.btn-primary.gold-grad:hover{filter:brightness(1.05)}
+.btn-ghost{background:#fff;border:1px solid var(--line);color:var(--charcoal)}
+.btn-ghost:hover{border-color:var(--gold);color:var(--gold-dark)}
+.btn-dark{background:var(--ink);color:#fff}.btn-dark:hover{background:#0b1220}
+.btn-white{background:#fff;color:var(--gold-dark)}.btn-white:hover{filter:brightness(.97)}
+.btn-subtle{background:var(--cream);color:var(--charcoal)}.btn-subtle:hover{background:var(--soft)}
+.btn-sm{padding:7px 12px;font-size:13px}
+.w100{width:100%}
+.badge{display:inline-block;font-size:11px;font-weight:700;padding:3px 9px;border-radius:999px;background:var(--soft);color:var(--gold-dark)}
+.badge.green{background:#dcfce7;color:#15803d}.badge.blue{background:#e0edff;color:#1d4ed8}.badge.amber{background:#fef3c7;color:#b45309}
+.badge.red{background:#fee2e2;color:#b91c1c}.badge.gray{background:#eef1f6;color:#475569}
+.inp{width:100%;border:1px solid var(--line);border-radius:12px;padding:10px 12px;font-size:14px;background:#fff;font-family:inherit;color:var(--charcoal)}
+.inp:focus{outline:0;border-color:var(--gold);box-shadow:0 0 0 3px rgba(37,99,235,.15)}
+.field{display:block;margin-bottom:2px}
+.field .lab{font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.04em}
+.field .val{margin-top:4px}
+.top{position:sticky;top:0;z-index:40;background:rgba(255,255,255,.85);color:var(--ink);backdrop-filter:blur(10px);border-bottom:1px solid var(--line)}
+.top-inner{max-width:1120px;margin:0 auto;padding:0 20px;height:62px;display:flex;align-items:center;gap:12px}
+.brand{display:flex;align-items:center;gap:9px;background:none;border:0;color:var(--ink)}
+.brand-badge{width:36px;height:36px;border-radius:11px;display:inline-flex;align-items:center;justify-content:center;font-weight:800;font-size:18px;color:#fff;background:linear-gradient(135deg,#3b82f6,#2563eb)}
+.brand-name{font-weight:800;font-size:20px;letter-spacing:-.01em}
+.search-wrap{position:relative;flex:1;max-width:440px}
+.search{width:100%;border-radius:12px;background:#f1f4fa;border:1px solid var(--line);padding:9px 14px;color:var(--ink);font-size:14px}
+.search::placeholder{color:#94a3b8}
+.search:focus{outline:0;background:#fff;border-color:var(--gold);box-shadow:0 0 0 3px rgba(37,99,235,.12)}
+.search-drop{position:absolute;top:44px;left:0;right:0;background:#fff;color:var(--charcoal);border:1px solid var(--line);border-radius:12px;box-shadow:0 16px 34px -10px rgba(15,23,42,.25);overflow:hidden;z-index:50}
+.search-drop button{display:flex;align-items:center;gap:10px;width:100%;background:none;border:0;padding:8px 12px;text-align:left}
+.search-drop button:hover{background:var(--cream)}
+.nav{display:flex;gap:2px}
+.navbtn{background:none;border:0;color:#475569;padding:7px 11px;border-radius:9px;font-size:14px;font-weight:500}
+.navbtn:hover{background:var(--cream);color:var(--ink)}
+.cartbtn{position:relative;background:#f1f4fa;border:1px solid var(--line);color:var(--ink);border-radius:12px;padding:8px 12px;font-size:14px}
+.cartbtn:hover{border-color:var(--gold)}
+.cart-badge{position:absolute;top:-8px;right:-8px;background:var(--gold);color:#fff;font-size:11px;width:20px;height:20px;border-radius:999px;display:inline-flex;align-items:center;justify-content:center}
+.top-sub{max-width:1120px;margin:0 auto;padding:0 20px 8px;display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;font-size:12px;color:var(--muted)}
+.rate{background:none;border:0;color:inherit;display:flex;align-items:center;gap:8px}
+.rate:hover{color:var(--gold)}
+.dot{width:8px;height:8px;border-radius:999px;display:inline-block}.dot.green{background:#22c55e}.dot.amber{background:#f59e0b}
+.hero{text-align:center;padding:26px 0}
+.eyebrow{color:var(--gold);letter-spacing:.28em;font-size:11px;font-weight:700}
+.hero-title{font-size:42px;margin-top:8px;font-weight:800}
+.launch{max-width:900px;margin:0 auto;display:grid;grid-template-columns:repeat(4,1fr);gap:16px}
+@media(max-width:820px){.launch{grid-template-columns:repeat(2,1fr)}}
+.lcard{background:var(--ivory);border:1px solid var(--line);border-radius:18px;padding:22px 18px;text-align:center;box-shadow:0 10px 28px -18px rgba(30,41,59,.22);transition:.16s}
+.lcard:hover{transform:translateY(-4px);border-color:#c9d6f5;box-shadow:0 18px 34px -20px rgba(37,99,235,.4)}
+.licon{width:52px;height:52px;border-radius:999px;display:inline-flex;align-items:center;justify-content:center;font-size:22px;margin-bottom:8px}
+.shelf{display:flex;gap:14px;overflow-x:auto;padding-bottom:6px}
+.shelf .mini{flex:0 0 auto;width:160px;background:var(--ivory);border:1px solid var(--line);border-radius:14px;padding:12px;text-align:left}
+.shelf .mini:hover{border-color:var(--gold)}
+.code{font-size:12px;color:var(--gold-dark);font-weight:700;letter-spacing:.02em}
+.tabs{display:inline-flex;background:#e9edf6;border-radius:12px;padding:4px;flex-wrap:wrap}
+.tab{background:none;border:0;padding:9px 15px;border-radius:9px;font-size:14px;font-weight:600;color:var(--muted)}
+.tab.on{background:#fff;color:var(--gold-dark);box-shadow:0 4px 12px -6px rgba(30,41,59,.25)}
+.catgrid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px}
+@media(max-width:900px){.catgrid{grid-template-columns:repeat(2,1fr)}}
+.prod{background:var(--ivory);border:1px solid var(--line);border-radius:18px;overflow:hidden;box-shadow:0 10px 26px -18px rgba(30,41,59,.22);transition:.15s}
+.prod:hover{border-color:#c9d6f5}
+.prod .ph{position:relative;background:linear-gradient(#f4f7fd,#fff);display:flex;justify-content:center;align-items:center;padding:18px 0;cursor:pointer;min-height:150px}
+.fav{position:absolute;top:8px;right:10px;background:rgba(255,255,255,.7);border:0;font-size:18px;color:#f59e0b;border-radius:999px;width:30px;height:30px}
+.prodwrap{display:grid;grid-template-columns:1fr 1fr;gap:30px}
+.optrow{display:flex;align-items:center;gap:10px;border:1px solid var(--line);border-radius:12px;padding:10px 12px;margin-bottom:8px;cursor:pointer;transition:.12s}
+.optrow.on{border-color:var(--gold);background:var(--soft)}
+.optrow .nm{flex:1;font-size:14px}
+.optrow .pr{font-weight:700;color:var(--gold-dark);font-size:14px}
+.pricebox{margin-top:16px;border-radius:18px;padding:20px;color:#fff;box-shadow:0 16px 32px -18px rgba(37,99,235,.55)}
+.price-big{font-weight:800;font-size:38px;letter-spacing:-.02em}
+.warn{margin-top:12px;font-size:11px;background:rgba(0,0,0,.18);border-radius:9px;padding:6px 10px}
+.cmpcard{background:var(--ivory);border:1px solid var(--line);border-radius:18px;padding:18px;box-shadow:0 10px 30px -18px rgba(30,41,59,.22)}
+.cmprow{display:flex;align-items:center;justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--line)}
+.cmprow:last-child{border:0}
+.quotewrap{display:grid;grid-template-columns:2fr 1fr;gap:24px}
+.qitem{background:var(--ivory);border:1px solid var(--line);border-radius:16px;padding:14px;display:flex;gap:14px;align-items:center;margin-bottom:12px}
+.sumrow{display:flex;justify-content:space-between;color:var(--muted);margin:3px 0}
+.sumrow.st{color:var(--ink);font-weight:700;font-size:16px}
+.listrow{display:flex;align-items:center;gap:12px;padding:12px 18px;border-bottom:1px solid var(--line)}
+.listrow:last-child{border:0}
+.cardgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:16px}
+.modal-bg{position:fixed;inset:0;background:rgba(15,23,42,.42);z-index:60;display:flex;align-items:center;justify-content:center;padding:16px}
+.modal{background:#fff;border-radius:20px;width:100%;max-width:540px;max-height:90vh;overflow:auto;box-shadow:0 24px 60px -12px rgba(15,23,42,.35)}
+.modal.wide{max-width:780px}
+.modal-h{display:flex;align-items:center;justify-content:space-between;padding:16px 22px;border-bottom:1px solid var(--line);position:sticky;top:0;background:#fff}
+.x{background:none;border:0;font-size:20px;color:var(--muted)}
+.toast{position:fixed;bottom:22px;left:50%;transform:translateX(-50%);z-index:80;background:var(--ink);color:#fff;padding:12px 20px;border-radius:12px;font-size:14px;box-shadow:0 12px 30px -8px rgba(15,23,42,.4)}
+.stat{background:var(--ivory);border:1px solid var(--line);border-radius:18px;padding:18px}
+.stat .n{font-weight:800;font-size:30px;color:var(--ink);margin-top:4px}
+.paramrow{display:flex;align-items:center;gap:12px;padding:9px 0;border-bottom:1px solid var(--line)}
+.paramrow .pl{flex:1;font-size:14px;color:var(--ink)}
+.hint{font-size:11px;color:var(--muted)}
+.check{display:flex;align-items:center;gap:8px;padding:8px 0;border-bottom:1px solid var(--line);font-size:14px}
+.check:last-child{border:0}
+.pimg{object-fit:cover;border-radius:14px;background:#f4f7fd}
+.print-area{max-width:780px;margin:22px auto;background:#fff;border-radius:14px;overflow:hidden;box-shadow:0 16px 44px -16px rgba(15,23,42,.3)}
+.pdf-head{padding:24px 40px;color:var(--ink);background:#eef1f6;border-bottom:1px solid var(--line);display:flex;align-items:center;justify-content:space-between}
+.pdf-head .muted2{color:#6b7280}
+.pdf-body{padding:24px 40px}
+.print-bar{background:var(--ink);color:#fff;position:sticky;top:0;z-index:10}
+.print-bar .inner{max-width:780px;margin:0 auto;padding:12px 16px;display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+@media print{.no-print{display:none!important}body{background:#fff!important}.print-area{box-shadow:none;margin:0}}
+.divider{border-top:1px solid var(--line)}
+</style>
+</head>
+<body>
+<div id="app"></div>
+<div id="modal-root"></div>
+<div id="toast-root"></div>
+<script>
+/* Rede de segurança: se o app não iniciar, mostra aviso em vez de tela em branco. */
+window.addEventListener('error',function(ev){var a=document.getElementById('app');if(a&&a.children.length===0){a.innerHTML='<div style="max-width:640px;margin:60px auto;padding:24px;background:#fff;border:1px solid #e6e8f0;border-radius:16px;font-family:Inter,Arial,sans-serif;color:#0f172a"><b>Não foi possível iniciar a aplicação.</b><div style="color:#64748b;font-size:13px;margin-top:8px">'+(ev.message||'')+'</div><div style="color:#94a3b8;font-size:12px;margin-top:6px">Recarregue com Ctrl+R. Se continuar, me envie esta mensagem que eu corrijo.</div></div>';}});
+setTimeout(function(){var a=document.getElementById('app');if(a&&a.children.length===0){a.innerHTML='<div style="max-width:640px;margin:60px auto;padding:24px;background:#fff;border:1px solid #e6e8f0;border-radius:16px;font-family:Inter,Arial,sans-serif;color:#0f172a"><b>A aplicação não carregou.</b><div style="color:#94a3b8;font-size:12px;margin-top:6px">Recarregue com Ctrl+R.</div></div>';}},2000);
+</script>
+<script>
+"use strict";
+/* ============================================================ UTILS ============================================================ */
+var TROY_OZ=31.1034768;
+function money(v){ return (v==null||isNaN(v))?'—':Number(v).toLocaleString('pt-BR',{style:'currency',currency:'BRL'}); }
+function usd(v){ return (v==null||isNaN(v))?'—':'US$ '+Number(v).toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2}); }
+function addDays(n){ var d=new Date(); d.setDate(d.getDate()+n); return d.toISOString().slice(0,10); }
+function fmtDate(iso){ return iso?iso.slice(0,10).split('-').reverse().join('/'):'—'; }
+function esc(s){ return (s==null?'':String(s)).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+function copyText(t){ try{ if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(t);return;} }catch(e){} var ta=document.createElement('textarea');ta.value=t;document.body.appendChild(ta);ta.select();try{document.execCommand('copy');}catch(e){}document.body.removeChild(ta); }
+function ring(tone,stone,size){
+  size=size||120; var gid='rg'+Math.random().toString(36).slice(2,7);
+  var SH={Zircônia:'#e8ecf2',Brilhante:'#f4f7fb'}; var sc=stone&&SH[stone]?SH[stone]:null;
+  return '<svg width="'+size+'" height="'+size+'" viewBox="0 0 120 120"><defs><linearGradient id="'+gid+'" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#e9dcc0"/><stop offset="45%" stop-color="'+tone+'"/><stop offset="100%" stop-color="#7d6231"/></linearGradient></defs>'
+    +'<ellipse cx="60" cy="74" rx="34" ry="34" fill="none" stroke="url(#'+gid+')" stroke-width="11"/><ellipse cx="60" cy="74" rx="34" ry="34" fill="none" stroke="rgba(255,255,255,.35)" stroke-width="2"/>'
+    +(sc?'<polygon points="60,20 71,34 60,46 49,34" fill="'+sc+'" stroke="#fff" stroke-width="1.2"/><polygon points="60,20 71,34 60,34" fill="rgba(255,255,255,.5)"/>':'')+'</svg>';
+}
+/* Foto do modelo se houver; senão, ilustração */
+function modelImg(m,stone,size){ if(m&&m.foto) return '<img class="pimg" src="'+m.foto+'" alt="" style="width:'+size+'px;height:'+size+'px"/>'; return ring(m?m.tone:'#b6924f',stone,size); }
+function logoImg(size,onDark){ if(state.store.logo){ if(onDark) return '<span style="height:'+size+'px;display:inline-flex;align-items:center;padding:4px 10px;border-radius:10px;background:#fff"><img src="'+state.store.logo+'" style="height:'+(size-10)+'px;max-width:220px;object-fit:contain;display:block"/></span>'; return '<img src="'+state.store.logo+'" style="height:'+size+'px;max-width:180px;object-fit:contain;display:block"/>'; } return '<span class="brand-badge"'+(onDark?' style="background:rgba(255,255,255,.2)"':'')+'>A</span>'; }
+
+/* ============================================================ CONSTANTES ============================================================ */
+var MAT=[
+  {id:'10kz',nome:'Ouro 10k · Zircônia',karat:'10k',pedra:'Zircônia'},
+  {id:'18kz',nome:'Ouro 18k · Zircônia',karat:'18k',pedra:'Zircônia'},
+  {id:'18kb',nome:'Ouro 18k · Brilhante',karat:'18k',pedra:'Brilhante'}
+];
+var MAT_BY={}; MAT.forEach(function(m){MAT_BY[m.id]=m;});
+MAT_BY['10k']={id:'10k',nome:'Ouro 10k',karat:'10k',pedra:null};
+MAT_BY['18k']={id:'18k',nome:'Ouro 18k',karat:'18k',pedra:null};
+var DIST=[{v:2,nome:'As duas com pedra',sub:'2× o valor da pedra'},{v:1,nome:'Uma com, uma sem',sub:'1× o valor da pedra'},{v:0,nome:'As duas sem pedra',sub:'apenas o ouro'}];
+var ORDER_STAGES=['Em aberto','Pronto para entrega','Entregue'];
+var STATUS=['Em aberto','Virou pedido','Vencido'];
+var STATUS_TONE={'Em aberto':'amber','Virou pedido':'green','Vencido':'red'};
+function stageTone(s){ return s==='Entregue'?'green':(s==='Pronto para entrega'?'blue':'amber'); }
+function toneCss(tone){ var m={green:['#dcfce7','#15803d'],blue:['#e0edff','#1d4ed8'],amber:['#fef3c7','#b45309'],red:['#fee2e2','#b91c1c'],gray:['#eef1f6','#475569']}; var c=m[tone]||m.gray; return 'background:'+c[0]+';color:'+c[1]+';border-color:'+c[0]+';font-weight:600'; }
+var FAIXAS=[{v:'0-2000',nome:'Até R$ 2.000'},{v:'2000-3500',nome:'R$ 2.000 a R$ 3.500'},{v:'3500-5000',nome:'R$ 3.500 a R$ 5.000'},{v:'5000-9999999',nome:'Acima de R$ 5.000'}];
+
+/* ============================================================ ESTADO ============================================================ */
+var state={
+  screen:'home', search:'',
+  rates:{ ouro:null, dolar:null, updatedAt:null, sourceDolar:'—', manualOuro:false },
+  store:{ nome:'Joalheria', cnpj:'00.000.000/0001-00', endereco:'Rua Exemplo, 123 — Centro',
+    telefone:'(00) 0000-0000', whatsapp:'(00) 90000-0000', instagram:'@joalheria', pix:'00000000000',
+    validadeDias:7, prazoDias:30, pgtoAvista:10, pgtoCartao:10, pgtoCrediario:6, logo:null, textoPadrao:'Agradecemos a preferência. Alianças sob encomenda, sujeitas à confirmação de medidas e da gravação.' },
+  models:[
+    {id:'m1',modelo:'AL-1001',nome:'Clássica Abaulada',foto:null,pesoAu750:9.5,pesoAu416:7.4,largura:5,indice10k:2.1,indice18k:3.6,zirconiaUSD:3,brilhanteUSD:45,pontosBrilhante:5,tone:'#b6924f',ativo:true},
+    {id:'m2',modelo:'AL-1002',nome:'Reta Polida',foto:null,pesoAu750:7.8,pesoAu416:6.1,largura:4,indice10k:1.8,indice18k:3.0,zirconiaUSD:3,brilhanteUSD:40,pontosBrilhante:4,tone:'#cdaa63',ativo:true},
+    {id:'m3',modelo:'AL-1003',nome:'Anatômica Diamantada',foto:null,pesoAu750:11.2,pesoAu416:8.7,largura:6,indice10k:2.5,indice18k:4.2,zirconiaUSD:4,brilhanteUSD:60,pontosBrilhante:6,tone:'#8f7239',ativo:true},
+    {id:'m4',modelo:'AL-1004',nome:'Trabalhada Fosca',foto:null,pesoAu750:8.6,pesoAu416:6.7,largura:5,indice10k:2.0,indice18k:3.4,zirconiaUSD:3,brilhanteUSD:50,pontosBrilhante:5,tone:'#b6924f',ativo:true},
+    {id:'m5',modelo:'AL-1005',nome:'Slim Delicada',foto:null,pesoAu750:6.2,pesoAu416:4.9,largura:3,indice10k:1.5,indice18k:2.5,zirconiaUSD:2,brilhanteUSD:35,pontosBrilhante:3,tone:'#cdaa63',ativo:true}
+  ],
+  templates:[
+    {id:'t1',tipo:'Primeiro contato',texto:'Olá, {nome}! Foi um prazer atender você. Preparei o orçamento do modelo {codigo}, na opção {opcao}. O valor ficou em {valor} à prazo ou {avista} à vista. Válido até {validade}. Qualquer dúvida fico à disposição!'},
+    {id:'t5',tipo:'Peça pronta',texto:'Olá, {nome}! Boa notícia, suas alianças chegaram e estão prontas para retirada.'},
+    {id:'t7',tipo:'Orçamento com várias alianças',texto:'Olá, {nome}! Segue o orçamento dos modelos de alianças:\n{itens}\n\nVálido até {validade}. Qualquer dúvida fico à disposição!'}
+  ],
+  clients:[], quotes:[], orders:[], favorites:[], recent:[],
+  activeModelId:null,
+  sel:{ matId:'18kz', dist:2, modo:'par', multi:[] },
+  cart:[], client:null,
+  qb:{ obs:'' },
+  pb:null, pedidoFromQuote:null,
+  printQuoteNum:null, printOrderNum:null, activeOrderId:null, adminTab:'cotacao', catSort:'', qSort:'', catLargura:'', catFaixa:'', catPedra:'', editQuoteNum:null, editOrderNum:null,
+  vendedoras:[], vendedoraSel:''
+};
+
+/* ============================================================ NUVEM (SUPABASE) ============================================================ */
+var SB_URL='https://hfrrrsnuwcyqznbxgqcq.supabase.co';
+var SB_KEY='sb_publishable_AHAki5RC0M3Bp_xRTBDEbA_ajPTgrb9';
+var SB_TOKEN=null, SB_REFRESH=null, AUTHLS='ALIANCAS_AUTH_v1';
+function sbHeaders(extra){ var h={apikey:SB_KEY,Authorization:'Bearer '+(SB_TOKEN||SB_KEY),'Content-Type':'application/json'}; if(extra) for(var k in extra) h[k]=extra[k]; return h; }
+function sbGet(path){ return fetch(SB_URL+'/rest/v1/'+path,{headers:sbHeaders()}).then(function(r){ return r.ok?r.json():[]; }).catch(function(){ return []; }); }
+function sbGetX(path){ return fetch(SB_URL+'/rest/v1/'+path,{headers:sbHeaders()}).then(function(r){ if(!r.ok) throw new Error('http '+r.status); return r.json(); }); }
+function sbUpsert(table,row){ return fetch(SB_URL+'/rest/v1/'+table,{method:'POST',headers:sbHeaders({Prefer:'resolution=merge-duplicates,return=minimal'}),body:JSON.stringify(row)}).catch(function(){}); }
+function sbPatch(qs,row){ return fetch(SB_URL+'/rest/v1/'+qs,{method:'PATCH',headers:sbHeaders({Prefer:'return=minimal'}),body:JSON.stringify(row)}).catch(function(){}); }
+function sbDel(table,col,val){ return fetch(SB_URL+'/rest/v1/'+table+'?'+col+'=eq.'+encodeURIComponent(val),{method:'DELETE',headers:sbHeaders({Prefer:'return=minimal'})}).catch(function(){}); }
+/* Autenticação */
+function saveAuth(){ try{ localStorage.setItem(AUTHLS,JSON.stringify({access_token:SB_TOKEN,refresh_token:SB_REFRESH})); }catch(e){} }
+function sbLogin(email,password){ return fetch(SB_URL+'/auth/v1/token?grant_type=password',{method:'POST',headers:{apikey:SB_KEY,'Content-Type':'application/json'},body:JSON.stringify({email:email,password:password})}).then(function(r){return r.json();}); }
+function sbSignup(email,password){ return fetch(SB_URL+'/auth/v1/signup',{method:'POST',headers:{apikey:SB_KEY,'Content-Type':'application/json'},body:JSON.stringify({email:email,password:password})}).then(function(r){return r.json();}); }
+function sbRefresh(){ if(!SB_REFRESH) return Promise.resolve(false); return fetch(SB_URL+'/auth/v1/token?grant_type=refresh_token',{method:'POST',headers:{apikey:SB_KEY,'Content-Type':'application/json'},body:JSON.stringify({refresh_token:SB_REFRESH})}).then(function(r){return r.json();}).then(function(d){ if(d&&d.access_token){ SB_TOKEN=d.access_token; SB_REFRESH=d.refresh_token; saveAuth(); return true; } return false; }).catch(function(){ return false; }); }
+function logout(){ SB_TOKEN=null; SB_REFRESH=null; try{ localStorage.removeItem(AUTHLS); }catch(e){} _loginMode='login'; showLogin(); }
+/* Sincronização por diferença: só o que mudou vai ao banco (não apaga dados de outro dispositivo) */
+var _shadow={store:'',templates:'',vendedoras:'',rates:'',models:{},quotes:{},orders:{}}, _cfgRow=false, _syncT=null;
+function shadowInit(){ _shadow.store=JSON.stringify(state.store); _shadow.templates=JSON.stringify(state.templates); _shadow.vendedoras=JSON.stringify(state.vendedoras); _shadow.rates=JSON.stringify(state.rates); _shadow.models={}; state.models.forEach(function(m){_shadow.models[m.id]=JSON.stringify(m);}); _shadow.quotes={}; state.quotes.forEach(function(q){_shadow.quotes[q.numero]=JSON.stringify(q);}); _shadow.orders={}; state.orders.forEach(function(o){_shadow.orders[o.numero]=JSON.stringify(o);}); }
+function save(){ if(!SB_TOKEN) return; if(_syncT) clearTimeout(_syncT); _syncT=setTimeout(cloudSync,700); }
+function cloudSync(){ if(!SB_TOKEN) return;
+  ['store','templates','vendedoras','rates'].forEach(function(col){ var s=JSON.stringify(state[col]); if(s!==_shadow[col]){ if(_cfgRow){ var row={}; row[col]=state[col]; sbPatch('config?id=eq.1',row); } else { sbUpsert('config',{id:1,store:state.store,templates:state.templates,vendedoras:state.vendedoras,rates:state.rates}); _cfgRow=true; } _shadow[col]=s; } });
+  syncColl('models','id',state.models,_shadow.models,function(m){return {id:m.id,data:m};});
+  syncColl('quotes','numero',state.quotes,_shadow.quotes,function(q){return {numero:q.numero,data:q};});
+  syncColl('orders','numero',state.orders,_shadow.orders,function(o){return {numero:o.numero,data:o};});
+}
+function syncColl(table,key,arr,shadow,toRow){ var seen={}; arr.forEach(function(it){ var k=it[key]; seen[k]=1; var s=JSON.stringify(it); if(shadow[k]!==s){ sbUpsert(table,toRow(it)); shadow[k]=s; } }); Object.keys(shadow).forEach(function(k){ if(!seen[k]){ sbDel(table,key,k); delete shadow[k]; } }); }
+function loadCloud(){ return Promise.all([sbGetX('config?select=*'),sbGetX('models?select=*'),sbGetX('quotes?select=*'),sbGetX('orders?select=*')]).then(function(res){ var cfg=res[0]&&res[0][0]; if(cfg){ _cfgRow=true; if(cfg.store) state.store=Object.assign({},state.store,cfg.store); if(cfg.templates&&cfg.templates.length) state.templates=cfg.templates; if(cfg.vendedoras) state.vendedoras=cfg.vendedoras; if(cfg.rates) state.rates=Object.assign({},state.rates,cfg.rates); } state.models=res[1].map(function(r){return r.data;}); state.quotes=res[2].map(function(r){return r.data;}); state.orders=res[3].map(function(r){return r.data;}); shadowInit(); if(!cfg){ sbUpsert('config',{id:1,store:state.store,templates:state.templates,vendedoras:state.vendedoras,rates:state.rates}); _cfgRow=true; } }); }
+/* Login e inicialização */
+var _loginMode='login';
+function showLogin(err){ var root=document.getElementById('app'); if(!root) return; root.innerHTML='<div style="min-height:82vh;display:flex;align-items:center;justify-content:center;padding:20px"><div class="card pad" style="width:100%;max-width:380px">'
+  +'<div style="text-align:center;margin-bottom:8px">'+logoImg(46,false)+'</div>'
+  +'<h1 class="serif" style="font-size:22px;text-align:center;margin:6px 0 2px">Alianças — Ótica Carina</h1>'
+  +'<p class="muted" style="text-align:center;margin-bottom:16px">'+(_loginMode==='signup'?'Criar a conta da loja':'Entre para acessar o sistema')+'</p>'
+  +(err?'<div class="warn" style="background:#fee2e2;color:#b91c1c;margin-bottom:10px">'+esc(err)+'</div>':'')
+  +'<label class="field"><span class="lab">E-mail</span><span class="val"><input id="lgEmail" type="email" class="inp" autocomplete="username"/></span></label>'
+  +'<label class="field mt"><span class="lab">Senha</span><span class="val"><input id="lgPass" type="password" class="inp" autocomplete="current-password"/></span></label>'
+  +'<button class="btn btn-primary gold-grad w100 mt" id="lgBtn">'+(_loginMode==='signup'?'Criar conta':'Entrar')+'</button>'
+  +'<div style="text-align:center;margin-top:12px"><a href="#" id="lgToggle" style="font-size:13px;color:var(--muted)">'+(_loginMode==='signup'?'Já tenho conta — entrar':'Primeira vez? Criar a conta da loja')+'</a></div>'
+  +'</div></div>';
+  var btn=document.getElementById('lgBtn');
+  var run=function(){ var em=(document.getElementById('lgEmail').value||'').trim(); var pw=document.getElementById('lgPass').value||''; if(!em||!pw){ showLogin('Preencha e-mail e senha.'); return; } btn.textContent='Aguarde…'; btn.disabled=true; var p=_loginMode==='signup'?sbSignup(em,pw):sbLogin(em,pw); p.then(function(d){ if(d&&d.access_token){ SB_TOKEN=d.access_token; SB_REFRESH=d.refresh_token; saveAuth(); startApp(); } else { showLogin((d&&(d.error_description||d.msg||d.message))||(_loginMode==='signup'?'Não foi possível criar a conta.':'E-mail ou senha inválidos.')); } }).catch(function(){ showLogin('Falha de conexão. Tente novamente.'); }); };
+  if(btn) btn.onclick=run;
+  var pass=document.getElementById('lgPass'); if(pass) pass.onkeydown=function(e){ if(e.key==='Enter') run(); };
+  var tog=document.getElementById('lgToggle'); if(tog) tog.onclick=function(e){ e.preventDefault(); _loginMode=(_loginMode==='signup'?'login':'signup'); showLogin(); };
+}
+function startApp(){ var root=document.getElementById('app'); if(root) root.innerHTML='<div style="min-height:60vh;display:flex;align-items:center;justify-content:center" class="muted">Carregando…</div>'; loadCloud().then(function(){ render(); fetchRates(); if(!window._refT) window._refT=setInterval(sbRefresh,2400000); }).catch(function(){ showLogin('Falha ao carregar os dados. Tente novamente.'); }); }
+function boot(){ var root=document.getElementById('app'); if(root) root.innerHTML='<div style="min-height:60vh;display:flex;align-items:center;justify-content:center" class="muted">Carregando…</div>'; try{ var a=JSON.parse(localStorage.getItem(AUTHLS)||'null'); if(a&&a.refresh_token){ SB_TOKEN=a.access_token; SB_REFRESH=a.refresh_token; sbRefresh().then(function(ok){ if(ok) startApp(); else { _loginMode='login'; showLogin(); } }); return; } }catch(e){} showLogin(); }
+function migrateTemplates(){
+  try{
+    if(!localStorage.getItem('AL_MIG_tmpl2')){ var t=state.templates.filter(function(x){return x.tipo==='Primeiro contato';})[0]; if(t) t.texto='Olá, {nome}! Foi um prazer atender você. Preparei o orçamento do modelo {codigo}, na opção {opcao}. O valor ficou em {valor} à prazo ou {avista} à vista. Válido até {validade}. Qualquer dúvida fico à disposição!'; localStorage.setItem('AL_MIG_tmpl2','1'); }
+    if(!localStorage.getItem('AL_MIG_tmpl3')){ state.templates=state.templates.filter(function(x){return x.tipo==='Primeiro contato'||x.tipo==='Peça pronta'||x.tipo==='Orçamento com várias alianças';}); var tp=state.templates.filter(function(x){return x.tipo==='Peça pronta';})[0]; if(tp) tp.texto='Olá, {nome}! Boa notícia, suas alianças chegaram e estão prontas para retirada.'; else state.templates.push({id:'t5',tipo:'Peça pronta',texto:'Olá, {nome}! Boa notícia, suas alianças chegaram e estão prontas para retirada.'}); localStorage.setItem('AL_MIG_tmpl3','1'); }
+    if(!localStorage.getItem('AL_MIG_tmpl4')){ if(!state.templates.some(function(x){return x.tipo==='Orçamento com várias alianças';})) state.templates.push({id:'t7',tipo:'Orçamento com várias alianças',texto:'Olá, {nome}! Segue o orçamento dos modelos de alianças:\n{itens}\n\nVálido até {validade}. Qualquer dúvida fico à disposição!'}); localStorage.setItem('AL_MIG_tmpl4','1'); }
+    save();
+  }catch(e){}
+}
+
+/* ============================================================ DADOS ============================================================ */
+function getModel(id){ for(var i=0;i<state.models.length;i++) if(state.models[i].id===id) return state.models[i]; return null; }
+function getQuote(n){ for(var i=0;i<state.quotes.length;i++) if(state.quotes[i].numero===n) return state.quotes[i]; return null; }
+function getOrder(n){ for(var i=0;i<state.orders.length;i++) if(state.orders[i].numero===n) return state.orders[i]; return null; }
+
+/* ============================================================ CÁLCULO ============================================================ */
+/* Par = índice(karat) × cotação do ouro × 2 + dist × (pedra US$ × dólar).  dist ∈ {0,1,2} */
+function priceOf(model, matId, dist){
+  var mat=MAT_BY[matId]; var falta=[];
+  var indice = mat.karat==='10k'? model.indice10k : model.indice18k;
+  if(state.rates.ouro==null) falta.push('cotação do ouro');
+  if(indice==null||indice==='') falta.push('índice '+mat.karat);
+  var goldPair=(indice||0)*(state.rates.ouro||0)*2;
+  var stoneUSD = mat.pedra==='Brilhante'? model.brilhanteUSD : model.zirconiaUSD;
+  if(dist>0){ if(stoneUSD==null||stoneUSD==='') falta.push('valor da pedra ('+(mat.pedra||'pedra')+')'); if(state.rates.dolar==null) falta.push('cotação do dólar'); }
+  var stones=dist*((stoneUSD||0)*(state.rates.dolar||0));
+  var par=goldPair+stones;
+  return { mat:mat, indice:indice, goldPair:goldPair, stones:stones, par:par, total:par,
+    pesoPar:(mat.karat==='10k'? model.pesoAu416 : model.pesoAu750)*2, falta:falta };
+}
+function valorModo(par,modo){ return modo==='unit'? par/2 : par; }
+function currentCalc(){ var m=getModel(state.activeModelId); if(!m) return null; var c=priceOf(m,state.sel.matId,state.sel.dist); c.valor=valorModo(c.par,state.sel.modo); return c; }
+function hasStone(m){ return (m.zirconiaUSD!=null&&m.zirconiaUSD!=='')||(m.brilhanteUSD!=null&&m.brilhanteUSD!==''); }
+function availMats(m){ var hasZ=(m.zirconiaUSD!=null&&m.zirconiaUSD!==''), hasB=(m.brilhanteUSD!=null&&m.brilhanteUSD!==''); var list=[]; if(hasZ){ list.push(MAT_BY['10kz']); list.push(MAT_BY['18kz']); } if(hasB){ list.push(MAT_BY['18kb']); } if(!hasZ&&!hasB){ list.push(MAT_BY['10k']); list.push(MAT_BY['18k']); } return list; }
+function basePrice(m){ var a=availMats(m); return priceOf(m,a[0].id,0).total; }
+
+/* ============================================================ NAVEGAÇÃO / AÇÕES ============================================================ */
+function go(s){ state.screen=s; window.scrollTo(0,0); render(); }
+function toast(msg){ var r=document.getElementById('toast-root'); r.innerHTML='<div class="toast">'+esc(msg)+'</div>'; setTimeout(function(){r.innerHTML='';},2600); }
+function openModel(id){ var m=getModel(id); if(!m) return; state.activeModelId=id; var av=availMats(m); var def=av.filter(function(o){return o.id==='10kz';})[0]||av.filter(function(o){return o.id==='10k';})[0]||av[0]; state.sel={matId:def.id,dist:hasStone(m)?2:0,modo:'par',multi:[]}; state.recent=[id].concat(state.recent.filter(function(x){return x!==id;})).slice(0,8); go('model'); }
+function toggleFav(id){ var i=state.favorites.indexOf(id); if(i>=0) state.favorites.splice(i,1); else state.favorites.push(id); render(); }
+function buildItemFor(matId){
+  var m=getModel(state.activeModelId), mat=MAT_BY[matId], c=priceOf(m,matId,state.sel.dist);
+  return { modelId:m.id, matId:matId, matNome:mat.nome, karat:mat.karat, pedra:mat.pedra, dist:state.sel.dist,
+    modo:state.sel.modo, pesoPar:c.pesoPar, pontos: mat.pedra==='Brilhante'? m.pontosBrilhante:null, par:c.par, total:valorModo(c.par,state.sel.modo),
+    aro1:'', aro2:'', grav1:'', grav2:'', pedraAro:1 };
+}
+function buildItem(){ return buildItemFor(state.sel.matId); }
+function addTodasVariacoes(){ var m=getModel(state.activeModelId); availMats(m).forEach(function(op){ state.cart.push(buildItemFor(op.id)); }); toast('Variações adicionadas ao orçamento.'); go('quote'); }
+function addToOrcamento(){ if(state.sel.multi && state.sel.multi.length){ state.sel.multi.forEach(function(id){ state.cart.push(buildItemFor(id)); }); } else { state.cart.push(buildItem()); } toast('Adicionado ao orçamento.'); go('quote'); }
+function criarPedidoDireto(){ state.cart.push(buildItem()); state.pedidoFromQuote=null; state.editOrderNum=null; state.pb={forma:'retirada',valorPago:'',comoPago:'',dataPromessa:addDays(state.store.prazoDias),obs:''}; toast('Preencha os dados para fechar o pedido.'); go('pedidoNew'); }
+function fetchRates(){
+  fetch('https://economia.awesomeapi.com.br/json/last/USD-BRL,XAU-BRL').then(function(r){return r.json();}).then(function(d){
+    var dol=parseFloat((d.USDBRL||{}).bid), oz=parseFloat((d.XAUBRL||{}).bid);
+    if(!dol) throw new Error('sem dados');
+    state.rates.dolar=dol; state.rates.sourceDolar='AwesomeAPI'; state.rates.updatedAt=new Date().toISOString();
+    if(!state.rates.manualOuro && oz) state.rates.ouro=oz/TROY_OZ;
+    toast('Cotações atualizadas.'); render();
+  }).catch(function(){
+    if(state.rates.dolar==null){ state.rates.dolar=5.40; state.rates.sourceDolar='exemplo (offline)'; }
+    if(state.rates.ouro==null){ state.rates.ouro=656; }
+    state.rates.updatedAt=new Date().toISOString();
+    toast('Sem internet para cotação — usando valores de exemplo (ajuste em Configurações).'); render();
+  });
+}
+
+/* ============================================================ RENDER ============================================================ */
+function render(){
+  var root=document.getElementById('app'), body; autoLost();
+  switch(state.screen){
+    case 'home': body=viewHome(); break;
+    case 'catalog': body=viewCatalog(); break;
+    case 'model': body=viewModel(); break;
+    case 'quote': body=viewQuote(); break;
+    case 'pedidoNew': body=viewPedidoNew(); break;
+    case 'saved': body=viewSaved(); break;
+    case 'clients': body=viewClients(); break;
+    case 'pedidos': body=viewPedidos(); break;
+    case 'order': body=viewOrder(); break;
+    case 'config': body=viewConfig(); break;
+    case 'print': body=viewPrint(); break;
+    case 'printos': body=viewPrintOS(); break;
+    default: body=viewHome();
+  }
+  if(state.screen==='print'||state.screen==='printos'){ root.innerHTML=body; } else { root.innerHTML=topBar()+'<main class="container fade">'+body+'</main>'; }
+  bind(); save();
+}
+
+function topBar(){
+  var r=state.rates;
+  var stale=!r.updatedAt||(Date.now()-new Date(r.updatedAt).getTime())>6*3600000;
+  var t=r.updatedAt?(new Date(r.updatedAt).getHours()+'h'+String(new Date(r.updatedAt).getMinutes()).padStart(2,'0')):'';
+  var rateTxt = r.ouro!=null ? ('Ouro '+money(r.ouro)+'/g · Dólar '+money(r.dolar)+' · '+t+(stale?' (desatualizada)':'')) : 'Defina as cotações em Configurações';
+  return '<header class="top"><div class="top-inner">'
+    +'<button class="brand" data-go="home">'+logoImg(36,false)+'<span class="brand-name">Alianças</span></button>'
+    +'<div class="search-wrap"><input id="globalSearch" class="search" placeholder="Buscar modelo por código ou nome…" autocomplete="off"/><div id="searchDrop"></div></div>'
+    +'<nav class="nav">'
+      +'<button class="navbtn" data-action="novo">Novo orçamento</button>'
+      +'<button class="navbtn" data-go="saved">Orçamentos</button>'
+      +'<button class="navbtn" data-go="pedidos">Pedidos</button>'
+      +'<button class="navbtn" data-go="config">Config</button>'
+      +'<button class="navbtn" data-logout title="Sair da conta">Sair</button>'
+    +'</nav>'
+    +'<button class="cartbtn" data-go="quote">🧾<span class="hide-sm"> Orçamento</span>'+(state.cart.length?'<span class="cart-badge">'+state.cart.length+'</span>':'')+'</button>'
+    +'</div><div class="top-sub"><button id="rateRefresh" class="rate"><span class="dot '+(stale?'amber':'green')+'"></span>'+rateTxt+' · <u>atualizar</u></button>'
+    +'</div></header>';
+}
+
+/* ---------------- Home ---------------- */
+function lcard(icon,bg,fg,title,desc,go2,act){ return '<button class="lcard" '+(act?('data-action="'+act+'"'):('data-go="'+go2+'"'))+'><div class="licon" style="background:'+bg+';color:'+fg+'">'+icon+'</div><div class="serif" style="font-size:17px">'+title+'</div><div class="muted" style="font-size:12px;margin-top:4px">'+desc+'</div></button>'; }
+function viewHome(){
+  var favs=state.favorites.map(getModel).filter(Boolean), rec=state.recent.map(getModel).filter(Boolean);
+  return '<div class="hero"><div class="eyebrow">ATENDIMENTO</div><h1 class="hero-title">Orçamento de alianças</h1><p class="muted">Encontre o modelo, mostre o preço e feche a venda em segundos.</p></div>'
+    +'<div class="launch">'
+      +lcard('＋','#e0edff','#2563eb','Novo Orçamento','Escolher modelo e calcular','',"novo")
+      +lcard('🧾','#dcfce7','#16a34a','Orçamentos','Ver e gerenciar salvos','saved')
+      +lcard('📦','#fef3c7','#d97706','Pedidos','Acompanhar produção','pedidos')
+      +lcard('⚙️','#f3e8ff','#9333ea','Configurações','Cotações, modelos e loja','config')
+    +'</div>'
+    +(favs.length?shelf('Favoritos',favs):'');
+}
+function shelf(title,items){
+  var h='<div class="mt2"><h3 class="serif" style="font-size:20px;margin-bottom:10px">'+title+'</h3><div class="shelf">';
+  items.forEach(function(p){ h+='<button class="mini" data-open="'+p.id+'"><div class="center">'+modelImg(p,null,64)+'</div><div class="code" style="margin-top:6px">'+p.modelo+'</div><div style="font-size:14px">'+esc(p.nome)+'</div></button>'; });
+  return h+'</div></div>';
+}
+
+/* ---------------- Catálogo ---------------- */
+function catalogCards(){
+  var q=state.search.trim().toLowerCase();
+  var list=state.models.filter(function(m){ return m.ativo&&(!q||m.modelo.toLowerCase().indexOf(q)>=0||m.nome.toLowerCase().indexOf(q)>=0); });
+  if(state.catLargura!=='') list=list.filter(function(m){return String(m.largura)===state.catLargura;});
+  if(state.catPedra==='com') list=list.filter(hasStone);
+  else if(state.catPedra==='sem') list=list.filter(function(m){return !hasStone(m);});
+  if(state.catFaixa!==''){ var fp=state.catFaixa.split('-'); list=list.filter(function(m){var b=basePrice(m); return b>=+fp[0] && b<+fp[1];}); }
+  if(state.catSort==='asc') list=list.slice().sort(function(a,b){return basePrice(a)-basePrice(b);});
+  else if(state.catSort==='desc') list=list.slice().sort(function(a,b){return basePrice(b)-basePrice(a);});
+  if(!list.length) return '<p class="muted">Nenhum modelo encontrado.</p>';
+  var h='';
+  list.forEach(function(m){
+    h+='<div class="prod"><div class="ph" data-open="'+m.id+'">'+modelImg(m,null,m.foto?150:104)+'<button class="fav" data-fav="'+m.id+'">'+(state.favorites.indexOf(m.id)>=0?'★':'☆')+'</button></div>'
+      +'<div class="pad"><div class="code">'+m.modelo+'</div><div class="serif" style="font-size:19px">'+esc(m.nome)+'</div>'
+      +'<div class="muted" style="font-size:12px;margin:2px 0 8px">Largura '+m.largura+'mm · a partir de <b style="color:var(--gold-dark)">'+money(basePrice(m))+'</b></div>'
+      +'<button class="btn btn-subtle w100 btn-sm" data-open="'+m.id+'">Ver preços</button></div></div>';
+  });
+  return h;
+}
+function viewCatalog(){
+  var larguras=[]; state.models.forEach(function(m){ if(m.largura!=null && larguras.indexOf(m.largura)<0) larguras.push(m.largura); }); larguras.sort(function(a,b){return a-b;});
+  return '<div class="between"><h1 class="serif" style="font-size:26px">Modelos de aliança</h1><input id="catFilter" class="inp" style="max-width:220px" placeholder="Filtrar por código/nome…" value="'+esc(state.search)+'"/></div>'
+    +'<div class="row gap mt" style="flex-wrap:wrap">'
+      +'<select id="catLargura" class="inp" style="width:auto"><option value="">Largura: todas</option>'+larguras.map(function(w){return '<option value="'+w+'"'+(state.catLargura===String(w)?' selected':'')+'>Largura '+w+'mm</option>';}).join('')+'</select>'
+      +'<select id="catFaixa" class="inp" style="width:auto"><option value="">Valor: todos</option>'+FAIXAS.map(function(f){return '<option value="'+f.v+'"'+(state.catFaixa===f.v?' selected':'')+'>'+f.nome+'</option>';}).join('')+'</select>'
+      +'<select id="catPedra" class="inp" style="width:auto"><option value="">Pedra: todas</option><option value="com"'+(state.catPedra==='com'?' selected':'')+'>Com pedra</option><option value="sem"'+(state.catPedra==='sem'?' selected':'')+'>Sem pedra</option></select>'
+      +'<select id="catSort" class="inp" style="width:auto"><option value="">Ordenar</option><option value="asc"'+(state.catSort==='asc'?' selected':'')+'>Menor valor</option><option value="desc"'+(state.catSort==='desc'?' selected':'')+'>Maior valor</option></select>'
+    +'</div>'
+    +'<div id="catalogGrid" class="catgrid mt">'+catalogCards()+'</div>';
+}
+
+/* ---------------- Modelo / Simulação ---------------- */
+function pricePanelInner(){
+  var c=currentCalc(); if(!c) return '';
+  var stone=hasStone(getModel(state.activeModelId)); var unit=state.sel.modo==='unit';
+  var distNome=DIST.filter(function(d){return d.v===state.sel.dist;})[0].nome;
+  var peso=unit?c.pesoPar/2:c.pesoPar;
+  return '<div class="between" style="align-items:flex-end"><div><div style="opacity:.85;font-size:13px">Preço '+(unit?'unitário':'do par')+'</div><div class="price-big">'+money(c.valor)+'</div>'
+    +'<div style="opacity:.85;font-size:12px;margin-top:2px">'+esc(c.mat.nome)+(stone?(' · '+esc(distNome)):'')+'</div></div>'
+    +'<div style="text-align:right;font-size:12px;opacity:.9">Peso ~'+peso.toFixed(1)+' g/'+(unit?'un':'par')+'<br>Prazo '+state.store.prazoDias+' dias</div></div>'
+    +(c.falta.length?'<div class="warn">⚠ A definir no cadastro: '+c.falta.join(', ')+'.</div>':'')
+    +'<div class="mt" style="display:flex;gap:8px"><button class="btn btn-dark" style="flex:1" id="addOrc">'+((state.sel.multi&&state.sel.multi.length)?('Adicionar '+state.sel.multi.length+' variações ao orçamento'):((state.cart.length||state.editQuoteNum)?'Adicionar ao orçamento':'Criar orçamento'))+'</button><button class="btn btn-white" style="flex:1" id="addPed">Criar pedido</button></div>';
+}
+/* comparação de opções removida a pedido do usuário */
+function viewModel(){
+  var m=getModel(state.activeModelId); if(!m) return viewHome();
+  var opts=availMats(m);
+  if(!opts.some(function(o){return o.id===state.sel.matId;})) state.sel.matId=opts[0].id;
+  var stone=hasStone(m); if(!stone) state.sel.dist=0;
+  var mat=MAT_BY[state.sel.matId];
+  var optRows=opts.map(function(op){ var c=priceOf(m,op.id,state.sel.dist); var checked=(state.sel.multi||[]).indexOf(op.id)>=0;
+    return '<div class="optrow '+(op.id===state.sel.matId?'on':'')+'"><label style="display:flex;align-items:center;gap:10px;flex:1;cursor:pointer;margin:0"><input type="radio" name="mat" value="'+op.id+'" '+(op.id===state.sel.matId?'checked':'')+'/><span class="nm">'+esc(op.nome)+'</span></label><span class="pr">'+money(valorModo(c.par,state.sel.modo))+'</span>'+(opts.length>1?'<label style="display:flex;align-items:center;gap:4px;margin:0 0 0 10px;font-size:12px;color:var(--muted);cursor:pointer" title="Incluir esta variação no orçamento"><input type="checkbox" data-multi="'+op.id+'" '+(checked?'checked':'')+' style="width:16px;height:16px;accent-color:var(--gold)"/> incluir</label>':'')+'</div>'; }).join('');
+  var distBlock = stone
+    ? ('<div class="field mt"><span class="lab">Distribuição no par</span></div><div style="margin-top:6px">'+DIST.map(function(d){ return '<label class="optrow '+(d.v===state.sel.dist?'on':'')+'"><input type="radio" name="dist" value="'+d.v+'" '+(d.v===state.sel.dist?'checked':'')+'/><span class="nm">'+d.nome+'<div class="hint">'+d.sub+'</div></span></label>'; }).join('')+'</div>')
+    : '<div class="hint mt">Modelo cadastrado sem pedra — o par é calculado somente com o ouro.</div>';
+  return '<button class="btn btn-ghost btn-sm" data-go="catalog">← Voltar aos modelos</button>'
+   +'<div class="prodwrap mt">'
+    +'<div class="card pad center" style="display:flex;flex-direction:column;align-items:center;justify-content:center">'
+      +modelImg(m, (stone&&state.sel.dist>0)?mat.pedra:null, 300)
+      +'<div class="center mt"><div class="code">'+m.modelo+'</div><h1 class="serif" style="font-size:26px">'+esc(m.nome)+'</h1>'
+      +'<div class="muted" style="font-size:12px;display:flex;gap:14px;justify-content:center;margin-top:6px;flex-wrap:wrap"><span>Largura '+m.largura+'mm</span><span>Peso 18k '+m.pesoAu750+'g</span><span>Peso 10k '+m.pesoAu416+'g</span></div>'
+      +(mat.pedra==='Brilhante'?'<div class="muted" style="font-size:12px;margin-top:4px">Brilhante '+m.pontosBrilhante+' pontos</div>':'')+'</div>'
+    +'</div>'
+    +'<div><div class="card pad">'
+      +'<div class="field"><span class="lab">Tipo de ouro'+(stone?' e pedra':'')+'</span></div><div style="margin-top:6px">'+optRows+'</div>'
+      +(opts.length>1?'<div class="hint" style="margin-top:4px">Marque "incluir" para colocar mais de uma variação no mesmo orçamento.</div>':'')
+      +distBlock
+      +'<label class="field mt" style="max-width:220px"><span class="lab">Exibir valor</span><span class="val"><select id="modo" class="inp"><option value="par"'+(state.sel.modo==='par'?' selected':'')+'>Valor do par</option><option value="unit"'+(state.sel.modo==='unit'?' selected':'')+'>Valor unitário</option></select></span></label>'
+      +'<div class="hint" style="margin-top:8px">Tamanho dos aros e gravação são preenchidos ao fechar o pedido.</div>'
+    +'</div>'
+    +'<div class="pricebox gold-grad" id="pricePanel">'+pricePanelInner()+'</div>'
+    +'</div></div>';
+}
+
+/* ---------------- Orçamento ---------------- */
+function qbSubtotal(){ return state.cart.reduce(function(s,i){return s+i.total;},0); }
+function setCliente(k,v){ if(!state.client) state.client={nome:'',whatsapp:'',obs:''}; state.client[k]=v; }
+function vendedoraSelectHtml(){
+  var opts='<option value="">Selecione…</option>'+state.vendedoras.map(function(v){return '<option'+(state.vendedoraSel===v?' selected':'')+'>'+esc(v)+'</option>';}).join('');
+  return '<label class="field mt"><span class="lab">Vendedora *</span><span class="val"><select id="vendSel" class="inp">'+opts+'</select></span></label>'+(state.vendedoras.length?'':'<div class="hint" style="color:#b45309">Cadastre as vendedoras em Configurações › Loja.</div>');
+}
+function pgtoOpcoes(subtotal, pg){
+  pg=pg||{avista:state.store.pgtoAvista,cartao:state.store.pgtoCartao,crediario:state.store.pgtoCrediario};
+  var av=(pg.avista||0), cp=(pg.cartao||1), cr=(pg.crediario||1);
+  return { av:av, cp:cp, cr:cr, avistaValor:subtotal*(1-av/100), avistaDesc:subtotal*av/100, cartaoParcela:subtotal/cp, crediarioParcela:subtotal/cr };
+}
+function shouldShowTotal(items){ return items.length===1 || (items.length===2 && items[0].modo==='unit' && items[1].modo==='unit'); }
+function pgtoBlock(subtotal, pg, showTotal){
+  var o=pgtoOpcoes(subtotal,pg);
+  if(showTotal===false){
+    return '<div class="divider" style="padding-top:10px"><div class="hint" style="margin-bottom:6px">Condições de pagamento</div>'
+      +'<div class="sumrow st"><span>À vista</span><span style="color:var(--gold-dark)">'+o.av+'% de desconto</span></div>'
+      +'<div class="sumrow st" style="margin-top:8px"><span>A prazo</span><span class="muted" style="font-weight:400;font-size:13px">sem juros</span></div>'
+      +'<div style="color:var(--muted);font-size:13px;margin:2px 0 0 2px">• Em até '+o.cp+'x sem juros no cartão</div>'
+      +'<div style="color:var(--muted);font-size:13px;margin:1px 0 0 2px">• Em até '+o.cr+'x sem juros no crediário</div>'
+      +'<div class="hint" style="margin-top:6px">Valor de cada par indicado em cada item.</div></div>';
+  }
+  return '<div class="divider" style="padding-top:10px"><div class="hint" style="margin-bottom:6px">Condições de pagamento</div>'
+    +'<div class="sumrow st"><span>À vista ('+o.av+'% off)</span><span style="color:var(--gold-dark)">'+money(o.avistaValor)+'</span></div>'
+    +'<div class="sumrow st" style="margin-top:8px"><span>A prazo</span><span>'+money(subtotal)+'</span></div>'
+    +'<div style="color:var(--muted);font-size:13px;margin:2px 0 0 2px">• Em até '+o.cp+'x sem juros no cartão</div>'
+    +'<div style="color:var(--muted);font-size:13px;margin:1px 0 0 2px">• Em até '+o.cr+'x sem juros no crediário</div></div>';
+}
+function qbSummaryInner(){
+  var c=state.client||{};
+  return '<div class="grid g2"><label class="field"><span class="lab">Nome do cliente *</span><span class="val"><input id="cliNome" class="inp" value="'+esc(c.nome||'')+'"/></span></label><label class="field"><span class="lab">Telefone (WhatsApp) *</span><span class="val"><input id="cliTel" class="inp" value="'+esc(c.whatsapp||'')+'"/></span></label></div>'
+    +vendedoraSelectHtml()
+    +'<label class="field mt"><span class="lab">Observações</span><span class="val"><textarea id="obsInp" rows="2" class="inp">'+esc(state.qb.obs)+'</textarea></span></label>'
+    +pgtoBlock(qbSubtotal(), null, shouldShowTotal(state.cart))
+    +'<div class="hint" style="margin-top:6px">Validade '+state.store.validadeDias+' dias · prazo de entrega '+state.store.prazoDias+' dias (definidos em Configurações › Pagamento).</div>'
+    +'<button class="btn btn-primary gold-grad w100 mt" id="saveBtn">Salvar e gerar PDF</button>';
+}
+function itemLine(it){ return esc(it.matNome)+' · '+distLabel(it.dist)+' · '+(it.modo==='unit'?'unitário':'par'); }
+function viewQuote(){
+  if(!state.cart.length) return '<h1 class="serif" style="font-size:26px">Orçamento</h1><div class="card pad center mt" style="padding:44px"><span class="muted">Nenhum item ainda.</span> <button class="btn btn-subtle btn-sm" data-action="novo">Escolher um modelo</button></div>';
+  var items='';
+  state.cart.forEach(function(it,idx){ var m=getModel(it.modelId);
+    items+='<div class="qitem">'+modelImg(m,it.dist>0?it.pedra:null,60)+'<div style="flex:1"><div class="code">'+m.modelo+'</div><div class="serif" style="font-size:17px">'+esc(m.nome)+'</div><div class="muted" style="font-size:12px">'+itemLine(it)+'</div></div><div class="center"><div class="serif" style="font-size:18px">'+money(it.total)+'</div><button data-rm="'+idx+'" style="background:none;border:0;color:#b23;font-size:12px;text-decoration:underline">remover</button></div></div>';
+  });
+  return '<div class="between"><h1 class="serif" style="font-size:26px">'+(state.editQuoteNum?('Editando '+state.editQuoteNum):'Orçamento')+'</h1><button class="btn btn-ghost btn-sm" data-go="catalog">+ Adicionar aliança</button></div>'
+    +'<div class="quotewrap mt"><div>'+items+'<button class="btn btn-white w100" id="toPedido" style="border:1px solid var(--line)">Fechar como pedido em vez de orçamento</button></div><div class="card pad" id="qbSummary">'+qbSummaryInner()+'</div></div>';
+}
+function distLabel(d){ return d===2?'2 pedras':(d===1?'1 pedra':'sem pedra'); }
+function editarOrcamento(num){ var q=getQuote(num); if(!q) return; state.cart=JSON.parse(JSON.stringify(q.itens)); state.cart.forEach(function(it){ if(it.pedraAro==null)it.pedraAro=1; }); state.client=q.client?JSON.parse(JSON.stringify(q.client)):null; state.vendedoraSel=q.vendedora||''; state.qb={obs:q.obs||''}; state.editQuoteNum=num; state.editOrderNum=null; toast('Editando '+num); go('quote'); }
+function saveQuote(){
+  var subtotal=qbSubtotal();
+  if(state.editQuoteNum){
+    var eq=getQuote(state.editQuoteNum);
+    if(eq){ eq.client=state.client; eq.vendedora=state.vendedoraSel; eq.itens=JSON.parse(JSON.stringify(state.cart)); eq.subtotal=subtotal; eq.total=subtotal; eq.obs=state.qb.obs; eq.validade=addDays(state.store.validadeDias); eq.prazoDias=state.store.prazoDias; eq.pgto={avista:state.store.pgtoAvista,cartao:state.store.pgtoCartao,crediario:state.store.pgtoCrediario}; eq.snapshot={ouro:state.rates.ouro,dolar:state.rates.dolar,calculadoEm:new Date().toISOString()}; eq.historico=(eq.historico||[]).concat([{em:new Date().toISOString(),acao:'Orçamento editado'}]); }
+    var n=state.editQuoteNum; state.editQuoteNum=null;
+    if(state.client && !state.clients.some(function(c){return c.whatsapp===state.client.whatsapp;})) state.clients.unshift(state.client);
+    state.cart=[]; state.client=null; state.qb={obs:''};
+    state.printQuoteNum=n; toast('Orçamento '+n+' atualizado.'); go('print'); return;
+  }
+  var num='ORC-'+(1000+state.quotes.length+1);
+  var q={ numero:num, client:state.client, vendedora:state.vendedoraSel, itens:JSON.parse(JSON.stringify(state.cart)), subtotal:subtotal, total:subtotal, obs:state.qb.obs,
+    validade:addDays(state.store.validadeDias), prazoDias:state.store.prazoDias,
+    pgto:{ avista:state.store.pgtoAvista, cartao:state.store.pgtoCartao, crediario:state.store.pgtoCrediario },
+    status:'Em aberto', criadoEm:new Date().toISOString(), snapshot:{ ouro:state.rates.ouro, dolar:state.rates.dolar, calculadoEm:new Date().toISOString() }, historico:[{em:new Date().toISOString(),acao:'Orçamento criado e emitido'}] };
+  state.quotes.unshift(q);
+  if(state.client && !state.clients.some(function(c){return c.whatsapp===state.client.whatsapp;})) state.clients.unshift(state.client);
+  state.cart=[]; state.client=null; state.qb={obs:''};
+  state.printQuoteNum=num; toast('Orçamento '+num+' salvo.'); go('print');
+}
+
+/* ---------------- Fechar pedido (aros + gravação) ---------------- */
+function pbSubtotal(){ return state.cart.reduce(function(s,i){return s+i.total;},0); }
+function pbCalc(){
+  var total=pbSubtotal(), f=state.pb.forma;
+  if(f==='pago') return {total:total, pago:total, falta:0, label:'Pago', como:'', pagamentos:[]};
+  if(f==='parcial'){ var pgs=state.pb.pagamentos||[]; var pago=pgs.reduce(function(s,p){return s+(+p.valor||0);},0); var como=pgs.filter(function(p){return +p.valor>0;}).map(function(p){return money(+p.valor||0)+(p.forma?(' '+p.forma):'');}).join(' + '); return {total:total, pago:pago, falta:Math.max(0,total-pago), label:'Pago parcialmente', como:como, pagamentos:JSON.parse(JSON.stringify(pgs))}; }
+  return {total:total, pago:0, falta:total, label:'Acertar na retirada', como:'', pagamentos:[]};
+}
+function pbPagamentosHtml(){
+  var pgs=state.pb.pagamentos||[];
+  var h='<div class="mt"><span class="lab">Pagamentos recebidos</span>';
+  pgs.forEach(function(p,i){ h+='<div class="row gap" style="margin-top:6px"><input class="inp" data-pgv="'+i+'" type="number" placeholder="Valor" value="'+(p.valor||'')+'" style="max-width:130px"/><input class="inp" data-pgf="'+i+'" placeholder="Forma (PIX, dinheiro…)" value="'+esc(p.forma||'')+'"/><button class="btn btn-ghost btn-sm" data-pgrm="'+i+'" style="color:#b23">✕</button></div>'; });
+  h+='<button class="btn btn-ghost btn-sm" id="pgAdd" style="margin-top:8px">+ Adicionar pagamento</button></div>';
+  return h;
+}
+function pbTotalsInner(){
+  var c=pbCalc(), f=state.pb.forma;
+  var h='<div class="divider" style="padding-top:10px"><div class="sumrow st"><span>Total</span><span>'+money(c.total)+'</span></div><div class="sumrow"><span>Situação</span><span>'+esc(c.label)+'</span></div>';
+  if(f==='parcial'){ h+='<div class="sumrow"><span>Já pago</span><span>'+money(c.pago)+'</span></div>'+(c.como?'<div class="hint" style="text-align:right">'+esc(c.como)+'</div>':'')+'<div class="sumrow st"><span>Falta</span><span>'+money(c.falta)+'</span></div>'; }
+  else if(f==='pago'){ h+='<div class="sumrow"><span>Já pago</span><span>'+money(c.total)+'</span></div>'; }
+  else { h+='<div class="sumrow"><span>A receber na retirada</span><span>'+money(c.total)+'</span></div>'; }
+  return h+'</div>';
+}
+function viewPedidoNew(){
+  if(!state.cart.length) return '<h1 class="serif" style="font-size:26px">Novo pedido</h1><div class="card pad center mt" style="padding:44px"><span class="muted">Nenhuma aliança selecionada.</span> <button class="btn btn-subtle btn-sm" data-action="novo">Escolher um modelo</button></div>';
+  if(!state.pb) state.pb={forma:'retirada',valorPago:'',comoPago:'',dataPromessa:addDays(state.store.prazoDias),obs:''};
+  var items='';
+  state.cart.forEach(function(it,idx){ var m=getModel(it.modelId);
+    var flds = (it.modo==='unit')
+      ? '<div class="grid g2 mt"><label class="field"><span class="lab">Aro</span><span class="val"><input class="inp" data-idx="'+idx+'" data-f="aro1" value="'+esc(it.aro1)+'"/></span></label><label class="field"><span class="lab">Gravação</span><span class="val"><input class="inp" data-idx="'+idx+'" data-f="grav1" maxlength="40" value="'+esc(it.grav1)+'"/></span></label></div>'
+      : '<div class="grid g2 mt"><label class="field"><span class="lab">Aro 1</span><span class="val"><input class="inp" data-idx="'+idx+'" data-f="aro1" value="'+esc(it.aro1)+'"/></span></label><label class="field"><span class="lab">Aro 2</span><span class="val"><input class="inp" data-idx="'+idx+'" data-f="aro2" value="'+esc(it.aro2)+'"/></span></label><label class="field"><span class="lab">Gravação aliança 1</span><span class="val"><input class="inp" data-idx="'+idx+'" data-f="grav1" maxlength="40" value="'+esc(it.grav1)+'"/></span></label><label class="field"><span class="lab">Gravação aliança 2</span><span class="val"><input class="inp" data-idx="'+idx+'" data-f="grav2" maxlength="40" value="'+esc(it.grav2)+'"/></span></label></div>';
+    items+='<div class="qitem" style="display:block"><div class="row gap" style="align-items:center">'+modelImg(m,it.dist>0?it.pedra:null,54)+'<div style="flex:1"><div class="code">'+m.modelo+'</div><div class="serif" style="font-size:16px">'+esc(m.nome)+'</div><div class="muted" style="font-size:12px">'+itemLine(it)+'</div></div><div class="serif">'+money(it.total)+'</div>'+(state.cart.length>1?'<button class="btn btn-ghost btn-sm" data-rmitem="'+idx+'" style="color:#b23;padding:4px 10px;margin-left:6px" title="Remover esta aliança do pedido">Remover</button>':'')+'</div>'+flds+((it.modo!=='unit'&&it.dist===1)?'<label class="field mt"><span class="lab">Qual aliança leva a pedra?</span><span class="val"><select class="inp" data-idx="'+idx+'" data-f="pedraAro"><option value="1"'+(((it.pedraAro||1))===1?' selected':'')+'>Aro 1</option><option value="2"'+((it.pedraAro||1)===2?' selected':'')+'>Aro 2</option></select></span></label>':'')+'</div>';
+  });
+  var sc=state.store;
+  var right='<div class="grid g2"><label class="field"><span class="lab">Nome do cliente *</span><span class="val"><input id="cliNome" class="inp" value="'+esc((state.client&&state.client.nome)||'')+'"/></span></label><label class="field"><span class="lab">Telefone (WhatsApp) *</span><span class="val"><input id="cliTel" class="inp" value="'+esc((state.client&&state.client.whatsapp)||'')+'"/></span></label></div>'
+    +vendedoraSelectHtml()
+    +'<label class="field mt"><span class="lab">Pagamento</span><span class="val"><select id="pbForma" class="inp"><option value="retirada"'+(state.pb.forma==='retirada'?' selected':'')+'>Acertar na retirada</option><option value="parcial"'+(state.pb.forma==='parcial'?' selected':'')+'>Pago parcialmente</option><option value="pago"'+(state.pb.forma==='pago'?' selected':'')+'>Pago</option></select></span></label>'
+    +(state.pb.forma==='parcial'?pbPagamentosHtml():'')
+    +'<label class="field mt"><span class="lab">Data prometida</span><span class="val"><input id="pbData" type="date" class="inp" value="'+state.pb.dataPromessa+'"/></span></label>'
+    +'<label class="field mt"><span class="lab">Observações</span><span class="val"><textarea id="pbObs" rows="2" class="inp" placeholder="Algo diferente neste pedido?">'+esc(state.pb.obs||'')+'</textarea></span></label>'
+    +'<div id="pbTotalsBox">'+pbTotalsInner()+'</div>'
+    +'<button class="btn btn-primary gold-grad w100 mt" id="pbCreate">'+(state.editOrderNum?'Salvar alterações':'Criar pedido de venda')+'</button>';
+  return '<div class="between"><h1 class="serif" style="font-size:26px">'+(state.editOrderNum?('Editando '+state.editOrderNum):'Novo pedido de venda')+'</h1>'+(state.pedidoFromQuote&&!state.editOrderNum?'<span class="badge">Do orçamento '+state.pedidoFromQuote+'</span>':'')+'</div>'
+    +'<div class="quotewrap mt"><div>'+items+'</div><div class="card pad" id="pbSummary" style="height:fit-content">'+right+'</div></div>';
+}
+function createPedido(){
+  if(!state.cart.length) return;
+  if(!state.client||!state.client.nome||!state.client.whatsapp){ toast('Informe nome e telefone do cliente.'); return; }
+  if(!state.vendedoraSel){ toast('Selecione a vendedora.'); return; }
+  var pc=pbCalc();
+  if(state.editOrderNum){
+    var eo=getOrder(state.editOrderNum);
+    if(eo){ eo.client=state.client; eo.vendedora=state.vendedoraSel; eo.itens=JSON.parse(JSON.stringify(state.cart)); eo.total=pc.total; eo.pagamento=pc.label; eo.pago=pc.pago; eo.falta=pc.falta; eo.comoPago=pc.como; eo.pagamentos=pc.pagamentos; eo.forma=state.pb.forma; eo.obs=state.pb.obs||''; eo.dataPromessa=state.pb.dataPromessa; }
+    var en=state.editOrderNum; state.editOrderNum=null;
+    if(state.client && !state.clients.some(function(x){return x.whatsapp===state.client.whatsapp;})) state.clients.unshift(state.client);
+    state.cart=[]; state.client=null; state.pb=null; state.pedidoFromQuote=null; state.activeOrderId=en; save();
+    toast('Pedido '+en+' atualizado.'); go('order'); return;
+  }
+  var num='PED-'+(2000+state.orders.length+1);
+  var o={ numero:num, orcamento: state.pedidoFromQuote||'Venda direta', client:state.client, vendedora:state.vendedoraSel, itens:JSON.parse(JSON.stringify(state.cart)),
+    total:pc.total, pagamento:pc.label, pago:pc.pago, falta:pc.falta, comoPago:pc.como, pagamentos:pc.pagamentos, forma:state.pb.forma, obs:state.pb.obs||'',
+    dataPromessa:state.pb.dataPromessa, stage:'Em aberto', criadoEm:new Date().toISOString(),
+    checklist:{ numeracao:false, material:false, pedra:false } };
+  state.orders.unshift(o);
+  if(state.client && !state.clients.some(function(x){return x.whatsapp===state.client.whatsapp;})) state.clients.unshift(state.client);
+  if(state.pedidoFromQuote){ var q=getQuote(state.pedidoFromQuote); if(q){ q.status='Virou pedido'; q.historico.push({em:new Date().toISOString(),acao:'Convertido no pedido '+num}); } }
+  state.cart=[]; state.client=null; state.pb=null; state.pedidoFromQuote=null; state.activeOrderId=num;
+  toast('Pedido '+num+' criado.'); go('order');
+}
+function editarPedido(num){
+  var o=getOrder(num); if(!o) return;
+  state.cart=JSON.parse(JSON.stringify(o.itens)); state.cart.forEach(function(it){ if(it.pedraAro==null)it.pedraAro=1; if(it.aro1==null)it.aro1=''; if(it.aro2==null)it.aro2=''; if(it.grav1==null)it.grav1=''; if(it.grav2==null)it.grav2=''; });
+  state.client=o.client?JSON.parse(JSON.stringify(o.client)):null; state.vendedoraSel=o.vendedora||'';
+  var forma=o.forma||(o.pagamento==='Pago'?'pago':(o.pagamento==='Pago parcialmente'?'parcial':'retirada'));
+  state.pb={forma:forma, pagamentos:(o.pagamentos&&o.pagamentos.length?JSON.parse(JSON.stringify(o.pagamentos)):(o.pago?[{valor:o.pago,forma:o.comoPago||''}]:[{valor:'',forma:''}])), comoPago:(o.comoPago||''), dataPromessa:o.dataPromessa, obs:o.obs||''};
+  state.pedidoFromQuote=(o.orcamento&&o.orcamento!=='Venda direta')?o.orcamento:null;
+  state.editOrderNum=num; state.editQuoteNum=null; toast('Editando '+num); go('pedidoNew');
+}
+
+/* ---------------- Clientes ---------------- */
+function viewClients(){
+  if(!state.clients.length) return '<h1 class="serif" style="font-size:26px">Clientes</h1><p class="muted mt">Nenhum cliente ainda. Eles aparecem aqui ao salvar um orçamento ou pedido.</p>';
+  var h='<h1 class="serif" style="font-size:26px">Clientes</h1><div class="card mt">';
+  state.clients.forEach(function(c){ h+='<div class="listrow"><div style="flex:1"><div style="font-weight:600;color:var(--ink)">'+esc(c.nome)+'</div><div class="muted" style="font-size:12px">'+esc(c.whatsapp||'')+(c.obs?' · '+esc(c.obs):'')+'</div></div></div>'; });
+  return h+'</div>';
+}
+
+/* ---------------- Orçamentos salvos ---------------- */
+function savedListInner(){
+  var list=state.quotes.filter(function(q){ return (!state._fStatus||q.status===state._fStatus)&&(!state._fVend||q.vendedora===state._fVend)&&(!state._fSearch||q.numero.toLowerCase().indexOf(state._fSearch.toLowerCase())>=0||(q.client&&q.client.nome.toLowerCase().indexOf(state._fSearch.toLowerCase())>=0)); });
+  if(state.qSort==='asc') list=list.slice().sort(function(a,b){return a.total-b.total;});
+  else if(state.qSort==='desc') list=list.slice().sort(function(a,b){return b.total-a.total;});
+  if(!list.length) return '<p class="muted mt">Nenhum orçamento encontrado.</p>';
+  var h='<div class="cardgrid mt">';
+  list.forEach(function(q){
+    h+='<div class="card pad" style="display:flex;flex-direction:column"><div class="between"><span class="serif" style="font-size:20px">'+(q.client?esc(q.client.nome):'—')+'</span><span class="serif" style="font-size:18px;color:var(--gold-dark)">'+money(q.total)+'</span></div>'
+      +'<div class="muted" style="font-size:13px;margin-top:2px">'+q.numero+'</div>'
+      +'<div class="muted" style="font-size:12px;margin-top:6px">Emitido '+fmtDate(q.criadoEm)+' · válido até '+fmtDate(q.validade)+' · '+q.itens.length+' item(ns)</div>'
+      +'<div style="margin-top:auto"><label class="field mt"><span class="lab">Status</span><span class="val"><select data-status="'+q.numero+'" class="inp" style="'+toneCss(STATUS_TONE[q.status]||'gray')+'">'+STATUS.map(function(s){return '<option'+(q.status===s?' selected':'')+' style="'+toneCss(STATUS_TONE[s]||'gray')+'">'+s+'</option>';}).join('')+'</select></span></label>'
+      +'<div class="row gap" style="margin-top:10px;flex-wrap:wrap"><button class="btn btn-ghost btn-sm" data-openpdf="'+q.numero+'">Ver / PDF</button>'
+      +'<button class="btn btn-ghost btn-sm" data-editq="'+q.numero+'">Editar</button>'
+      +'<button class="btn btn-ghost btn-sm" data-recalc="'+q.numero+'">Recalcular</button>'
+      +(q.status!=='Virou pedido'?'<button class="btn btn-primary gold-grad btn-sm" data-pedido="'+q.numero+'">Gerar pedido</button>':'')
+      +'<button class="btn btn-ghost btn-sm" data-delq="'+q.numero+'" style="color:#b23">Excluir</button>'
+      +'</div></div></div>';
+  });
+  return h+'</div>';
+}
+function viewSaved(){
+  return '<h1 class="serif" style="font-size:26px">Orçamentos salvos</h1>'
+    +'<div class="row gap mt" style="flex-wrap:wrap"><input id="savSearch" class="inp" style="max-width:280px" placeholder="Buscar por número ou cliente…" value="'+esc(state._fSearch||'')+'"/>'
+    +'<select id="savStatus" class="inp" style="max-width:200px"><option value="">Todos os status</option>'+STATUS.map(function(s){return '<option'+(state._fStatus===s?' selected':'')+'>'+s+'</option>';}).join('')+'</select>'
+    +(state.vendedoras&&state.vendedoras.length?'<select id="savVend" class="inp" style="max-width:200px"><option value="">Todas as vendedoras</option>'+state.vendedoras.map(function(v){return '<option'+(state._fVend===v?' selected':'')+'>'+esc(v)+'</option>';}).join('')+'</select>':'')
+    +'<select id="savSort" class="inp" style="max-width:170px"><option value="">Ordenar</option><option value="desc"'+(state.qSort==='desc'?' selected':'')+'>Maior valor</option><option value="asc"'+(state.qSort==='asc'?' selected':'')+'>Menor valor</option></select></div>'
+    +'<div id="savList">'+savedListInner()+'</div>';
+}
+function gerarPedido(quoteNum){
+  var q=getQuote(quoteNum); if(!q) return;
+  state.cart=JSON.parse(JSON.stringify(q.itens));
+  state.cart.forEach(function(it){ if(it.aro1==null)it.aro1=''; if(it.aro2==null)it.aro2=''; if(it.grav1==null)it.grav1=''; if(it.grav2==null)it.grav2=''; });
+  state.client=q.client?JSON.parse(JSON.stringify(q.client)):null;
+  if(q.vendedora) state.vendedoraSel=q.vendedora;
+  state.pb={forma:'retirada',valorPago:'',comoPago:'',dataPromessa:addDays(state.store.prazoDias),obs:''};
+  state.pedidoFromQuote=quoteNum; state.editOrderNum=null; go('pedidoNew');
+}
+
+/* ---------------- Pedidos ---------------- */
+function viewPedidos(){
+  if(!state.orders.length) return '<h1 class="serif" style="font-size:26px">Pedidos</h1><p class="muted mt">Nenhum pedido ainda. Crie um pedido direto na página da aliança ou a partir de um orçamento.</p><button class="btn btn-ghost mt" data-action="novo">Nova venda</button>';
+  var h='<h1 class="serif" style="font-size:26px">Pedidos de venda</h1><div class="cardgrid mt">';
+  state.orders.forEach(function(o){
+    var done=0,tot=0; for(var k in o.checklist){ tot++; if(o.checklist[k]) done++; }
+    h+='<div class="card pad" style="display:flex;flex-direction:column"><div class="between"><span class="serif" style="font-size:20px">'+(o.client?esc(o.client.nome):'—')+'</span><span class="serif" style="font-size:18px;color:var(--gold-dark)">'+money(o.total)+'</span></div>'
+      +'<div class="muted" style="font-size:13px;margin-top:2px">'+o.numero+'</div>'
+      +'<div class="muted" style="font-size:12px;margin-top:6px">Origem: '+esc(o.orcamento)+' · promessa '+fmtDate(o.dataPromessa)+' · conferência '+done+'/'+tot+'</div>'
+      +'<div style="margin-top:auto"><label class="field mt"><span class="lab">Status</span><span class="val"><select data-ostatus="'+o.numero+'" class="inp" style="'+toneCss(stageTone(o.stage))+'">'+ORDER_STAGES.map(function(s){return '<option'+(o.stage===s?' selected':'')+' style="'+toneCss(stageTone(s))+'">'+s+'</option>';}).join('')+'</select></span></label>'
+      +'<div class="row gap" style="margin-top:10px"><button class="btn btn-ghost btn-sm" data-order="'+o.numero+'">Abrir</button><button class="btn btn-ghost btn-sm" data-edito="'+o.numero+'">Editar</button><button class="btn btn-ghost btn-sm" data-delo="'+o.numero+'" style="color:#b23">Excluir</button></div></div></div>';
+  });
+  return h+'</div>';
+}
+function fornecedorMsg(o){
+  var L=['*Pedido para produção — '+state.store.nome+'*','Ref: '+o.numero,''];
+  o.itens.forEach(function(it){ var m=getModel(it.modelId);
+    var karat = it.karat==='10k'?'Ouro 10k':'Ouro 18k';
+    var stLabel = it.pedra ? (it.pedra+(it.pedra==='Brilhante'&&it.pontos?' '+it.pontos+'pts':'')) : null;
+    var aroLine = function(aro,com,grav){ return '*Aro '+(aro||'?')+(com?(' com '+stLabel):' sem pedra')+(grav?(' — gravação: '+grav):'')+'*'; };
+    L.push('Modelo: *'+m.modelo+'*');
+    L.push('Material: *'+karat+'*');
+    L.push('Aros:');
+    if(it.modo==='unit'){
+      L.push(aroLine(it.aro1, (it.dist>0&&stLabel), it.grav1));
+    } else {
+      var a1,a2;
+      if(!stLabel||it.dist===0){ a1=false; a2=false; }
+      else if(it.dist===2){ a1=true; a2=true; }
+      else { a1=(it.pedraAro!==2); a2=(it.pedraAro===2); }
+      L.push(aroLine(it.aro1, a1, it.grav1));
+      L.push(aroLine(it.aro2, a2, it.grav2));
+    }
+    L.push('');
+  });
+  if(o.obs) L.push('Obs.: '+o.obs);
+  L.push('Cliente precisa até: '+fmtDate(o.dataPromessa));
+  return L.join('\n');
+}
+function msgPronta(o){ var tpl=state.templates.filter(function(t){return t.tipo==='Peça pronta';})[0]; return (tpl?tpl.texto:'Olá {nome}, suas alianças estão prontas para retirada!').replace('{nome}', o.client?(o.client.nome||'').split(' ')[0]:''); }
+function abrirWhatsCliente(o){ var txt=msgPronta(o); copyText(txt); var num=((o.client&&o.client.whatsapp)||'').replace(/\D/g,''); if(num&&num.length<=11) num='55'+num; toast('Mensagem copiada. Abrindo WhatsApp do cliente…'); window.open('https://wa.me/'+num+'?text='+encodeURIComponent(txt),'_blank'); }
+function setOrderStage(o,stage){ o.stage=stage; save(); if(stage==='Pronto para entrega') abrirWhatsCliente(o); render(); }
+function autoLost(){ var lim=30*86400000, now=Date.now(); state.quotes.forEach(function(q){ if(q.status==='Em aberto' && q.criadoEm && (now-new Date(q.criadoEm).getTime())>lim){ q.status='Vencido'; q.historico=(q.historico||[]).concat([{em:new Date().toISOString(),acao:'Marcado como vencido (1 mês sem retorno)'}]); } }); }
+function viewOrder(){
+  var o=getOrder(state.activeOrderId); if(!o) return viewPedidos();
+  var items='';
+  o.itens.forEach(function(it){ var m=getModel(it.modelId);
+    var unit=it.modo==='unit';
+    var aros=unit?('aro '+(it.aro1||'?')):('aros '+(it.aro1||'?')+' / '+(it.aro2||'?'));
+    var gravs=unit?(it.grav1?('Gravação: “'+esc(it.grav1)+'”'):''):((it.grav1||it.grav2)?('Gravações: “'+esc(it.grav1||'—')+'” / “'+esc(it.grav2||'—')+'”'):'');
+    var peso=(unit?it.pesoPar/2:it.pesoPar);
+    items+='<div class="listrow">'+modelImg(m,it.dist>0?it.pedra:null,44)+'<div style="flex:1"><span class="code">'+m.modelo+'</span> <span style="font-size:14px">'+esc(m.nome)+'</span><div class="muted" style="font-size:12px">'+esc(it.matNome)+' · '+distLabel(it.dist)+' · '+(unit?'unitário':'par')+' · '+aros+' · peso ~'+peso.toFixed(1)+'g'+(it.pontos?' · brilhante '+it.pontos+'pts':'')+'</div>'+(gravs?'<div class="muted" style="font-size:12px">'+gravs+'</div>':'')+'</div><div class="serif">'+money(it.total)+'</div></div>';
+  });
+  var CL=[['numeracao','Aros conferidos'],['material','Material (ouro) conferido'],['pedra','Pedra conferida']];
+  var checks=CL.map(function(c){ return '<label class="check"><input type="checkbox" data-check="'+c[0]+'" '+(o.checklist[c[0]]?'checked':'')+'/> '+c[1]+'</label>'; }).join('');
+  return '<button class="btn btn-ghost btn-sm" data-go="pedidos">← Voltar aos pedidos</button>'
+    +'<div class="between mt"><h1 class="serif" style="font-size:26px">Pedido '+o.numero+'</h1><div class="row gap"><button class="btn btn-ghost btn-sm" data-edito="'+o.numero+'">Editar pedido</button><span class="badge '+stageTone(o.stage)+'">'+o.stage+'</span></div></div>'
+    +'<div class="quotewrap mt"><div><div class="card">'+items+'</div>'
+      +'<div class="card pad mt"><h3 class="serif" style="font-size:18px;margin-bottom:6px">Checklist de conferência - antes de fazer o pedido para a fábrica</h3>'+checks+'</div>'
+      +'<div class="card pad mt"><div class="between"><h3 class="serif" style="font-size:18px">Mensagem para o fornecedor</h3><div class="row gap"><button class="btn btn-ghost btn-sm" id="fornCopy">Copiar</button><a class="btn btn-primary gold-grad btn-sm" id="fornWa" target="_blank" rel="noreferrer">WhatsApp</a></div></div><div class="hint" style="margin:4px 0 6px">Copie e envie ao seu fornecedor para fazer o pedido.</div><pre style="white-space:pre-wrap;font-family:inherit;font-size:13px;background:var(--cream);border-radius:10px;padding:12px;color:var(--charcoal)">'+esc(fornecedorMsg(o))+'</pre></div>'
+      +'</div>'
+      +'<div class="card pad" style="height:fit-content"><div class="sumrow"><span>Cliente</span><span>'+(o.client?esc(o.client.nome):'—')+'</span></div><div class="sumrow"><span>Telefone</span><span>'+(o.client?esc(o.client.whatsapp||'—'):'—')+'</span></div><div class="sumrow"><span>Vendedora</span><span>'+esc(o.vendedora||'—')+'</span></div><div class="sumrow st"><span>Total</span><span>'+money(o.total)+'</span></div><div class="sumrow"><span>Pagamento</span><span>'+esc(o.pagamento||'—')+'</span></div>'+((o.pago||0)>0?'<div class="sumrow"><span>Já pago</span><span>'+money(o.pago)+'</span></div>'+(o.comoPago?'<div class="hint" style="text-align:right">'+esc(o.comoPago)+'</div>':''):'')+(((o.falta||0)>0&&o.pagamento!=='Pago')?'<div class="sumrow st"><span>Falta</span><span>'+money(o.falta)+'</span></div>':'')+(o.obs?'<div class="divider" style="padding-top:8px;margin-top:4px"><div class="hint">Observações</div><div style="font-size:13px">'+esc(o.obs)+'</div></div>':'')
+      +'<label class="field mt"><span class="lab">Data prometida</span><span class="val"><input id="oData" type="date" class="inp" value="'+o.dataPromessa+'"/></span></label>'
+      +'<label class="field mt"><span class="lab">Status do pedido</span><span class="val"><select id="oStage" class="inp" style="'+toneCss(stageTone(o.stage))+'">'+ORDER_STAGES.map(function(s){return '<option'+(o.stage===s?' selected':'')+' style="'+toneCss(stageTone(s))+'">'+s+'</option>';}).join('')+'</select></span></label><button class="btn btn-primary gold-grad w100 mt" data-printos="'+o.numero+'">🖨 Imprimir ordem de serviço</button></div></div>';
+}
+
+/* ---------------- Configurações ---------------- */
+function viewConfig(){
+  var tabs=[['cotacao','Cotações'],['modelos','Modelos'],['pagamento','Pagamento'],['loja','Loja'],['mensagens','Mensagens']];
+  var body= state.adminTab==='modelos'?adminModelos(): state.adminTab==='pagamento'?adminPagamento(): state.adminTab==='loja'?adminLoja(): state.adminTab==='mensagens'?adminMensagens(): adminCotacao();
+  return '<h1 class="serif" style="font-size:26px">Configurações</h1><div class="tabs mt">'+tabs.map(function(t){return '<button class="tab '+(state.adminTab===t[0]?'on':'')+'" data-atab="'+t[0]+'">'+t[1]+'</button>';}).join('')+'</div><div class="mt">'+body+'</div>';
+}
+function adminCotacao(){
+  var r=state.rates;
+  return '<div class="grid g2"><div class="card pad"><h3 class="serif" style="font-size:18px">Cotação atual</h3><div class="sumrow"><span>Ouro (por grama)</span><span>'+money(r.ouro)+' <span class="muted" style="font-size:11px">'+(r.manualOuro?'(manual)':'(automático)')+'</span></span></div><div class="sumrow"><span>Dólar</span><span>'+money(r.dolar)+' <span class="muted" style="font-size:11px">(automático)</span></span></div><div class="sumrow"><span>Fonte</span><span>'+esc(r.sourceDolar)+'</span></div><div class="sumrow"><span>Atualizado</span><span>'+(r.updatedAt?fmtDate(r.updatedAt):'—')+'</span></div><button class="btn btn-primary gold-grad mt" id="rateAuto">Atualizar cotações agora</button><div class="hint" style="margin-top:6px">'+(r.manualOuro?'O dólar vem automático da AwesomeAPI. O ouro está <b>fixado manualmente</b> — ajuste ou volte ao automático ao lado.':'Dólar e ouro são atualizados <b>automaticamente</b> pela AwesomeAPI a cada abertura. Se quiser, você pode fixar o ouro manualmente ao lado.')+'</div></div>'
+    +'<div class="card pad"><h3 class="serif" style="font-size:18px">Definir manualmente</h3>'
+    +'<label class="field"><span class="lab">Cotação do ouro (R$ por grama)</span><span class="val"><input id="mOuro" type="number" step="0.01" class="inp" value="'+(r.manualOuro?(r.ouro||''):'')+'" placeholder="'+(r.manualOuro?'':('Automático: '+(r.ouro!=null?money(r.ouro):'—')))+'"/></span></label>'
+    +'<div class="hint" style="margin-top:4px">'+(r.manualOuro?'Você está usando um valor <b>manual</b> para o ouro.':'Usando o valor <b>automático</b> da AwesomeAPI.')+' Para voltar ao automático, deixe o campo em branco e salve.</div>'
+    +(r.manualOuro?'<button class="btn btn-subtle btn-sm mt" id="rateAuto2">Voltar ao valor automático</button>':'')
+    +'<label class="field mt"><span class="lab">Dólar (R$) — opcional</span><span class="val"><input id="mDolar" type="number" step="0.01" class="inp" value="" placeholder="Automático: '+(r.dolar!=null?money(r.dolar):'—')+'"/></span></label>'
+    +'<button class="btn btn-primary gold-grad mt" id="rateManual">Salvar cotações</button></div></div>';
+}
+function adminModelosCards(){
+  var q=(state.mSearch||'').trim().toLowerCase();
+  var list=state.models.filter(function(m){ return !q||m.modelo.toLowerCase().indexOf(q)>=0||m.nome.toLowerCase().indexOf(q)>=0; });
+  if(!list.length) return '<p class="muted">Nenhum modelo encontrado.</p>';
+  var cards='';
+  list.forEach(function(m){
+    cards+='<div class="card pad" style="text-align:center"><div class="code">'+m.modelo+'</div><div style="margin:6px 0">'+modelImg(m,null,m.foto?110:80)+'</div><div class="serif" style="font-size:16px">'+esc(m.nome)+'</div><div class="muted" style="font-size:12px;margin-top:2px">Largura '+m.largura+'mm · índ. 10k '+(m.indice10k!=null?m.indice10k:'—')+' / 18k '+(m.indice18k!=null?m.indice18k:'—')+'</div><div class="muted" style="font-size:12px">zircônia '+usd(m.zirconiaUSD)+' · brilhante '+usd(m.brilhanteUSD)+'</div><button class="btn btn-subtle btn-sm w100 mt" data-editmodel="'+m.id+'">Editar</button></div>';
+  });
+  return cards;
+}
+function adminModelos(){
+  return '<div class="between" style="margin-bottom:10px"><input id="mSearch" class="inp" style="max-width:280px" placeholder="Buscar modelo por código ou nome…" value="'+esc(state.mSearch||'')+'"/><button class="btn btn-primary gold-grad btn-sm" id="novoModelo">+ Novo modelo</button></div>'
+    +'<div id="mGrid" class="cardgrid">'+adminModelosCards()+'</div>'
+    +'<div class="hint" style="margin-top:8px">Campos: foto, modelo, nome, peso Au750 (18k), peso Au416 (10k), largura, índice 10k, índice 18k, valor da zircônia (US$), valor do brilhante (US$) e pontos do brilhante.</div>';
+}
+function adminPagamento(){
+  var s=state.store;
+  function pr(lab,key,suf){ return '<div class="paramrow"><div class="pl">'+lab+'</div><input type="number" data-store="'+key+'" value="'+(s[key]==null?'':s[key])+'"/><span class="hint" style="width:30px">'+(suf||'')+'</span></div>'; }
+  return '<div class="card pad" style="max-width:560px"><h3 class="serif" style="font-size:18px;margin-bottom:6px">Condições de pagamento</h3>'+pr('Desconto à vista','pgtoAvista','%')+pr('Parcelas no cartão (sem juros)','pgtoCartao','x')+pr('Parcelas no crediário (sem juros)','pgtoCrediario','x')+pr('Validade padrão do orçamento','validadeDias','dias')+pr('Prazo padrão de entrega','prazoDias','dias')+'<div class="hint" style="margin-top:8px">Aplicados automaticamente nos orçamentos e pedidos.</div></div>';
+}
+function adminLoja(){
+  var s=state.store;
+  function f(lab,key,type){ return '<label class="field"><span class="lab">'+lab+'</span><span class="val"><input class="inp" data-store="'+key+'" type="'+(type||'text')+'" value="'+esc(s[key])+'"/></span></label>'; }
+  return '<div class="card pad" style="max-width:760px"><div class="field" style="margin-bottom:12px"><span class="lab">Logo da loja (aparece no topo e no PDF)</span><span class="val row gap" style="margin-top:6px"><img id="storeLogoPrev" src="'+(s.logo||'')+'" style="width:64px;height:64px;border-radius:12px;object-fit:contain;background:#f4f7fd;border:1px solid var(--line);'+(s.logo?'':'display:none')+'"/><input type="file" accept="image/*" id="storeLogo"/>'+(s.logo?'<button class="btn btn-ghost btn-sm" id="storeLogoDel">Remover</button>':'')+'</span></div><div class="grid g2">'+f('Nome da empresa','nome')+f('CNPJ','cnpj')+f('Endereço','endereco')+f('WhatsApp','whatsapp')+f('Instagram','instagram')+f('Chave PIX','pix')+'</div><label class="field mt"><span class="lab">Texto padrão do orçamento</span><span class="val"><textarea class="inp" data-store="textoPadrao" rows="2">'+esc(s.textoPadrao)+'</textarea></span></label><label class="field mt"><span class="lab">Vendedoras (uma por linha)</span><span class="val"><textarea class="inp" id="vendList" rows="3" placeholder="Ana&#10;Helena&#10;Maria">'+esc(state.vendedoras.join('\n'))+'</textarea></span></label></div>';
+}
+function adminMensagens(){
+  var h='<div style="max-width:760px">';
+  state.templates.forEach(function(t){ h+='<div class="card pad" style="margin-bottom:12px"><div style="font-weight:600;color:var(--ink);font-size:14px;margin-bottom:6px">'+esc(t.tipo)+'</div><textarea class="inp" data-tmpl="'+t.id+'" rows="2">'+esc(t.texto)+'</textarea></div>'; });
+  return h+'<div class="hint">Variáveis: {nome} (primeiro nome) · {codigo} · {opcao} · {valor} (à prazo) · {avista} (à vista) · {validade} · {itens} (lista de alianças, na mensagem de vários) · {numero}.</div></div>';
+}
+
+/* ---------------- PDF / WhatsApp ---------------- */
+function pedraDesc(it){
+  var st = it.pedra ? it.pedra.toLowerCase() : null;
+  if(it.modo==='unit') return (it.dist>0&&st)?('com '+st):'sem pedra';
+  if(!st || it.dist===0) return 'as duas sem pedra';
+  if(it.dist===2) return 'as duas com '+st;
+  return 'uma com '+st+' e a outra sem pedra';
+}
+function pedraCurto(it){
+  var st = it.pedra ? it.pedra.toLowerCase() : null;
+  if(!st) return null;
+  if(it.modo==='unit') return it.dist>0?{txt:st, mk:''}:null;
+  if(it.dist===0) return null;
+  if(it.dist===2) return {txt:st, mk:'¹'};
+  return {txt:st, mk:'²'};
+}
+function opcaoDesc(it){ if(!it) return ''; return (it.karat==='10k'?'ouro 10k':'ouro 18k')+', '+pedraDesc(it); }
+function waTextFor(q){
+  var nome=q.client?(q.client.nome||'').split(' ')[0]:'';
+  if(q.itens.length>1){
+    var lines=q.itens.map(function(it){ var m=getModel(it.modelId); var pc=pedraCurto(it); var sp=pc?(' · '+pc.txt+pc.mk):''; return '*'+m.modelo+'* · '+(it.karat==='10k'?'Ouro 10k':'Ouro 18k')+sp+': '+money(it.total)+' à prazo'; });
+    var usa1=q.itens.some(function(it){return it.modo!=='unit'&&it.pedra&&it.dist===2;}), usa2=q.itens.some(function(it){return it.modo!=='unit'&&it.pedra&&it.dist===1;});
+    var leg=[]; if(usa1) leg.push('¹ as duas com pedra'); if(usa2) leg.push('² uma com pedra e a outra sem');
+    var itens=lines.join('\n')+(leg.length?('\n\n'+leg.join('\n')):'');
+    var tplM=state.templates.filter(function(t){return t.tipo==='Orçamento com várias alianças';})[0];
+    var txtM=tplM?tplM.texto:'Olá, {nome}! Segue o orçamento dos modelos de alianças:\n{itens}\n\nVálido até {validade}. Qualquer dúvida fico à disposição!';
+    return txtM.replace('{nome}',nome).replace('{itens}',itens).replace('{validade}',fmtDate(q.validade));
+  }
+  var tpl=state.templates.filter(function(t){return t.tipo==='Primeiro contato';})[0]; var txt=tpl?tpl.texto:''; var it=q.itens[0];
+  var av=pgtoOpcoes(q.subtotal!=null?q.subtotal:q.total, q.pgto).avistaValor;
+  return txt.replace('{nome}',nome).replace('{codigo}',q.itens.map(function(i){return getModel(i.modelId).modelo;}).join(', ')).replace('{opcao}',opcaoDesc(it)).replace('{valor}',money(q.total)).replace('{avista}',money(av)).replace('{prazo}',state.store.prazoDias+' dias').replace('{validade}',fmtDate(q.validade));
+}
+function viewPrint(){
+  var q=getQuote(state.printQuoteNum); if(!q) return '<div class="container center" style="padding:60px"><p class="muted">Nenhum orçamento selecionado.</p><button class="btn btn-subtle" data-go="saved">Ver salvos</button></div>';
+  var st=state.store, items='';
+  q.itens.forEach(function(it){ var m=getModel(it.modelId);
+    items+='<div class="row" style="gap:16px;padding:14px 0;border-bottom:1px solid var(--line)"><div style="background:var(--cream);border-radius:12px;padding:4px">'+modelImg(m,it.dist>0?it.pedra:null,70)+'</div><div style="flex:1"><div class="code">'+m.modelo+'</div><div class="serif" style="font-size:17px">'+esc(m.nome)+'</div><div class="muted" style="font-size:12px">'+esc(it.matNome)+' · '+distLabel(it.dist)+' · '+(it.modo==='unit'?'unitário':'par')+(it.pontos?' · brilhante '+it.pontos+'pts':'')+'</div></div><div class="serif" style="font-size:17px">'+money(it.total)+'</div></div>';
+  });
+  return '<div class="print-bar no-print"><div class="inner"><button class="btn btn-subtle btn-sm" data-go="saved" style="margin-right:auto">← Voltar</button><button class="btn btn-subtle btn-sm" id="btnPrint">🖨 Baixar PDF / Imprimir</button><button class="btn btn-subtle btn-sm" id="btnWa">💬 Mensagem WhatsApp</button><button class="btn btn-subtle btn-sm" id="btnCopy">Copiar mensagem</button></div></div>'
+    +'<div class="print-area"><div class="pdf-head"><div class="row" style="gap:12px">'+logoImg(48,false)+'<div><div class="serif" style="font-size:22px">'+esc(st.nome)+'</div><div class="muted2" style="font-size:12px">'+esc(st.endereco)+' · '+esc(st.whatsapp)+'</div></div></div><div class="center"><div class="serif" style="font-size:20px">'+q.numero+'</div><div class="muted2" style="font-size:12px">Emitido '+fmtDate(q.criadoEm)+'</div></div></div>'
+    +'<div class="pdf-body"><div class="between" style="border-bottom:1px solid var(--line);padding-bottom:14px"><div><div class="lab" style="font-size:11px;color:var(--muted);text-transform:uppercase">Cliente</div><div style="font-weight:600;color:var(--ink)">'+(q.client?esc(q.client.nome):'—')+'</div><div class="muted">'+(q.client?esc(q.client.whatsapp||''):'')+'</div>'+(q.vendedora?'<div class="muted" style="font-size:12px;margin-top:2px">Vendedora: '+esc(q.vendedora)+'</div>':'')+'</div><div style="text-align:right;font-size:13px"><div><span class="muted">Validade:</span> <b style="color:var(--ink)">'+fmtDate(q.validade)+'</b></div><div style="margin-top:3px"><span class="muted">Prazo de entrega:</span> <b style="color:var(--ink)">'+(q.prazoDias||state.store.prazoDias)+' dias</b></div></div></div>'
+    +items
+    +'<div class="row" style="justify-content:flex-end;margin-top:14px"><div style="width:300px">'+pgtoBlock(q.subtotal, q.pgto, shouldShowTotal(q.itens))+'</div></div>'
+    +(q.obs?'<div class="mt" style="font-size:14px"><b>Observações:</b> '+esc(q.obs)+'</div>':'')
+    +'<div class="muted" style="font-size:12px;margin-top:8px">'+esc(st.textoPadrao)+'</div>'
+    +'<div class="muted" style="font-size:11px;border-top:1px solid var(--line);margin-top:12px;padding-top:8px">Cotações registradas na emissão: ouro '+money(q.snapshot.ouro)+'/g · dólar '+money(q.snapshot.dolar)+' · '+fmtDate(q.snapshot.calculadoEm)+'. Valores garantidos dentro da validade. Aros e gravações são definidos no fechamento do pedido.</div>'
+    +'</div></div>';
+}
+
+/* ---------------- Ordem de serviço (impressão) ---------------- */
+function osItems(o){
+  var items='';
+  o.itens.forEach(function(it){ var m=getModel(it.modelId);
+    var karat=it.karat==='10k'?'Ouro 10k':'Ouro 18k';
+    var stLabel=it.pedra?(it.pedra+(it.pedra==='Brilhante'&&it.pontos?' '+it.pontos+'pts':'')):null;
+    var line=function(aro,com,grav){ return '<div style="font-size:13px">Aro <b>'+(aro||'?')+'</b> — '+(com?('com '+stLabel):'sem pedra')+(grav?(' · gravação: “'+esc(grav)+'”'):'')+'</div>'; };
+    var aros;
+    if(it.modo==='unit'){ aros=line(it.aro1,(it.dist>0&&stLabel),it.grav1); }
+    else { var a1,a2; if(!stLabel||it.dist===0){a1=false;a2=false;} else if(it.dist===2){a1=true;a2=true;} else {a1=(it.pedraAro!==2);a2=(it.pedraAro===2);} aros=line(it.aro1,a1,it.grav1)+line(it.aro2,a2,it.grav2); }
+    items+='<div style="padding:8px 0;border-bottom:1px solid var(--line)"><span class="code">'+m.modelo+'</span> <b style="color:var(--ink)">'+esc(m.nome)+'</b> · Material: <b>'+karat+'</b>'+aros+'</div>';
+  });
+  return items;
+}
+function osPag(o){
+  return '<div class="sumrow st"><span>Total</span><span>'+money(o.total)+'</span></div><div class="sumrow"><span>Pagamento</span><span>'+esc(o.pagamento||'—')+'</span></div>'
+    +((o.pago||0)>0?'<div class="sumrow"><span>Já pago</span><span>'+money(o.pago)+'</span></div>'+(o.comoPago?'<div class="hint" style="text-align:right">'+esc(o.comoPago)+'</div>':''):'')
+    +(((o.falta||0)>0&&o.pagamento!=='Pago')?'<div class="sumrow st"><span>Falta receber</span><span>'+money(o.falta)+'</span></div>':'');
+}
+function osVia(o,tipo){
+  var st=state.store;
+  var prazo=o.prazoDias||Math.round((new Date(o.dataPromessa).getTime()-new Date(o.criadoEm).getTime())/86400000);
+  var topRight = tipo==='cliente'
+    ? '<div><span class="muted">Prazo de entrega:</span> <b style="color:var(--ink)">'+prazo+' dias</b></div>'
+    : '<div><span class="muted">Cliente precisa até:</span> <b style="color:var(--ink)">'+fmtDate(o.dataPromessa)+'</b></div><div style="margin-top:2px"><span class="muted">Origem:</span> '+esc(o.orcamento)+'</div>';
+  return '<div class="between" style="align-items:flex-start;margin-bottom:8px"><div class="row" style="gap:10px">'+logoImg(38,false)+'<div><div class="serif" style="font-size:18px">'+esc(st.nome)+'</div><div class="muted2" style="font-size:11px">Ordem de Serviço · '+(tipo==='cliente'?'Via do cliente':'Via da loja')+'</div></div></div><div class="center"><div class="serif" style="font-size:17px">'+o.numero+'</div><div class="muted2" style="font-size:11px">'+fmtDate(o.criadoEm)+'</div></div></div>'
+    +'<div class="between" style="border-bottom:1px solid var(--line);padding-bottom:8px;font-size:13px"><div><span class="muted">Cliente:</span> <b style="color:var(--ink)">'+(o.client?esc(o.client.nome):'—')+'</b> · '+(o.client?esc(o.client.whatsapp||''):'')+(o.vendedora?(' · Vendedora: '+esc(o.vendedora)):'')+'</div><div style="text-align:right">'+topRight+'</div></div>'
+    +osItems(o)
+    +'<div class="row" style="justify-content:flex-end;margin-top:8px"><div style="width:280px">'+osPag(o)+'</div></div>'
+    +(o.obs?'<div style="font-size:13px;margin-top:6px"><b>Obs.:</b> '+esc(o.obs)+'</div>':'')
+    +(tipo==='cliente'?'<div style="margin-top:10px;font-weight:700;color:var(--ink);text-align:center">Apresente esta ordem de serviço para retirada das alianças.</div>':'');
+}
+function viewPrintOS(){
+  var o=getOrder(state.printOrderNum); if(!o) return '<div class="container center" style="padding:60px"><p class="muted">Nenhum pedido selecionado.</p><button class="btn btn-subtle" data-go="pedidos">Ver pedidos</button></div>';
+  return '<div class="print-bar no-print"><div class="inner"><button class="btn btn-subtle btn-sm" data-go="pedidos" style="margin-right:auto">← Voltar</button><button class="btn btn-subtle btn-sm" id="btnPrintOS">🖨 Imprimir ordem de serviço</button></div></div>'
+    +'<div class="print-area" style="padding:0">'
+      +'<div style="padding:22px 34px">'+osVia(o,'loja')+'</div>'
+      +'<div style="border-top:2px dashed #9aa4b2;position:relative;height:0;margin:6px 20px"><span style="position:absolute;top:-9px;left:50%;transform:translateX(-50%);background:#fff;padding:0 12px;color:#94a3b8;font-size:11px">— — —  ✂  corte aqui  — — —</span></div>'
+      +'<div style="padding:22px 34px">'+osVia(o,'cliente')+'</div>'
+    +'</div>';
+}
+
+/* ============================================================ MODAIS ============================================================ */
+function closeModal(){ document.getElementById('modal-root').innerHTML=''; }
+function modalShell(title,inner,wide){ return '<div class="modal-bg" id="mbg"><div class="modal'+(wide?' wide':'')+'"><div class="modal-h"><h3 class="serif" style="font-size:20px">'+title+'</h3><button class="x" id="mx">✕</button></div><div class="pad">'+inner+'</div></div></div>'; }
+function bindModalClose(){ var x=document.getElementById('mx'); if(x) x.onclick=closeModal; var bg=document.getElementById('mbg'); if(bg) bg.onclick=function(e){ if(e.target.id==='mbg') closeModal(); }; }
+function afterClientSave(){ if(state.screen==='quote'){ var s=document.getElementById('qbSummary'); if(s){s.innerHTML=qbSummaryInner(); bindQuoteSummary();} } else render(); }
+function openClientModal(){
+  var c=state.client||{};
+  function f(lab,key,type){ return '<label class="field"><span class="lab">'+lab+'</span><span class="val"><input class="inp" id="cf_'+key+'" type="'+(type||'text')+'" value="'+esc(c[key]||'')+'"/></span></label>'; }
+  var inner='<div class="grid g2">'+f('Nome *','nome')+f('Telefone (WhatsApp) *','whatsapp')+'</div><label class="field mt"><span class="lab">Observações</span><span class="val"><textarea class="inp" id="cf_obs" rows="2">'+esc(c.obs||'')+'</textarea></span></label><div class="row" style="justify-content:flex-end;gap:8px;margin-top:16px"><button class="btn btn-ghost" id="cCancel">Cancelar</button><button class="btn btn-primary gold-grad" id="cSave">Salvar cliente</button></div>';
+  document.getElementById('modal-root').innerHTML=modalShell('Cliente',inner,true); bindModalClose();
+  document.getElementById('cCancel').onclick=closeModal;
+  document.getElementById('cSave').onclick=function(){ var obj={ nome:document.getElementById('cf_nome').value, whatsapp:document.getElementById('cf_whatsapp').value, obs:document.getElementById('cf_obs').value }; if(!obj.nome||!obj.whatsapp){toast('Informe nome e telefone.');return;} state.client=obj; closeModal(); afterClientSave(); toast('Cliente salvo.'); };
+}
+function openWaModal(q){
+  var inner='<textarea id="waTa" class="inp" rows="7">'+esc(waTextFor(q))+'</textarea><div class="row" style="justify-content:flex-end;gap:8px;margin-top:12px"><button class="btn btn-ghost" id="waCopy">Copiar</button><a class="btn btn-primary gold-grad" id="waOpen" target="_blank" rel="noreferrer">Abrir no WhatsApp</a></div>';
+  document.getElementById('modal-root').innerHTML=modalShell('Mensagem para WhatsApp',inner); bindModalClose();
+  var upd=function(){ var n=((q.client&&q.client.whatsapp)||'').replace(/\D/g,''); if(n&&n.length<=11) n='55'+n; document.getElementById('waOpen').href='https://wa.me/'+n+'?text='+encodeURIComponent(document.getElementById('waTa').value); };
+  document.getElementById('waTa').oninput=upd; upd();
+  document.getElementById('waCopy').onclick=function(){ copyText(document.getElementById('waTa').value); toast('Mensagem copiada.'); };
+}
+function openRecalc(num){
+  var q=getQuote(num); if(!q) return;
+  var novo=q.itens.reduce(function(s,it){ var m=getModel(it.modelId); return s+valorModo(priceOf(m,it.matId,it.dist).par, it.modo); },0);
+  var diff=novo-q.subtotal;
+  var inner='<p class="muted" style="font-size:14px">Emitido com ouro <b>'+money(q.snapshot.ouro)+'/g</b> e dólar <b>'+money(q.snapshot.dolar)+'</b>. Com as cotações atuais, o subtotal seria:</p><div class="row" style="justify-content:center;gap:22px;margin:16px 0"><div class="center"><div class="hint">Original</div><div class="serif" style="font-size:22px">'+money(q.subtotal)+'</div></div><div style="color:var(--gold-dark)">→</div><div class="center"><div class="hint">Atualizado</div><div class="serif" style="font-size:22px;color:var(--gold-dark)">'+money(novo)+'</div></div><span class="badge '+(diff>0?'red':'green')+'">'+(diff>0?'+':'')+money(diff)+'</span></div><p class="hint" style="margin-bottom:12px">O preço de um orçamento enviado nunca muda sozinho. Escolha:</p><div class="grid" style="gap:8px"><button class="btn btn-ghost" id="rcKeep">Manter valores originais</button><button class="btn btn-primary gold-grad" id="rcNew">Criar nova versão com cotação atual</button></div>';
+  document.getElementById('modal-root').innerHTML=modalShell('Recalcular orçamento',inner); bindModalClose();
+  document.getElementById('rcKeep').onclick=closeModal;
+  document.getElementById('rcNew').onclick=function(){ var nq=JSON.parse(JSON.stringify(q)); nq.numero=q.numero+'-v2'; nq.subtotal=novo; nq.total=novo; nq.status='Em elaboração'; nq.criadoEm=new Date().toISOString(); nq.snapshot={ouro:state.rates.ouro,dolar:state.rates.dolar,calculadoEm:new Date().toISOString()}; nq.historico=(q.historico||[]).concat([{em:new Date().toISOString(),acao:'Nova versão com cotação atual'}]); state.quotes.unshift(nq); closeModal(); toast('Nova versão criada.'); render(); };
+}
+function openModelModal(id){
+  var m = id? JSON.parse(JSON.stringify(getModel(id))) : {id:'m'+Date.now(),modelo:'',nome:'',foto:null,pesoAu750:'',pesoAu416:'',largura:'',indice10k:'',indice18k:'',zirconiaUSD:'',brilhanteUSD:'',pontosBrilhante:'',tone:'#b6924f',ativo:true};
+  function f(lab,key,type){ return '<label class="field"><span class="lab">'+lab+'</span><span class="val"><input class="inp" id="mf_'+key+'" type="'+(type||'text')+'" value="'+esc(m[key])+'"/></span></label>'; }
+  var foto='<div class="field"><span class="lab">Foto da aliança</span><span class="val row gap"><img id="mf_prev" src="'+(m.foto||'')+'" style="width:64px;height:64px;border-radius:12px;object-fit:cover;background:#f4f7fd;'+(m.foto?'':'display:none')+'"/><input type="file" accept="image/*" id="mf_foto"/></span></div>';
+  var inner=foto+'<div class="grid g2 mt">'+f('Modelo (código)','modelo')+f('Nome','nome')+f('Peso médio Au750 / 18k (g)','pesoAu750','number')+f('Peso médio Au416 / 10k (g)','pesoAu416','number')+f('Largura (mm)','largura','number')+f('Índice ouro 10k','indice10k','number')+f('Índice ouro 18k','indice18k','number')+f('Valor zircônia (US$)','zirconiaUSD','number')+f('Valor brilhante (US$)','brilhanteUSD','number')+f('Pontos do brilhante','pontosBrilhante','number')+'</div>'
+    +'<div class="row" style="justify-content:space-between;gap:8px;margin-top:16px">'+(id?'<button class="btn btn-ghost" id="mDel" style="color:#b23">Excluir</button>':'<span></span>')+'<div class="row gap"><button class="btn btn-ghost" id="mCancel">Cancelar</button><button class="btn btn-primary gold-grad" id="mSave">Salvar modelo</button></div></div>';
+  document.getElementById('modal-root').innerHTML=modalShell(id?'Editar modelo':'Novo modelo',inner,true); bindModalClose();
+  document.getElementById('mCancel').onclick=closeModal;
+  var fi=document.getElementById('mf_foto'); if(fi) fi.onchange=function(){ var file=fi.files&&fi.files[0]; if(!file) return; var rd=new FileReader(); rd.onload=function(){ m.foto=rd.result; var pv=document.getElementById('mf_prev'); if(pv){ pv.src=m.foto; pv.style.display='block'; } }; rd.readAsDataURL(file); };
+  if(id){ var del=document.getElementById('mDel'); if(del) del.onclick=function(){ state.models=state.models.filter(function(x){return x.id!==id;}); closeModal(); toast('Modelo excluído.'); render(); }; }
+  document.getElementById('mSave').onclick=function(){
+    var num=['pesoAu750','pesoAu416','largura','indice10k','indice18k','zirconiaUSD','brilhanteUSD','pontosBrilhante'];
+    m.modelo=document.getElementById('mf_modelo').value; m.nome=document.getElementById('mf_nome').value;
+    num.forEach(function(k){ var v=document.getElementById('mf_'+k).value; m[k]= v===''?null:+v; });
+    if(!m.modelo||!m.nome){ toast('Informe modelo e nome.'); return; }
+    var ex=getModel(m.id); if(ex){ for(var k in m) ex[k]=m[k]; } else { state.models.push(m); }
+    closeModal(); toast('Modelo salvo.'); render();
+  };
+}
+
+/* ============================================================ BIND ============================================================ */
+function bind(){
+  document.querySelectorAll('[data-go]').forEach(function(b){ b.addEventListener('click',function(){ go(b.getAttribute('data-go')); }); });
+  document.querySelectorAll('[data-logout]').forEach(function(b){ b.addEventListener('click',function(){ if(window.confirm('Sair da conta neste dispositivo?')) logout(); }); });
+  document.querySelectorAll('[data-open]').forEach(function(b){ b.addEventListener('click',function(){ openModel(b.getAttribute('data-open')); }); });
+  document.querySelectorAll('[data-fav]').forEach(function(b){ b.addEventListener('click',function(e){ e.stopPropagation(); toggleFav(b.getAttribute('data-fav')); }); });
+  document.querySelectorAll('[data-action]').forEach(function(b){ b.addEventListener('click',function(){ if(b.getAttribute('data-action')==='novo'){ state.cart=[]; state.client=null; state.qb={obs:''}; state.editQuoteNum=null; state.editOrderNum=null; go('catalog'); } }); });
+  document.querySelectorAll('[data-order]').forEach(function(b){ b.addEventListener('click',function(){ state.activeOrderId=b.getAttribute('data-order'); go('order'); }); });
+  document.querySelectorAll('[data-ostatus]').forEach(function(el){ el.onchange=function(){ var o=getOrder(el.getAttribute('data-ostatus')); if(o) setOrderStage(o, el.value); }; });
+  document.querySelectorAll('[data-delo]').forEach(function(b){ b.addEventListener('click',function(){ var n=b.getAttribute('data-delo'); if(window.confirm('Excluir o pedido '+n+'? Esta ação não pode ser desfeita.')){ state.orders=state.orders.filter(function(x){return x.numero!==n;}); save(); render(); } }); });
+  document.querySelectorAll('[data-printos]').forEach(function(b){ b.addEventListener('click',function(){ state.printOrderNum=b.getAttribute('data-printos'); go('printos'); }); });
+  document.querySelectorAll('[data-edito]').forEach(function(b){ b.addEventListener('click',function(){ editarPedido(b.getAttribute('data-edito')); }); });
+  var bpo=document.getElementById('btnPrintOS'); if(bpo) bpo.onclick=function(){ window.print(); };
+  var gs=document.getElementById('globalSearch'); if(gs){ gs.value=state.search; gs.oninput=function(){ state.search=gs.value; renderSearchDrop(); }; gs.onblur=function(){ setTimeout(function(){ var d=document.getElementById('searchDrop'); if(d) d.innerHTML=''; },150); }; }
+  var rf=document.getElementById('rateRefresh'); if(rf) rf.onclick=fetchRates;
+  if(state.screen==='catalog'){
+    var updCat=function(){ var g=document.getElementById('catalogGrid'); if(g){ g.innerHTML=catalogCards(); bindGrid(); } };
+    var cf=document.getElementById('catFilter'); if(cf) cf.oninput=function(){ state.search=cf.value; updCat(); };
+    var cs=document.getElementById('catSort'); if(cs) cs.onchange=function(){ state.catSort=cs.value; updCat(); };
+    var cl=document.getElementById('catLargura'); if(cl) cl.onchange=function(){ state.catLargura=cl.value; updCat(); };
+    var cx=document.getElementById('catFaixa'); if(cx) cx.onchange=function(){ state.catFaixa=cx.value; updCat(); };
+    var cp=document.getElementById('catPedra'); if(cp) cp.onchange=function(){ state.catPedra=cp.value; updCat(); };
+  }
+  if(state.screen==='model') bindModel();
+  if(state.screen==='quote') bindQuote();
+  if(state.screen==='pedidoNew') bindPedidoNew();
+  if(state.screen==='saved') bindSaved();
+  if(state.screen==='order') bindOrder();
+  if(state.screen==='config') bindConfig();
+  if(state.screen==='print') bindPrint();
+}
+function bindGrid(){ document.querySelectorAll('#catalogGrid [data-open]').forEach(function(b){ b.addEventListener('click',function(){ openModel(b.getAttribute('data-open')); }); }); document.querySelectorAll('#catalogGrid [data-fav]').forEach(function(b){ b.addEventListener('click',function(e){ e.stopPropagation(); toggleFav(b.getAttribute('data-fav')); }); }); }
+function renderSearchDrop(){
+  var d=document.getElementById('searchDrop'); if(!d) return; var q=state.search.trim().toLowerCase();
+  if(!q){ d.innerHTML=''; return; }
+  var list=state.models.filter(function(m){ return m.ativo&&(m.modelo.toLowerCase().indexOf(q)>=0||m.nome.toLowerCase().indexOf(q)>=0); }).slice(0,6);
+  if(!list.length){ d.innerHTML=''; return; }
+  d.className='search-drop'; d.innerHTML=list.map(function(m){ return '<button data-os="'+m.id+'">'+modelImg(m,null,34)+'<span><span class="code">'+m.modelo+'</span><br><span style="font-size:14px">'+esc(m.nome)+'</span></span></button>'; }).join('');
+  d.querySelectorAll('[data-os]').forEach(function(b){ b.addEventListener('mousedown',function(){ openModel(b.getAttribute('data-os')); }); });
+}
+function bindModel(){
+  document.querySelectorAll('input[name=mat]').forEach(function(el){ el.onchange=function(){ state.sel.matId=el.value; render(); }; });
+  document.querySelectorAll('input[name=dist]').forEach(function(el){ el.onchange=function(){ state.sel.dist=+el.value; render(); }; });
+  document.querySelectorAll('[data-multi]').forEach(function(el){ el.onchange=function(){ var id=el.getAttribute('data-multi'); if(!state.sel.multi) state.sel.multi=[]; var i=state.sel.multi.indexOf(id); if(el.checked && i<0) state.sel.multi.push(id); else if(!el.checked && i>=0) state.sel.multi.splice(i,1); updateModelPanels(); }; });
+  var md=document.getElementById('modo'); if(md) md.onchange=function(){ state.sel.modo=md.value; render(); };
+  bindModelButtons();
+}
+function bindModelButtons(){ var a=document.getElementById('addOrc'); if(a) a.onclick=addToOrcamento; var p=document.getElementById('addPed'); if(p) p.onclick=criarPedidoDireto; var aa=document.getElementById('addAll'); if(aa) aa.onclick=addTodasVariacoes; }
+function updateModelPanels(){ var pp=document.getElementById('pricePanel'); if(pp){ pp.innerHTML=pricePanelInner(); bindModelButtons(); } }
+function bindQuote(){
+  bindQuoteSummary();
+  document.querySelectorAll('[data-rm]').forEach(function(b){ b.onclick=function(){ state.cart.splice(+b.getAttribute('data-rm'),1); render(); }; });
+  var tp=document.getElementById('toPedido'); if(tp) tp.onclick=function(){ state.pedidoFromQuote=null; state.editOrderNum=null; state.pb={forma:'retirada',valorPago:'',comoPago:'',dataPromessa:addDays(state.store.prazoDias),obs:''}; go('pedidoNew'); };
+}
+function bindQuoteSummary(){
+  var nm=document.getElementById('cliNome'); if(nm) nm.oninput=function(){ setCliente('nome',nm.value); };
+  var tl=document.getElementById('cliTel'); if(tl) tl.oninput=function(){ setCliente('whatsapp',tl.value); };
+  var vs=document.getElementById('vendSel'); if(vs) vs.onchange=function(){ state.vendedoraSel=vs.value; };
+  var ob=document.getElementById('obsInp'); if(ob) ob.oninput=function(){ state.qb.obs=ob.value; };
+  var sv=document.getElementById('saveBtn'); if(sv) sv.onclick=function(){ if(!state.cart.length){toast('Adicione ao menos um item.');return;} if(!state.client||!state.client.nome||!state.client.whatsapp){toast('Informe nome e telefone do cliente.');return;} if(!state.vendedoraSel){toast('Selecione a vendedora.');return;} saveQuote(); };
+}
+function bindPedidoNew(){
+  document.querySelectorAll('[data-idx]').forEach(function(el){ el.oninput=function(){ var i=+el.getAttribute('data-idx'), f=el.getAttribute('data-f'); if(state.cart[i]) state.cart[i][f]=(f==='pedraAro'?+el.value:el.value); }; el.onchange=el.oninput; });
+  document.querySelectorAll('[data-rmitem]').forEach(function(el){ el.onclick=function(){ var i=+el.getAttribute('data-rmitem'); state.cart.splice(i,1); render(); }; });
+  var nm=document.getElementById('cliNome'); if(nm) nm.oninput=function(){ setCliente('nome',nm.value); };
+  var tl=document.getElementById('cliTel'); if(tl) tl.oninput=function(){ setCliente('whatsapp',tl.value); };
+  var vs=document.getElementById('vendSel'); if(vs) vs.onchange=function(){ state.vendedoraSel=vs.value; };
+  var updP=function(){ var b=document.getElementById('pbTotalsBox'); if(b) b.innerHTML=pbTotalsInner(); };
+  var fo=document.getElementById('pbForma'); if(fo) fo.onchange=function(){ state.pb.forma=fo.value; if(fo.value==='parcial' && (!state.pb.pagamentos||!state.pb.pagamentos.length)) state.pb.pagamentos=[{valor:'',forma:''}]; render(); };
+  document.querySelectorAll('[data-pgv]').forEach(function(el){ el.oninput=function(){ var i=+el.getAttribute('data-pgv'); if(state.pb.pagamentos[i]) state.pb.pagamentos[i].valor=el.value; updP(); }; });
+  document.querySelectorAll('[data-pgf]').forEach(function(el){ el.oninput=function(){ var i=+el.getAttribute('data-pgf'); if(state.pb.pagamentos[i]) state.pb.pagamentos[i].forma=el.value; updP(); }; });
+  document.querySelectorAll('[data-pgrm]').forEach(function(el){ el.onclick=function(){ var i=+el.getAttribute('data-pgrm'); state.pb.pagamentos.splice(i,1); if(!state.pb.pagamentos.length) state.pb.pagamentos=[{valor:'',forma:''}]; render(); }; });
+  var pgA=document.getElementById('pgAdd'); if(pgA) pgA.onclick=function(){ if(!state.pb.pagamentos) state.pb.pagamentos=[]; state.pb.pagamentos.push({valor:'',forma:''}); render(); };
+  var da=document.getElementById('pbData'); if(da) da.onchange=function(){ state.pb.dataPromessa=da.value; };
+  var ob=document.getElementById('pbObs'); if(ob) ob.oninput=function(){ state.pb.obs=ob.value; };
+  var cr=document.getElementById('pbCreate'); if(cr) cr.onclick=createPedido;
+}
+function bindSaved(){
+  var s=document.getElementById('savSearch'); if(s) s.oninput=function(){ state._fSearch=s.value; var l=document.getElementById('savList'); if(l){ l.innerHTML=savedListInner(); bindSavedList(); } };
+  var st=document.getElementById('savStatus'); if(st) st.onchange=function(){ state._fStatus=st.value; var l=document.getElementById('savList'); if(l){ l.innerHTML=savedListInner(); bindSavedList(); } };
+  var sv=document.getElementById('savVend'); if(sv) sv.onchange=function(){ state._fVend=sv.value; var l=document.getElementById('savList'); if(l){ l.innerHTML=savedListInner(); bindSavedList(); } };
+  var so=document.getElementById('savSort'); if(so) so.onchange=function(){ state.qSort=so.value; var l=document.getElementById('savList'); if(l){ l.innerHTML=savedListInner(); bindSavedList(); } };
+  bindSavedList();
+}
+function bindSavedList(){
+  document.querySelectorAll('#savList [data-status]').forEach(function(el){ el.onchange=function(){ var q=getQuote(el.getAttribute('data-status')); if(q){ q.status=el.value; var l=document.getElementById('savList'); if(l){ l.innerHTML=savedListInner(); bindSavedList(); } save(); } }; });
+  document.querySelectorAll('#savList [data-openpdf]').forEach(function(b){ b.onclick=function(){ state.printQuoteNum=b.getAttribute('data-openpdf'); go('print'); }; });
+  document.querySelectorAll('#savList [data-recalc]').forEach(function(b){ b.onclick=function(){ openRecalc(b.getAttribute('data-recalc')); }; });
+  document.querySelectorAll('#savList [data-pedido]').forEach(function(b){ b.onclick=function(){ gerarPedido(b.getAttribute('data-pedido')); }; });
+  document.querySelectorAll('#savList [data-editq]').forEach(function(b){ b.onclick=function(){ editarOrcamento(b.getAttribute('data-editq')); }; });
+  document.querySelectorAll('#savList [data-delq]').forEach(function(b){ b.onclick=function(){ var n=b.getAttribute('data-delq'); if(window.confirm('Excluir o orçamento '+n+'? Esta ação não pode ser desfeita.')){ state.quotes=state.quotes.filter(function(x){return x.numero!==n;}); save(); render(); } }; });
+}
+function bindOrder(){
+  var o=getOrder(state.activeOrderId); if(!o) return;
+  document.querySelectorAll('[data-check]').forEach(function(el){ el.onchange=function(){ o.checklist[el.getAttribute('data-check')]=el.checked; save(); }; });
+  var st=document.getElementById('oStage'); if(st) st.onchange=function(){ setOrderStage(o, st.value); };
+  var dt=document.getElementById('oData'); if(dt) dt.onchange=function(){ o.dataPromessa=dt.value; };
+  var fc=document.getElementById('fornCopy'); if(fc) fc.onclick=function(){ copyText(fornecedorMsg(o)); toast('Mensagem copiada.'); };
+  var fw=document.getElementById('fornWa'); if(fw) fw.href='https://wa.me/?text='+encodeURIComponent(fornecedorMsg(o));
+}
+function bindConfig(){
+  document.querySelectorAll('[data-atab]').forEach(function(b){ b.onclick=function(){ state.adminTab=b.getAttribute('data-atab'); render(); }; });
+  var ra=document.getElementById('rateAuto'); if(ra) ra.onclick=fetchRates;
+  var rm=document.getElementById('rateManual'); if(rm) rm.onclick=function(){ var o=document.getElementById('mOuro').value.trim(), d=document.getElementById('mDolar').value.trim(); if(d!=='') state.rates.dolar=+d; if(o===''){ state.rates.manualOuro=false; save(); toast('Voltando ao ouro automático…'); fetchRates(); return; } state.rates.ouro=+o; state.rates.manualOuro=true; state.rates.updatedAt=new Date().toISOString(); save(); toast('Cotação do ouro salva (manual).'); render(); };
+  var ra2=document.getElementById('rateAuto2'); if(ra2) ra2.onclick=function(){ state.rates.manualOuro=false; save(); toast('Voltando ao ouro automático…'); fetchRates(); };
+  document.querySelectorAll('[data-store]').forEach(function(el){ el.oninput=function(){ var k=el.getAttribute('data-store'); state.store[k]= (el.type==='number')?(+el.value):el.value; }; });
+  var vl=document.getElementById('vendList'); if(vl) vl.oninput=function(){ state.vendedoras=vl.value.split('\n').map(function(x){return x.trim();}).filter(function(x){return x;}); };
+  document.querySelectorAll('[data-tmpl]').forEach(function(el){ el.oninput=function(){ var t=state.templates.filter(function(x){return x.id===el.getAttribute('data-tmpl');})[0]; if(t) t.texto=el.value; }; });
+  function bindMEdits(){ document.querySelectorAll('[data-editmodel]').forEach(function(b){ b.onclick=function(){ openModelModal(b.getAttribute('data-editmodel')); }; }); }
+  bindMEdits();
+  var nm=document.getElementById('novoModelo'); if(nm) nm.onclick=function(){ openModelModal(null); };
+  var ms=document.getElementById('mSearch'); if(ms) ms.oninput=function(){ state.mSearch=ms.value; var g=document.getElementById('mGrid'); if(g){ g.innerHTML=adminModelosCards(); bindMEdits(); } };
+  var lg=document.getElementById('storeLogo'); if(lg) lg.onchange=function(){ var file=lg.files&&lg.files[0]; if(!file) return; var rd=new FileReader(); rd.onload=function(){ state.store.logo=rd.result; var pv=document.getElementById('storeLogoPrev'); if(pv){ pv.src=state.store.logo; pv.style.display='block'; } save(); toast('Logo atualizado.'); render(); }; rd.readAsDataURL(file); };
+  var ld=document.getElementById('storeLogoDel'); if(ld) ld.onclick=function(){ state.store.logo=null; save(); render(); };
+}
+function bindPrint(){
+  var bp=document.getElementById('btnPrint'); if(bp) bp.onclick=function(){ window.print(); };
+  var bw=document.getElementById('btnWa'); if(bw) bw.onclick=function(){ var q=getQuote(state.printQuoteNum); var txt=waTextFor(q); var n=((q.client&&q.client.whatsapp)||'').replace(/\D/g,''); if(n&&n.length<=11) n='55'+n; copyText(txt); window.open('https://wa.me/'+n+'?text='+encodeURIComponent(txt),'_blank'); };
+  var bc=document.getElementById('btnCopy'); if(bc) bc.onclick=function(){ copyText(waTextFor(getQuote(state.printQuoteNum))); toast('Mensagem copiada.'); };
+}
+
+/* ============================================================ START ============================================================ */
+boot();
+</script>
+</body>
+</html>
