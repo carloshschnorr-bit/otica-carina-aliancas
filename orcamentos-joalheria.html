@@ -211,7 +211,7 @@ var state={
   templates:[
     {id:'t1',tipo:'Primeiro contato',texto:'Olá, {nome}! Segue o orçamento do modelo de aliança solicitado:\n\n*{codigo}* — {opcao}\n{valor} à prazo ou {avista} à vista.\n\nVálido até {validade}. Qualquer dúvida, fico à disposição!'},
     {id:'t5',tipo:'Peça pronta',texto:'Olá, {nome}! Boa notícia, suas alianças chegaram e estão prontas para retirada.'},
-    {id:'t7',tipo:'Orçamento com várias alianças',texto:'Olá, {nome}! Segue os orçamentos dos modelos de alianças solicitados:\n{itens}\n\nVálido até {validade}. Qualquer dúvida, fico à disposição!'}
+    {id:'t7',tipo:'Orçamento com várias alianças',texto:'Olá, {nome}! Segue o orçamento das alianças solicitadas:\n{itens}\n\nVálido até {validade}. Qualquer dúvida, fico à disposição!'}
   ],
   clients:[], quotes:[], orders:[], favorites:[], recent:[],
   activeModelId:null,
@@ -799,7 +799,7 @@ function pedraCurto(it){
   if(it.dist===2) return {txt:st, mk:'¹'};
   return {txt:st, mk:'²'};
 }
-function opcaoDesc(it){ if(!it) return ''; return (it.karat==='10k'?'ouro 10k':'ouro 18k')+', '+pedraDesc(it); }
+function opcaoDesc(it){ if(!it) return ''; var karat=(it.karat==='10k'?'ouro 10k':'ouro 18k'); var st=it.pedra?it.pedra.toLowerCase():null; if(!st||it.dist===0) return karat; return karat+', '+pedraDesc(it); }
 function fixGreeting(t){ return t.replace(/Olá,\s*!/g,'Olá!'); }
 function waTextFor(q){
   var nome=q.client?(q.client.nome||'').split(' ')[0]:'';
@@ -809,7 +809,7 @@ function waTextFor(q){
     var leg=[]; if(usa1) leg.push('¹ as duas com pedra'); if(usa2) leg.push('² uma com pedra e a outra sem');
     var itens=lines.join('\n')+(leg.length?('\n\n'+leg.join('\n')):'');
     var tplM=state.templates.filter(function(t){return t.tipo==='Orçamento com várias alianças';})[0];
-    var txtM=tplM?tplM.texto:'Olá, {nome}! Segue os orçamentos dos modelos de alianças solicitados:\n{itens}\n\nVálido até {validade}. Qualquer dúvida, fico à disposição!';
+    var txtM=tplM?tplM.texto:'Olá, {nome}! Segue o orçamento das alianças solicitadas:\n{itens}\n\nVálido até {validade}. Qualquer dúvida, fico à disposição!';
     return fixGreeting(txtM.replace('{nome}',nome).replace('{itens}',itens).replace('{validade}',fmtDate(q.validade)));
   }
   var tpl=state.templates.filter(function(t){return t.tipo==='Primeiro contato';})[0]; var txt=tpl?tpl.texto:'Olá, {nome}! Segue o orçamento do modelo de aliança solicitado:\n\n*{codigo}* — {opcao}\n{valor} à prazo ou {avista} à vista.\n\nVálido até {validade}. Qualquer dúvida, fico à disposição!'; var it=q.itens[0];
