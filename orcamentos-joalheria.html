@@ -763,7 +763,7 @@ function adminModelosCards(){
   return cards;
 }
 function adminModelos(){
-  return '<div class="between" style="margin-bottom:10px"><input id="mSearch" class="inp" style="max-width:280px" placeholder="Buscar modelo por código ou nome…" value="'+esc(state.mSearch||'')+'"/><button class="btn btn-primary gold-grad btn-sm" id="novoModelo">+ Novo modelo</button></div>'
+  return '<div class="between" style="margin-bottom:10px;flex-wrap:wrap;gap:8px"><input id="mSearch" class="inp" style="max-width:280px" placeholder="Buscar modelo por código ou nome…" value="'+esc(state.mSearch||'')+'"/><div class="row gap" style="flex-wrap:wrap"><button class="btn btn-subtle btn-sm" id="importModelos">📥 Importar planilha</button><button class="btn btn-primary gold-grad btn-sm" id="novoModelo">+ Novo modelo</button></div></div>'
     +'<div id="mGrid" class="cardgrid">'+adminModelosCards()+'</div>'
     +'<div class="hint" style="margin-top:8px">Campos: foto, modelo, nome, peso Au750 (18k), peso Au416 (10k), largura, índice 10k, índice 18k, valor da zircônia (US$), valor do brilhante (US$) e pontos do brilhante.</div>';
 }
@@ -904,6 +904,37 @@ function openRecalc(num){
   document.getElementById('rcKeep').onclick=closeModal;
   document.getElementById('rcNew').onclick=function(){ var nq=JSON.parse(JSON.stringify(q)); nq.numero=q.numero+'-v2'; nq.subtotal=novo; nq.total=novo; nq.status='Em elaboração'; nq.criadoEm=new Date().toISOString(); nq.snapshot={ouro:state.rates.ouro,dolar:state.rates.dolar,calculadoEm:new Date().toISOString()}; nq.historico=(q.historico||[]).concat([{em:new Date().toISOString(),acao:'Nova versão com cotação atual'}]); state.quotes.unshift(nq); closeModal(); toast('Nova versão criada.'); render(); };
 }
+/* ---------------- Importar planilha de modelos ---------------- */
+function _impNum(s){ if(s==null||s==='') return null; s=String(s).replace(/[^\d.,]/g,''); if(!s) return null; s=s.replace(/\.(?=\d{3}(\D|$))/g,'').replace(',','.'); var n=parseFloat(s); return isNaN(n)?null:n; }
+function importParseRows(rows){
+  var models=[], cur=null;
+  for(var i=0;i<rows.length;i++){
+    var r=rows[i]||[]; var c0=(r[0]==null?'':String(r[0])).trim(); var c1=(r[1]==null?'':String(r[1])); var c2=(r[2]==null?'':String(r[2]));
+    if(/^AL\s*\d+/i.test(c0) && /PESO/i.test(c1)){
+      if(cur) models.push(cur);
+      cur={ modelo:c0.replace(/\s+/g,'').toUpperCase(), peso750:_impNum((c1.match(/750:\s*([\d.,]+)/)||[])[1]), peso416:_impNum((c1.match(/416:\s*([\d.,]+)/)||[])[1]), larguraRaw:((c1.match(/LARGURA:\s*([\d.,]+)/i)||[])[1]||''), largura:_impNum((c1.match(/LARGURA:\s*([\d.,]+)/i)||[])[1]), obs:'', pontos:null };
+    } else if(cur){
+      if(/^obs/i.test(c0) && !cur.obs){ cur.obs=c0.replace(/^obs\.?:?\s*/i,'').trim(); }
+      var mb=c2.match(/brilhante\s*([\d.,]+)\s*(pts|pnt)/i); if(mb && cur.pontos==null) cur.pontos=_impNum(mb[1]);
+    }
+  }
+  if(cur) models.push(cur);
+  return models;
+}
+function importToModel(x){ var nb=x.obs?(x.obs.charAt(0).toUpperCase()+x.obs.slice(1)):'Aliança'; var nome=nb+(x.larguraRaw?' '+x.larguraRaw+'mm':''); return { id:'m_'+x.modelo, modelo:x.modelo, nome:nome, foto:null, pesoAu750:x.peso750, pesoAu416:x.peso416, largura:x.largura, indice10k:'', indice18k:'', zirconiaUSD:'', brilhanteUSD:'', pontosBrilhante:(x.pontos==null?'':x.pontos), tone:'#c6a15b', ativo:true }; }
+function doImport(){
+  var models=window._impParsed||[]; var add=0,upd=0;
+  models.forEach(function(x){ var m=importToModel(x); var ex=state.models.filter(function(o){return (o.modelo||'').replace(/\s+/g,'').toUpperCase()===m.modelo;})[0]; if(ex){ ex.nome=m.nome; ex.pesoAu750=m.pesoAu750; ex.pesoAu416=m.pesoAu416; ex.largura=m.largura; if(m.pontosBrilhante!=='') ex.pontosBrilhante=m.pontosBrilhante; upd++; } else { state.models.push(m); add++; } });
+  save(); closeModal(); toast(add+' modelo(s) importado(s)'+(upd?' · '+upd+' atualizado(s)':'')+'.'); render();
+}
+function openImport(){
+  document.getElementById('modal-root').innerHTML=modalShell('Importar planilha de modelos','<p class="muted" style="font-size:14px">Selecione a planilha (.xlsx ou .csv). Vou cadastrar código, pesos, largura, pontos do brilhante e o nome (Obs + largura). Índices, valores de pedra e fotos ficam em branco pra você preencher depois.</p><div class="mt"><input type="file" id="impFile" accept=".xlsx,.xls,.csv" class="inp"/></div><div id="impMsg" class="hint" style="margin-top:10px"></div><div id="impPrev" style="margin-top:8px"></div>', true);
+  bindModalClose();
+  var msg=document.getElementById('impMsg');
+  var ensureXLSX=function(cb){ if(window.XLSX) return cb(); msg.textContent='Carregando leitor de planilha…'; var s=document.createElement('script'); s.src='https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js'; s.onload=function(){ cb(); }; s.onerror=function(){ msg.textContent='Não consegui carregar o leitor (verifique a internet).'; }; document.head.appendChild(s); };
+  var fi=document.getElementById('impFile');
+  if(fi) fi.onchange=function(){ var file=this.files&&this.files[0]; if(!file) return; ensureXLSX(function(){ msg.textContent='Lendo a planilha…'; var rd=new FileReader(); rd.onload=function(e){ try{ var wb=XLSX.read(new Uint8Array(e.target.result),{type:'array'}); var parsed=[]; wb.SheetNames.forEach(function(sn){ var rws=XLSX.utils.sheet_to_json(wb.Sheets[sn],{header:1,defval:''}); var p=importParseRows(rws); if(p.length>parsed.length) parsed=p; }); if(!parsed.length){ msg.textContent='Nenhum modelo reconhecido (esperado códigos tipo "AL 04" com pesos e largura).'; return; } window._impParsed=parsed; var prev=parsed.slice(0,6).map(function(x){ var m=importToModel(x); return '<div style="font-size:13px;border-bottom:1px solid var(--line);padding:6px 0"><b>'+esc(m.modelo)+'</b> — '+esc(m.nome)+'<div class="muted" style="font-size:12px">750: '+(m.pesoAu750||'?')+'g · 416: '+(m.pesoAu416||'?')+'g · larg '+(m.largura||'?')+'mm'+(m.pontosBrilhante!==''?' · brilhante '+m.pontosBrilhante+'pts':'')+'</div></div>'; }).join(''); msg.innerHTML='<b>'+parsed.length+' modelos</b> encontrados. Prévia dos 6 primeiros:'; document.getElementById('impPrev').innerHTML=prev+'<button class="btn btn-primary gold-grad w100 mt" id="impGo">Importar '+parsed.length+' modelos</button>'; document.getElementById('impGo').onclick=doImport; }catch(err){ msg.textContent='Erro ao ler: '+err.message; } }; rd.readAsArrayBuffer(file); }); };
+}
 function openModelModal(id){
   var m = id? JSON.parse(JSON.stringify(getModel(id))) : {id:'m'+Date.now(),modelo:'',nome:'',foto:null,pesoAu750:'',pesoAu416:'',largura:'',indice10k:'',indice18k:'',zirconiaUSD:'',brilhanteUSD:'',pontosBrilhante:'',tone:'#b6924f',ativo:true};
   function f(lab,key,type){ return '<label class="field"><span class="lab">'+lab+'</span><span class="val"><input class="inp" id="mf_'+key+'" type="'+(type||'text')+'" value="'+esc(m[key])+'"/></span></label>'; }
@@ -1037,6 +1068,7 @@ function bindConfig(){
   function bindMEdits(){ document.querySelectorAll('[data-editmodel]').forEach(function(b){ b.onclick=function(){ openModelModal(b.getAttribute('data-editmodel')); }; }); }
   bindMEdits();
   var nm=document.getElementById('novoModelo'); if(nm) nm.onclick=function(){ openModelModal(null); };
+  var im=document.getElementById('importModelos'); if(im) im.onclick=openImport;
   var ms=document.getElementById('mSearch'); if(ms) ms.oninput=function(){ state.mSearch=ms.value; var g=document.getElementById('mGrid'); if(g){ g.innerHTML=adminModelosCards(); bindMEdits(); } };
   var lg=document.getElementById('storeLogo'); if(lg) lg.onchange=function(){ var file=lg.files&&lg.files[0]; if(!file) return; var rd=new FileReader(); rd.onload=function(){ state.store.logo=rd.result; var pv=document.getElementById('storeLogoPrev'); if(pv){ pv.src=state.store.logo; pv.style.display='block'; } save(); toast('Logo atualizado.'); render(); }; rd.readAsDataURL(file); };
   var ld=document.getElementById('storeLogoDel'); if(ld) ld.onclick=function(){ state.store.logo=null; save(); render(); };
