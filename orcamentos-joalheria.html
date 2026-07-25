@@ -137,8 +137,8 @@ em{font-style:normal;color:var(--gold)}
   .top-inner{height:auto;padding:8px 12px;flex-wrap:wrap;gap:8px}
   .brand-name{font-size:17px}
   .search-wrap{order:5;flex:1 1 100%;max-width:none}
-  .nav{order:6;flex:1 1 100%;flex-wrap:nowrap;gap:2px;justify-content:space-between;overflow-x:auto}
-  .navbtn{padding:5px 4px;font-size:12px;white-space:nowrap}
+  .nav{order:6;flex:1 1 100%;flex-wrap:nowrap;gap:5px;justify-content:space-between;overflow-x:auto;padding-bottom:2px}
+  .navbtn{padding:6px 8px;font-size:11.5px;white-space:nowrap;border:1px solid var(--line);background:#f1f4fa;border-radius:9px;color:var(--ink);flex:1 1 auto;text-align:center}
   .cartbtn{margin-left:auto;padding:7px 11px}
   .top-sub{padding:6px 12px 8px}
 }
@@ -206,7 +206,7 @@ var state={
     {id:'m5',modelo:'AL-1005',nome:'Slim Delicada',foto:null,pesoAu750:6.2,pesoAu416:4.9,largura:3,indice10k:1.5,indice18k:2.5,zirconiaUSD:2,brilhanteUSD:35,pontosBrilhante:3,tone:'#cdaa63',ativo:true}
   ],
   templates:[
-    {id:'t1',tipo:'Primeiro contato',texto:'Olá, {nome}! Segue o orçamento do modelo de aliança solicitado:\n\n*{codigo}* — {opcao}\nR$ {valor} à prazo ou R$ {avista} à vista.\n\nVálido até {validade}. Qualquer dúvida, fico à disposição!'},
+    {id:'t1',tipo:'Primeiro contato',texto:'Olá, {nome}! Segue o orçamento do modelo de aliança solicitado:\n\n*{codigo}* — {opcao}\n{valor} à prazo ou {avista} à vista.\n\nVálido até {validade}. Qualquer dúvida, fico à disposição!'},
     {id:'t5',tipo:'Peça pronta',texto:'Olá, {nome}! Boa notícia, suas alianças chegaram e estão prontas para retirada.'},
     {id:'t7',tipo:'Orçamento com várias alianças',texto:'Olá, {nome}! Segue os orçamentos dos modelos de alianças solicitados:\n{itens}\n\nVálido até {validade}. Qualquer dúvida, fico à disposição!'}
   ],
@@ -809,7 +809,7 @@ function waTextFor(q){
     var txtM=tplM?tplM.texto:'Olá, {nome}! Segue os orçamentos dos modelos de alianças solicitados:\n{itens}\n\nVálido até {validade}. Qualquer dúvida, fico à disposição!';
     return fixGreeting(txtM.replace('{nome}',nome).replace('{itens}',itens).replace('{validade}',fmtDate(q.validade)));
   }
-  var tpl=state.templates.filter(function(t){return t.tipo==='Primeiro contato';})[0]; var txt=tpl?tpl.texto:'Olá, {nome}! Segue o orçamento do modelo de aliança solicitado:\n\n*{codigo}* — {opcao}\nR$ {valor} à prazo ou R$ {avista} à vista.\n\nVálido até {validade}. Qualquer dúvida, fico à disposição!'; var it=q.itens[0];
+  var tpl=state.templates.filter(function(t){return t.tipo==='Primeiro contato';})[0]; var txt=tpl?tpl.texto:'Olá, {nome}! Segue o orçamento do modelo de aliança solicitado:\n\n*{codigo}* — {opcao}\n{valor} à prazo ou {avista} à vista.\n\nVálido até {validade}. Qualquer dúvida, fico à disposição!'; var it=q.itens[0];
   var av=pgtoOpcoes(q.subtotal!=null?q.subtotal:q.total, q.pgto).avistaValor;
   return fixGreeting(txt.replace('{nome}',nome).replace('{codigo}',q.itens.map(function(i){return getModel(i.modelId).modelo;}).join(', ')).replace('{opcao}',opcaoDesc(it)).replace('{valor}',money(q.total)).replace('{avista}',money(av)).replace('{prazo}',state.store.prazoDias+' dias').replace('{validade}',fmtDate(q.validade)));
 }
