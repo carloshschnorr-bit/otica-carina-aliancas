@@ -141,6 +141,9 @@ em{font-style:normal;color:var(--gold)}
   .navbtn{padding:6px 8px;font-size:11.5px;white-space:nowrap;border:1px solid var(--line);background:#f1f4fa;border-radius:9px;color:var(--ink);flex:1 1 auto;text-align:center}
   .cartbtn{margin-left:auto;padding:7px 11px}
   .top-sub{padding:6px 12px 8px}
+  .print-bar .inner{display:grid;grid-template-columns:1fr 1fr;gap:8px;padding:10px 12px}
+  .print-bar .inner .btn{width:100%;margin:0!important;font-size:12px;padding:9px 6px}
+  .print-bar .inner #btnWa{grid-column:1/-1}
 }
 </style>
 </head>
@@ -819,7 +822,7 @@ function viewPrint(){
   q.itens.forEach(function(it){ var m=getModel(it.modelId);
     items+='<div class="row" style="gap:16px;padding:14px 0;border-bottom:1px solid var(--line)"><div style="background:var(--cream);border-radius:12px;padding:4px">'+modelImg(m,it.dist>0?it.pedra:null,70)+'</div><div style="flex:1"><div class="code">'+m.modelo+'</div><div class="serif" style="font-size:17px">'+esc(m.nome)+'</div><div class="muted" style="font-size:12px">'+esc(it.matNome)+' · '+distLabel(it.dist)+' · '+(it.modo==='unit'?'unitário':'par')+(it.pontos?' · brilhante '+it.pontos+'pts':'')+'</div></div><div class="serif" style="font-size:17px">'+money(it.total)+'</div></div>';
   });
-  return '<div class="print-bar no-print"><div class="inner"><button class="btn btn-subtle btn-sm" data-go="saved" style="margin-right:auto">← Voltar</button><button class="btn btn-subtle btn-sm" id="btnPrint">🖨 Baixar PDF / Imprimir</button><button class="btn btn-subtle btn-sm" id="btnWa">💬 Mensagem WhatsApp</button><button class="btn btn-subtle btn-sm" id="btnCopy">Copiar mensagem</button></div></div>'
+  return '<div class="print-bar no-print"><div class="inner"><button class="btn btn-subtle btn-sm" data-go="saved" style="margin-right:auto">← Voltar</button><button class="btn btn-subtle btn-sm" id="btnPrint">🖨 Baixar PDF / Imprimir</button><button class="btn btn-primary gold-grad btn-sm" id="btnWa">💬 Copiar mensagem</button></div></div>'
     +'<div class="print-area"><div class="pdf-head"><div class="row" style="gap:12px">'+logoImg(48,false)+'<div><div class="serif" style="font-size:22px">'+esc(st.nome)+'</div><div class="muted2" style="font-size:12px">'+esc(st.endereco)+' · '+esc(st.whatsapp)+'</div></div></div><div class="center"><div class="serif" style="font-size:20px">'+q.numero+'</div><div class="muted2" style="font-size:12px">Emitido '+fmtDate(q.criadoEm)+'</div></div></div>'
     +'<div class="pdf-body"><div class="between" style="border-bottom:1px solid var(--line);padding-bottom:14px"><div><div class="lab" style="font-size:11px;color:var(--muted);text-transform:uppercase">Cliente</div><div style="font-weight:600;color:var(--ink)">'+(q.client?esc(q.client.nome):'—')+'</div><div class="muted">'+(q.client?esc(q.client.whatsapp||''):'')+'</div>'+(q.vendedora?'<div class="muted" style="font-size:12px;margin-top:2px">Vendedora: '+esc(q.vendedora)+'</div>':'')+'</div><div style="text-align:right;font-size:13px"><div><span class="muted">Validade:</span> <b style="color:var(--ink)">'+fmtDate(q.validade)+'</b></div><div style="margin-top:3px"><span class="muted">Prazo de entrega:</span> <b style="color:var(--ink)">'+(q.prazoDias||state.store.prazoDias)+' dias</b></div></div></div>'
     +items
@@ -1038,8 +1041,7 @@ function bindConfig(){
 }
 function bindPrint(){
   var bp=document.getElementById('btnPrint'); if(bp) bp.onclick=function(){ window.print(); };
-  var bw=document.getElementById('btnWa'); if(bw) bw.onclick=function(){ var q=getQuote(state.printQuoteNum); var txt=waTextFor(q); var n=((q.client&&q.client.whatsapp)||'').replace(/\D/g,''); if(n&&n.length<=11) n='55'+n; copyText(txt); window.open('https://wa.me/'+n+'?text='+encodeURIComponent(txt),'_blank'); };
-  var bc=document.getElementById('btnCopy'); if(bc) bc.onclick=function(){ copyText(waTextFor(getQuote(state.printQuoteNum))); toast('Mensagem copiada.'); };
+  var bw=document.getElementById('btnWa'); if(bw) bw.onclick=function(){ copyText(waTextFor(getQuote(state.printQuoteNum))); toast('Mensagem copiada! Cole na conversa do cliente.'); };
 }
 
 /* ============================================================ START ============================================================ */
