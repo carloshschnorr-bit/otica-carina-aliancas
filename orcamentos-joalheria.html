@@ -137,8 +137,8 @@ em{font-style:normal;color:var(--gold)}
   .top-inner{height:auto;padding:8px 12px;flex-wrap:wrap;gap:8px}
   .brand-name{font-size:17px}
   .search-wrap{order:5;flex:1 1 100%;max-width:none}
-  .nav{order:6;flex:1 1 100%;flex-wrap:wrap;gap:4px;justify-content:flex-start}
-  .navbtn{padding:6px 10px;font-size:13px}
+  .nav{order:6;flex:1 1 100%;flex-wrap:nowrap;gap:2px;justify-content:space-between;overflow-x:auto}
+  .navbtn{padding:5px 4px;font-size:12px;white-space:nowrap}
   .cartbtn{margin-left:auto;padding:7px 11px}
   .top-sub{padding:6px 12px 8px}
 }
@@ -206,9 +206,9 @@ var state={
     {id:'m5',modelo:'AL-1005',nome:'Slim Delicada',foto:null,pesoAu750:6.2,pesoAu416:4.9,largura:3,indice10k:1.5,indice18k:2.5,zirconiaUSD:2,brilhanteUSD:35,pontosBrilhante:3,tone:'#cdaa63',ativo:true}
   ],
   templates:[
-    {id:'t1',tipo:'Primeiro contato',texto:'Olá, {nome}! Foi um prazer atender você. Preparei o orçamento do modelo {codigo}, na opção {opcao}. O valor ficou em {valor} à prazo ou {avista} à vista. Válido até {validade}. Qualquer dúvida fico à disposição!'},
+    {id:'t1',tipo:'Primeiro contato',texto:'Olá, {nome}! Segue o orçamento do modelo de aliança solicitado:\n\n*{codigo}* — {opcao}\nR$ {valor} à prazo ou R$ {avista} à vista.\n\nVálido até {validade}. Qualquer dúvida, fico à disposição!'},
     {id:'t5',tipo:'Peça pronta',texto:'Olá, {nome}! Boa notícia, suas alianças chegaram e estão prontas para retirada.'},
-    {id:'t7',tipo:'Orçamento com várias alianças',texto:'Olá, {nome}! Segue o orçamento dos modelos de alianças:\n{itens}\n\nVálido até {validade}. Qualquer dúvida fico à disposição!'}
+    {id:'t7',tipo:'Orçamento com várias alianças',texto:'Olá, {nome}! Segue os orçamentos dos modelos de alianças solicitados:\n{itens}\n\nVálido até {validade}. Qualquer dúvida, fico à disposição!'}
   ],
   clients:[], quotes:[], orders:[], favorites:[], recent:[],
   activeModelId:null,
@@ -364,7 +364,7 @@ function topBar(){
     +'<button class="brand" data-go="home">'+logoImg(36,false)+'<span class="brand-name">Alianças</span></button>'
     +'<div class="search-wrap"><input id="globalSearch" class="search" placeholder="Buscar modelo por código ou nome…" autocomplete="off"/><div id="searchDrop"></div></div>'
     +'<nav class="nav">'
-      +'<button class="navbtn" data-action="novo">Novo orçamento</button>'
+      +'<button class="navbtn" data-action="novo">Novo</button>'
       +'<button class="navbtn" data-go="saved">Orçamentos</button>'
       +'<button class="navbtn" data-go="pedidos">Pedidos</button>'
       +'<button class="navbtn" data-go="config">Config</button>'
@@ -500,7 +500,8 @@ function pgtoBlock(subtotal, pg, showTotal){
 }
 function qbSummaryInner(){
   var c=state.client||{};
-  return '<div class="grid g2"><label class="field"><span class="lab">Nome do cliente *</span><span class="val"><input id="cliNome" class="inp" value="'+esc(c.nome||'')+'"/></span></label><label class="field"><span class="lab">Telefone (WhatsApp) *</span><span class="val"><input id="cliTel" class="inp" value="'+esc(c.whatsapp||'')+'"/></span></label></div>'
+  return '<div class="grid g2"><label class="field"><span class="lab">Nome do cliente (opcional)</span><span class="val"><input id="cliNome" class="inp" placeholder="deixe vazio p/ orçamento rápido" value="'+esc(c.nome||'')+'"/></span></label><label class="field"><span class="lab">Telefone (opcional)</span><span class="val"><input id="cliTel" class="inp" value="'+esc(c.whatsapp||'')+'"/></span></label></div>'
+    +'<div class="hint" style="margin-top:2px">Sem nome? É só clicar em salvar — vira um orçamento rápido de WhatsApp.</div>'
     +vendedoraSelectHtml()
     +'<label class="field mt"><span class="lab">Observações</span><span class="val"><textarea id="obsInp" rows="2" class="inp">'+esc(state.qb.obs)+'</textarea></span></label>'
     +pgtoBlock(qbSubtotal(), null, shouldShowTotal(state.cart))
@@ -530,7 +531,7 @@ function saveQuote(){
     state.printQuoteNum=n; toast('Orçamento '+n+' atualizado.'); go('print'); return;
   }
   var num='ORC-'+(1000+state.quotes.length+1);
-  var q={ numero:num, client:state.client, vendedora:state.vendedoraSel, itens:JSON.parse(JSON.stringify(state.cart)), subtotal:subtotal, total:subtotal, obs:state.qb.obs,
+  var q={ numero:num, client:(state.client||{nome:'',whatsapp:''}), vendedora:state.vendedoraSel, itens:JSON.parse(JSON.stringify(state.cart)), subtotal:subtotal, total:subtotal, obs:state.qb.obs,
     validade:addDays(state.store.validadeDias), prazoDias:state.store.prazoDias,
     pgto:{ avista:state.store.pgtoAvista, cartao:state.store.pgtoCartao, crediario:state.store.pgtoCrediario },
     status:'Em aberto', criadoEm:new Date().toISOString(), snapshot:{ ouro:state.rates.ouro, dolar:state.rates.dolar, calculadoEm:new Date().toISOString() }, historico:[{em:new Date().toISOString(),acao:'Orçamento criado e emitido'}] };
@@ -635,7 +636,7 @@ function savedListInner(){
   if(!list.length) return '<p class="muted mt">Nenhum orçamento encontrado.</p>';
   var h='<div class="cardgrid mt">';
   list.forEach(function(q){
-    h+='<div class="card pad" style="display:flex;flex-direction:column"><div class="between"><span class="serif" style="font-size:20px">'+(q.client?esc(q.client.nome):'—')+'</span><span class="serif" style="font-size:18px;color:var(--gold-dark)">'+money(q.total)+'</span></div>'
+    h+='<div class="card pad" style="display:flex;flex-direction:column"><div class="between"><span class="serif" style="font-size:20px">'+((q.client&&q.client.nome)?esc(q.client.nome):'Cliente WhatsApp')+'</span><span class="serif" style="font-size:18px;color:var(--gold-dark)">'+money(q.total)+'</span></div>'
       +'<div class="muted" style="font-size:13px;margin-top:2px">'+q.numero+'</div>'
       +'<div class="muted" style="font-size:12px;margin-top:6px">Emitido '+fmtDate(q.criadoEm)+' · válido até '+fmtDate(q.validade)+' · '+q.itens.length+' item(ns)</div>'
       +'<div style="margin-top:auto"><label class="field mt"><span class="lab">Status</span><span class="val"><select data-status="'+q.numero+'" class="inp" style="'+toneCss(STATUS_TONE[q.status]||'gray')+'">'+STATUS.map(function(s){return '<option'+(q.status===s?' selected':'')+' style="'+toneCss(STATUS_TONE[s]||'gray')+'">'+s+'</option>';}).join('')+'</select></span></label>'
@@ -796,6 +797,7 @@ function pedraCurto(it){
   return {txt:st, mk:'²'};
 }
 function opcaoDesc(it){ if(!it) return ''; return (it.karat==='10k'?'ouro 10k':'ouro 18k')+', '+pedraDesc(it); }
+function fixGreeting(t){ return t.replace(/Olá,\s*!/g,'Olá!'); }
 function waTextFor(q){
   var nome=q.client?(q.client.nome||'').split(' ')[0]:'';
   if(q.itens.length>1){
@@ -804,12 +806,12 @@ function waTextFor(q){
     var leg=[]; if(usa1) leg.push('¹ as duas com pedra'); if(usa2) leg.push('² uma com pedra e a outra sem');
     var itens=lines.join('\n')+(leg.length?('\n\n'+leg.join('\n')):'');
     var tplM=state.templates.filter(function(t){return t.tipo==='Orçamento com várias alianças';})[0];
-    var txtM=tplM?tplM.texto:'Olá, {nome}! Segue o orçamento dos modelos de alianças:\n{itens}\n\nVálido até {validade}. Qualquer dúvida fico à disposição!';
-    return txtM.replace('{nome}',nome).replace('{itens}',itens).replace('{validade}',fmtDate(q.validade));
+    var txtM=tplM?tplM.texto:'Olá, {nome}! Segue os orçamentos dos modelos de alianças solicitados:\n{itens}\n\nVálido até {validade}. Qualquer dúvida, fico à disposição!';
+    return fixGreeting(txtM.replace('{nome}',nome).replace('{itens}',itens).replace('{validade}',fmtDate(q.validade)));
   }
-  var tpl=state.templates.filter(function(t){return t.tipo==='Primeiro contato';})[0]; var txt=tpl?tpl.texto:''; var it=q.itens[0];
+  var tpl=state.templates.filter(function(t){return t.tipo==='Primeiro contato';})[0]; var txt=tpl?tpl.texto:'Olá, {nome}! Segue o orçamento do modelo de aliança solicitado:\n\n*{codigo}* — {opcao}\nR$ {valor} à prazo ou R$ {avista} à vista.\n\nVálido até {validade}. Qualquer dúvida, fico à disposição!'; var it=q.itens[0];
   var av=pgtoOpcoes(q.subtotal!=null?q.subtotal:q.total, q.pgto).avistaValor;
-  return txt.replace('{nome}',nome).replace('{codigo}',q.itens.map(function(i){return getModel(i.modelId).modelo;}).join(', ')).replace('{opcao}',opcaoDesc(it)).replace('{valor}',money(q.total)).replace('{avista}',money(av)).replace('{prazo}',state.store.prazoDias+' dias').replace('{validade}',fmtDate(q.validade));
+  return fixGreeting(txt.replace('{nome}',nome).replace('{codigo}',q.itens.map(function(i){return getModel(i.modelId).modelo;}).join(', ')).replace('{opcao}',opcaoDesc(it)).replace('{valor}',money(q.total)).replace('{avista}',money(av)).replace('{prazo}',state.store.prazoDias+' dias').replace('{validade}',fmtDate(q.validade)));
 }
 function viewPrint(){
   var q=getQuote(state.printQuoteNum); if(!q) return '<div class="container center" style="padding:60px"><p class="muted">Nenhum orçamento selecionado.</p><button class="btn btn-subtle" data-go="saved">Ver salvos</button></div>';
@@ -978,7 +980,7 @@ function bindQuoteSummary(){
   var tl=document.getElementById('cliTel'); if(tl) tl.oninput=function(){ setCliente('whatsapp',tl.value); };
   var vs=document.getElementById('vendSel'); if(vs) vs.onchange=function(){ state.vendedoraSel=vs.value; };
   var ob=document.getElementById('obsInp'); if(ob) ob.oninput=function(){ state.qb.obs=ob.value; };
-  var sv=document.getElementById('saveBtn'); if(sv) sv.onclick=function(){ if(!state.cart.length){toast('Adicione ao menos um item.');return;} if(!state.client||!state.client.nome||!state.client.whatsapp){toast('Informe nome e telefone do cliente.');return;} if(!state.vendedoraSel){toast('Selecione a vendedora.');return;} saveQuote(); };
+  var sv=document.getElementById('saveBtn'); if(sv) sv.onclick=function(){ if(!state.cart.length){toast('Adicione ao menos um item.');return;} var temNome=state.client&&state.client.nome&&state.client.nome.trim(); if(temNome&&!state.vendedoraSel){toast('Selecione a vendedora.');return;} saveQuote(); };
 }
 function bindPedidoNew(){
   document.querySelectorAll('[data-idx]').forEach(function(el){ el.oninput=function(){ var i=+el.getAttribute('data-idx'), f=el.getAttribute('data-f'); if(state.cart[i]) state.cart[i][f]=(f==='pedraAro'?+el.value:el.value); }; el.onchange=el.oninput; });
