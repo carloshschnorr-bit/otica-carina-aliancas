@@ -130,7 +130,7 @@ em{font-style:normal;color:var(--gold)}
 .pdf-body{padding:24px 40px}
 .print-bar{background:var(--ink);color:#fff;position:sticky;top:0;z-index:10}
 .print-bar .inner{max-width:780px;margin:0 auto;padding:12px 16px;display:flex;gap:8px;flex-wrap:wrap;align-items:center}
-@media print{.no-print{display:none!important}body{background:#fff!important}.print-area{box-shadow:none;margin:0}}
+@media print{@page{margin:0}.no-print{display:none!important}html,body{background:#fff!important;background-image:none!important}.print-area{box-shadow:none;margin:0}.pdf-body{padding:20px 26px}}
 .divider{border-top:1px solid var(--line)}
 /* ---- Responsivo do topo (por último, para vencer as regras base) ---- */
 @media(max-width:620px){
@@ -639,7 +639,7 @@ function savedListInner(){
   if(!list.length) return '<p class="muted mt">Nenhum orçamento encontrado.</p>';
   var h='<div class="cardgrid mt">';
   list.forEach(function(q){
-    h+='<div class="card pad" style="display:flex;flex-direction:column"><div class="between"><span class="serif" style="font-size:20px">'+((q.client&&q.client.nome)?esc(q.client.nome):'Cliente WhatsApp')+'</span><span class="serif" style="font-size:18px;color:var(--gold-dark)">'+money(q.total)+'</span></div>'
+    h+='<div class="card pad" data-cardq="'+q.numero+'" style="display:flex;flex-direction:column;cursor:pointer"><div class="between"><span class="serif" style="font-size:20px">'+((q.client&&q.client.nome)?esc(q.client.nome):'Cliente WhatsApp')+'</span><span class="serif" style="font-size:18px;color:var(--gold-dark)">'+money(q.total)+'</span></div>'
       +'<div class="muted" style="font-size:13px;margin-top:2px">'+q.numero+'</div>'
       +'<div class="muted" style="font-size:12px;margin-top:6px">Emitido '+fmtDate(q.criadoEm)+' · válido até '+fmtDate(q.validade)+' · '+q.itens.length+' item(ns)</div>'
       +'<div style="margin-top:auto"><label class="field mt"><span class="lab">Status</span><span class="val"><select data-status="'+q.numero+'" class="inp" style="'+toneCss(STATUS_TONE[q.status]||'gray')+'">'+STATUS.map(function(s){return '<option'+(q.status===s?' selected':'')+' style="'+toneCss(STATUS_TONE[s]||'gray')+'">'+s+'</option>';}).join('')+'</select></span></label>'
@@ -676,7 +676,7 @@ function viewPedidos(){
   var h='<h1 class="serif" style="font-size:26px">Pedidos de venda</h1><div class="cardgrid mt">';
   state.orders.forEach(function(o){
     var done=0,tot=0; for(var k in o.checklist){ tot++; if(o.checklist[k]) done++; }
-    h+='<div class="card pad" style="display:flex;flex-direction:column"><div class="between"><span class="serif" style="font-size:20px">'+(o.client?esc(o.client.nome):'—')+'</span><span class="serif" style="font-size:18px;color:var(--gold-dark)">'+money(o.total)+'</span></div>'
+    h+='<div class="card pad" data-cardo="'+o.numero+'" style="display:flex;flex-direction:column;cursor:pointer"><div class="between"><span class="serif" style="font-size:20px">'+(o.client?esc(o.client.nome):'—')+'</span><span class="serif" style="font-size:18px;color:var(--gold-dark)">'+money(o.total)+'</span></div>'
       +'<div class="muted" style="font-size:13px;margin-top:2px">'+o.numero+'</div>'
       +'<div class="muted" style="font-size:12px;margin-top:6px">Origem: '+esc(o.orcamento)+' · promessa '+fmtDate(o.dataPromessa)+' · conferência '+done+'/'+tot+'</div>'
       +'<div style="margin-top:auto"><label class="field mt"><span class="lab">Status</span><span class="val"><select data-ostatus="'+o.numero+'" class="inp" style="'+toneCss(stageTone(o.stage))+'">'+ORDER_STAGES.map(function(s){return '<option'+(o.stage===s?' selected':'')+' style="'+toneCss(stageTone(s))+'">'+s+'</option>';}).join('')+'</select></span></label>'
@@ -775,7 +775,7 @@ function adminPagamento(){
 function adminLoja(){
   var s=state.store;
   function f(lab,key,type){ return '<label class="field"><span class="lab">'+lab+'</span><span class="val"><input class="inp" data-store="'+key+'" type="'+(type||'text')+'" value="'+esc(s[key])+'"/></span></label>'; }
-  return '<div class="card pad" style="max-width:760px"><div class="field" style="margin-bottom:12px"><span class="lab">Logo da loja (aparece no topo e no PDF)</span><span class="val row gap" style="margin-top:6px"><img id="storeLogoPrev" src="'+(s.logo||'')+'" style="width:64px;height:64px;border-radius:12px;object-fit:contain;background:#f4f7fd;border:1px solid var(--line);'+(s.logo?'':'display:none')+'"/><input type="file" accept="image/*" id="storeLogo"/>'+(s.logo?'<button class="btn btn-ghost btn-sm" id="storeLogoDel">Remover</button>':'')+'</span></div><div class="grid g2">'+f('Nome da empresa','nome')+f('CNPJ','cnpj')+f('Endereço','endereco')+f('WhatsApp','whatsapp')+f('Instagram','instagram')+f('Chave PIX','pix')+'</div><label class="field mt"><span class="lab">Texto padrão do orçamento</span><span class="val"><textarea class="inp" data-store="textoPadrao" rows="2">'+esc(s.textoPadrao)+'</textarea></span></label><label class="field mt"><span class="lab">Vendedoras (uma por linha)</span><span class="val"><textarea class="inp" id="vendList" rows="3" placeholder="Ana&#10;Helena&#10;Maria">'+esc(state.vendedoras.join('\n'))+'</textarea></span></label></div>';
+  return '<div class="card pad" style="max-width:760px"><div class="field" style="margin-bottom:12px"><span class="lab">Logo da loja (aparece no topo e no PDF)</span><span class="val row gap" style="margin-top:6px;flex-wrap:wrap;align-items:center"><img id="storeLogoPrev" src="'+(s.logo||'')+'" style="width:64px;height:64px;border-radius:12px;object-fit:contain;background:#f4f7fd;border:1px solid var(--line);'+(s.logo?'':'display:none')+'"/><input type="file" accept="image/*" id="storeLogo"/>'+(s.logo?'<button class="btn btn-ghost btn-sm" id="storeLogoDel">Remover</button>':'')+'</span></div><div class="grid g2">'+f('Nome da empresa','nome')+f('CNPJ','cnpj')+f('Endereço','endereco')+f('WhatsApp','whatsapp')+f('Instagram','instagram')+f('Chave PIX','pix')+'</div><label class="field mt"><span class="lab">Texto padrão do orçamento</span><span class="val"><textarea class="inp" data-store="textoPadrao" rows="2">'+esc(s.textoPadrao)+'</textarea></span></label><label class="field mt"><span class="lab">Vendedoras (uma por linha)</span><span class="val"><textarea class="inp" id="vendList" rows="3" placeholder="Ana&#10;Helena&#10;Maria">'+esc(state.vendedoras.join('\n'))+'</textarea></span></label></div>';
 }
 function adminMensagens(){
   var h='<div style="max-width:760px">';
@@ -932,6 +932,7 @@ function bind(){
   document.querySelectorAll('[data-fav]').forEach(function(b){ b.addEventListener('click',function(e){ e.stopPropagation(); toggleFav(b.getAttribute('data-fav')); }); });
   document.querySelectorAll('[data-action]').forEach(function(b){ b.addEventListener('click',function(){ if(b.getAttribute('data-action')==='novo'){ state.cart=[]; state.client=null; state.qb={obs:''}; state.editQuoteNum=null; state.editOrderNum=null; go('catalog'); } }); });
   document.querySelectorAll('[data-order]').forEach(function(b){ b.addEventListener('click',function(){ state.activeOrderId=b.getAttribute('data-order'); go('order'); }); });
+  document.querySelectorAll('[data-cardo]').forEach(function(c){ c.addEventListener('click',function(e){ if(e.target.closest('button,select,option,input,textarea,label,a')) return; state.activeOrderId=c.getAttribute('data-cardo'); go('order'); }); });
   document.querySelectorAll('[data-ostatus]').forEach(function(el){ el.onchange=function(){ var o=getOrder(el.getAttribute('data-ostatus')); if(o) setOrderStage(o, el.value); }; });
   document.querySelectorAll('[data-delo]').forEach(function(b){ b.addEventListener('click',function(){ var n=b.getAttribute('data-delo'); if(window.confirm('Excluir o pedido '+n+'? Esta ação não pode ser desfeita.')){ state.orders=state.orders.filter(function(x){return x.numero!==n;}); save(); render(); } }); });
   document.querySelectorAll('[data-printos]').forEach(function(b){ b.addEventListener('click',function(){ state.printOrderNum=b.getAttribute('data-printos'); go('printos'); }); });
@@ -1011,6 +1012,7 @@ function bindSaved(){
 function bindSavedList(){
   document.querySelectorAll('#savList [data-status]').forEach(function(el){ el.onchange=function(){ var q=getQuote(el.getAttribute('data-status')); if(q){ q.status=el.value; var l=document.getElementById('savList'); if(l){ l.innerHTML=savedListInner(); bindSavedList(); } save(); } }; });
   document.querySelectorAll('#savList [data-openpdf]').forEach(function(b){ b.onclick=function(){ state.printQuoteNum=b.getAttribute('data-openpdf'); go('print'); }; });
+  document.querySelectorAll('#savList [data-cardq]').forEach(function(c){ c.addEventListener('click',function(e){ if(e.target.closest('button,select,option,input,textarea,label,a')) return; state.printQuoteNum=c.getAttribute('data-cardq'); go('print'); }); });
   document.querySelectorAll('#savList [data-recalc]').forEach(function(b){ b.onclick=function(){ openRecalc(b.getAttribute('data-recalc')); }; });
   document.querySelectorAll('#savList [data-pedido]').forEach(function(b){ b.onclick=function(){ gerarPedido(b.getAttribute('data-pedido')); }; });
   document.querySelectorAll('#savList [data-editq]').forEach(function(b){ b.onclick=function(){ editarOrcamento(b.getAttribute('data-editq')); }; });
