@@ -200,7 +200,7 @@ var state={
   rates:{ ouro:null, dolar:null, updatedAt:null, sourceDolar:'—', manualOuro:false },
   store:{ nome:'Joalheria', cnpj:'00.000.000/0001-00', endereco:'Rua Exemplo, 123 — Centro',
     telefone:'(00) 0000-0000', whatsapp:'(00) 90000-0000', instagram:'@joalheria', pix:'00000000000',
-    validadeDias:7, prazoDias:30, pgtoAvista:10, pgtoCartao:10, pgtoCrediario:6, logo:null, textoPadrao:'Agradecemos a preferência. Alianças sob encomenda, sujeitas à confirmação de medidas e da gravação.' },
+    validadeDias:7, prazoDias:30, pgtoAvista:10, pgtoCartao:10, pgtoCrediario:6, logo:null, cursos:[], textoPadrao:'Agradecemos a preferência. Alianças sob encomenda, sujeitas à confirmação de medidas e da gravação.' },
   models:[
     {id:'m1',modelo:'AL-1001',nome:'Clássica Abaulada',foto:null,pesoAu750:9.5,pesoAu416:7.4,largura:5,indice10k:2.1,indice18k:3.6,zirconiaUSD:3,brilhanteUSD:45,pontosBrilhante:5,tone:'#b6924f',ativo:true},
     {id:'m2',modelo:'AL-1002',nome:'Reta Polida',foto:null,pesoAu750:7.8,pesoAu416:6.1,largura:4,indice10k:1.8,indice18k:3.0,zirconiaUSD:3,brilhanteUSD:40,pontosBrilhante:4,tone:'#cdaa63',ativo:true},
@@ -219,7 +219,7 @@ var state={
   cart:[], client:null,
   qb:{ obs:'' },
   pb:null, pedidoFromQuote:null,
-  printQuoteNum:null, printOrderNum:null, activeOrderId:null, adminTab:'cotacao', catSort:'', qSort:'', catLargura:'', catFaixa:'', catPedra:'', editQuoteNum:null, editOrderNum:null,
+  printQuoteNum:null, printOrderNum:null, activeOrderId:null, adminTab:'cotacao', catTipo:'alianca', catSort:'', qSort:'', catLargura:'', catFaixa:'', catPedra:'', editQuoteNum:null, editOrderNum:null,
   vendedoras:[], vendedoraSel:''
 };
 
@@ -382,9 +382,10 @@ function topBar(){
 function lcard(icon,bg,fg,title,desc,go2,act){ return '<button class="lcard" '+(act?('data-action="'+act+'"'):('data-go="'+go2+'"'))+'><div class="licon" style="background:'+bg+';color:'+fg+'">'+icon+'</div><div class="serif" style="font-size:17px">'+title+'</div><div class="muted" style="font-size:12px;margin-top:4px">'+desc+'</div></button>'; }
 function viewHome(){
   var favs=state.favorites.map(getModel).filter(Boolean), rec=state.recent.map(getModel).filter(Boolean);
-  return '<div class="hero"><div class="eyebrow">ATENDIMENTO</div><h1 class="hero-title">Orçamento de alianças</h1><p class="muted">Encontre o modelo, mostre o preço e feche a venda em segundos.</p></div>'
+  return '<div class="hero"><div class="eyebrow">ATENDIMENTO</div><h1 class="hero-title">Novo orçamento</h1><p class="muted">Escolha o tipo, encontre o modelo e feche a venda em segundos.</p></div>'
     +'<div class="launch">'
-      +lcard('＋','#e0edff','#2563eb','Novo Orçamento','Escolher modelo e calcular','',"novo")
+      +lcard('💍','#e0edff','#2563eb','Alianças','Orçamento de alianças','',"nova_alianca")
+      +lcard('🎓','#fce7f3','#db2777','Anéis de formatura','Orçamento de formatura','',"nova_formatura")
       +lcard('🧾','#dcfce7','#16a34a','Orçamentos','Ver e gerenciar salvos','saved')
       +lcard('📦','#fef3c7','#d97706','Pedidos','Acompanhar produção','pedidos')
       +lcard('⚙️','#f3e8ff','#9333ea','Configurações','Cotações, modelos e loja','config')
@@ -400,7 +401,7 @@ function shelf(title,items){
 /* ---------------- Catálogo ---------------- */
 function catalogCards(){
   var q=state.search.trim().toLowerCase();
-  var list=state.models.filter(function(m){ return m.ativo&&(!q||m.modelo.toLowerCase().indexOf(q)>=0||m.nome.toLowerCase().indexOf(q)>=0); });
+  var list=state.models.filter(function(m){ return m.ativo&&(m.tipo||'alianca')===state.catTipo&&(!q||m.modelo.toLowerCase().indexOf(q)>=0||m.nome.toLowerCase().indexOf(q)>=0); });
   if(state.catLargura!=='') list=list.filter(function(m){return String(m.largura)===state.catLargura;});
   if(state.catPedra==='com') list=list.filter(hasStone);
   else if(state.catPedra==='sem') list=list.filter(function(m){return !hasStone(m);});
@@ -419,13 +420,13 @@ function catalogCards(){
 }
 function viewCatalog(){
   var larguras=[]; state.models.forEach(function(m){ if(m.largura!=null && larguras.indexOf(m.largura)<0) larguras.push(m.largura); }); larguras.sort(function(a,b){return a-b;});
-  return '<div class="between"><h1 class="serif" style="font-size:26px">Modelos de aliança</h1><input id="catFilter" class="inp" style="max-width:220px" placeholder="Filtrar por código/nome…" value="'+esc(state.search)+'"/></div>'
-    +'<div class="row gap mt" style="flex-wrap:wrap">'
+  return '<div class="between"><h1 class="serif" style="font-size:26px">'+(state.catTipo==='formatura'?'Anéis de formatura':'Modelos de aliança')+'</h1><input id="catFilter" class="inp" style="max-width:220px" placeholder="Filtrar por código/nome…" value="'+esc(state.search)+'"/></div>'
+    +(state.catTipo==='alianca'?('<div class="row gap mt" style="flex-wrap:wrap">'
       +'<select id="catLargura" class="inp" style="width:auto"><option value="">Largura: todas</option>'+larguras.map(function(w){return '<option value="'+w+'"'+(state.catLargura===String(w)?' selected':'')+'>Largura '+w+'mm</option>';}).join('')+'</select>'
       +'<select id="catFaixa" class="inp" style="width:auto"><option value="">Valor: todos</option>'+FAIXAS.map(function(f){return '<option value="'+f.v+'"'+(state.catFaixa===f.v?' selected':'')+'>'+f.nome+'</option>';}).join('')+'</select>'
       +'<select id="catPedra" class="inp" style="width:auto"><option value="">Pedra: todas</option><option value="com"'+(state.catPedra==='com'?' selected':'')+'>Com pedra</option><option value="sem"'+(state.catPedra==='sem'?' selected':'')+'>Sem pedra</option></select>'
       +'<select id="catSort" class="inp" style="width:auto"><option value="">Ordenar</option><option value="asc"'+(state.catSort==='asc'?' selected':'')+'>Menor valor</option><option value="desc"'+(state.catSort==='desc'?' selected':'')+'>Maior valor</option></select>'
-    +'</div>'
+    +'</div>'):'')
     +'<div id="catalogGrid" class="catgrid mt">'+catalogCards()+'</div>';
 }
 
@@ -738,8 +739,8 @@ function viewOrder(){
 
 /* ---------------- Configurações ---------------- */
 function viewConfig(){
-  var tabs=[['cotacao','Cotações'],['modelos','Modelos'],['pagamento','Pagamento'],['loja','Loja'],['mensagens','Mensagens']];
-  var body= state.adminTab==='modelos'?adminModelos(): state.adminTab==='pagamento'?adminPagamento(): state.adminTab==='loja'?adminLoja(): state.adminTab==='mensagens'?adminMensagens(): adminCotacao();
+  var tabs=[['cotacao','Cotações'],['modelos','Modelos'],['cursos','Cursos'],['pagamento','Pagamento'],['loja','Loja'],['mensagens','Mensagens']];
+  var body= state.adminTab==='modelos'?adminModelos(): state.adminTab==='cursos'?adminCursos(): state.adminTab==='pagamento'?adminPagamento(): state.adminTab==='loja'?adminLoja(): state.adminTab==='mensagens'?adminMensagens(): adminCotacao();
   return '<h1 class="serif" style="font-size:26px">Configurações</h1><div class="tabs mt">'+tabs.map(function(t){return '<button class="tab '+(state.adminTab===t[0]?'on':'')+'" data-atab="'+t[0]+'">'+t[1]+'</button>';}).join('')+'</div><div class="mt">'+body+'</div>';
 }
 function adminCotacao(){
@@ -776,6 +777,11 @@ function adminLoja(){
   var s=state.store;
   function f(lab,key,type){ return '<label class="field"><span class="lab">'+lab+'</span><span class="val"><input class="inp" data-store="'+key+'" type="'+(type||'text')+'" value="'+esc(s[key])+'"/></span></label>'; }
   return '<div class="card pad" style="max-width:760px"><div class="field" style="margin-bottom:12px"><span class="lab">Logo da loja (aparece no topo e no PDF)</span><span class="val row gap" style="margin-top:6px;flex-wrap:wrap;align-items:center"><img id="storeLogoPrev" src="'+(s.logo||'')+'" style="width:64px;height:64px;border-radius:12px;object-fit:contain;background:#f4f7fd;border:1px solid var(--line);'+(s.logo?'':'display:none')+'"/><input type="file" accept="image/*" id="storeLogo"/>'+(s.logo?'<button class="btn btn-ghost btn-sm" id="storeLogoDel">Remover</button>':'')+'</span></div><div class="grid g2">'+f('Nome da empresa','nome')+f('CNPJ','cnpj')+f('Endereço','endereco')+f('WhatsApp','whatsapp')+f('Instagram','instagram')+f('Chave PIX','pix')+'</div><label class="field mt"><span class="lab">Texto padrão do orçamento</span><span class="val"><textarea class="inp" data-store="textoPadrao" rows="2">'+esc(s.textoPadrao)+'</textarea></span></label><label class="field mt"><span class="lab">Vendedoras (uma por linha)</span><span class="val"><textarea class="inp" id="vendList" rows="3" placeholder="Ana&#10;Helena&#10;Maria">'+esc(state.vendedoras.join('\n'))+'</textarea></span></label></div>';
+}
+function adminCursos(){
+  var cs=state.store.cursos||[];
+  var rows=cs.length? cs.map(function(c,i){ return '<div class="row gap" style="align-items:center;margin-top:8px"><input class="inp" data-cnome="'+i+'" placeholder="Curso (ex.: Medicina)" value="'+esc(c.nome||'')+'" style="flex:2;min-width:120px"/><input class="inp" data-csimb="'+i+'" placeholder="Símbolo" value="'+esc(c.simbolo||'')+'" style="flex:1;max-width:120px"/><input class="inp" data-ccor="'+i+'" placeholder="Cor da pedra" value="'+esc(c.cor||'')+'" style="flex:1;min-width:100px"/><button class="btn btn-ghost btn-sm" data-crm="'+i+'" style="color:#b23">✕</button></div>'; }).join('') : '<div class="muted" style="font-size:14px;margin-top:10px">Nenhum curso cadastrado ainda.</div>';
+  return '<div class="card pad" style="max-width:760px"><h3 class="serif" style="font-size:18px">Cursos de formatura</h3><div class="hint">Nome, símbolo e cor da pedra (zircônia) de cada curso. Você escolhe o curso ao fazer um orçamento/pedido de formatura.</div>'+rows+'<button class="btn btn-subtle btn-sm mt" id="cursoAdd">+ Adicionar curso</button></div>';
 }
 function adminMensagens(){
   var h='<div style="max-width:760px">';
@@ -961,7 +967,7 @@ function bind(){
   document.querySelectorAll('[data-logout]').forEach(function(b){ b.addEventListener('click',function(){ if(window.confirm('Sair da conta neste dispositivo?')) logout(); }); });
   document.querySelectorAll('[data-open]').forEach(function(b){ b.addEventListener('click',function(){ openModel(b.getAttribute('data-open')); }); });
   document.querySelectorAll('[data-fav]').forEach(function(b){ b.addEventListener('click',function(e){ e.stopPropagation(); toggleFav(b.getAttribute('data-fav')); }); });
-  document.querySelectorAll('[data-action]').forEach(function(b){ b.addEventListener('click',function(){ if(b.getAttribute('data-action')==='novo'){ state.cart=[]; state.client=null; state.qb={obs:''}; state.editQuoteNum=null; state.editOrderNum=null; go('catalog'); } }); });
+  document.querySelectorAll('[data-action]').forEach(function(b){ b.addEventListener('click',function(){ var a=b.getAttribute('data-action'); if(a==='novo'||a==='nova_alianca'||a==='nova_formatura'){ if(a==='nova_alianca') state.catTipo='alianca'; if(a==='nova_formatura') state.catTipo='formatura'; state.cart=[]; state.client=null; state.qb={obs:''}; state.editQuoteNum=null; state.editOrderNum=null; state.search=''; go('catalog'); } }); });
   document.querySelectorAll('[data-order]').forEach(function(b){ b.addEventListener('click',function(){ state.activeOrderId=b.getAttribute('data-order'); go('order'); }); });
   document.querySelectorAll('[data-cardo]').forEach(function(c){ c.addEventListener('click',function(e){ if(e.target.closest('button,select,option,input,textarea,label,a')) return; state.activeOrderId=c.getAttribute('data-cardo'); go('order'); }); });
   document.querySelectorAll('[data-ostatus]').forEach(function(el){ el.onchange=function(){ var o=getOrder(el.getAttribute('data-ostatus')); if(o) setOrderStage(o, el.value); }; });
@@ -1069,6 +1075,11 @@ function bindConfig(){
   bindMEdits();
   var nm=document.getElementById('novoModelo'); if(nm) nm.onclick=function(){ openModelModal(null); };
   var im=document.getElementById('importModelos'); if(im) im.onclick=openImport;
+  document.querySelectorAll('[data-cnome]').forEach(function(el){ el.oninput=function(){ var i=+el.getAttribute('data-cnome'); if(state.store.cursos[i]) state.store.cursos[i].nome=el.value; save(); }; });
+  document.querySelectorAll('[data-csimb]').forEach(function(el){ el.oninput=function(){ var i=+el.getAttribute('data-csimb'); if(state.store.cursos[i]) state.store.cursos[i].simbolo=el.value; save(); }; });
+  document.querySelectorAll('[data-ccor]').forEach(function(el){ el.oninput=function(){ var i=+el.getAttribute('data-ccor'); if(state.store.cursos[i]) state.store.cursos[i].cor=el.value; save(); }; });
+  document.querySelectorAll('[data-crm]').forEach(function(b){ b.onclick=function(){ state.store.cursos.splice(+b.getAttribute('data-crm'),1); save(); render(); }; });
+  var ca=document.getElementById('cursoAdd'); if(ca) ca.onclick=function(){ if(!state.store.cursos) state.store.cursos=[]; state.store.cursos.push({id:'c'+Date.now(),nome:'',simbolo:'',cor:''}); render(); };
   var ms=document.getElementById('mSearch'); if(ms) ms.oninput=function(){ state.mSearch=ms.value; var g=document.getElementById('mGrid'); if(g){ g.innerHTML=adminModelosCards(); bindMEdits(); } };
   var lg=document.getElementById('storeLogo'); if(lg) lg.onchange=function(){ var file=lg.files&&lg.files[0]; if(!file) return; var rd=new FileReader(); rd.onload=function(){ state.store.logo=rd.result; var pv=document.getElementById('storeLogoPrev'); if(pv){ pv.src=state.store.logo; pv.style.display='block'; } save(); toast('Logo atualizado.'); render(); }; rd.readAsDataURL(file); };
   var ld=document.getElementById('storeLogoDel'); if(ld) ld.onclick=function(){ state.store.logo=null; save(); render(); };
