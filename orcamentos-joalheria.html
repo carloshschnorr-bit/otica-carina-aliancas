@@ -660,15 +660,17 @@ function viewClients(){
 }
 
 /* ---------------- Orçamentos salvos ---------------- */
+function docTipo(d){ return (d&&d.itens&&d.itens[0]&&d.itens[0].tipo==='formatura')?'formatura':'alianca'; }
+function tipoTag(t){ var f=(t==='formatura'); return '<span style="display:inline-block;padding:2px 8px;border-radius:999px;font-size:11px;font-weight:600;background:'+(f?'#fce7f3':'#e0edff')+';color:'+(f?'#db2777':'#2563eb')+'">'+(f?'🎓 Formatura':'💍 Aliança')+'</span>'; }
 function savedListInner(){
-  var list=state.quotes.filter(function(q){ return (!state._fStatus||q.status===state._fStatus)&&(!state._fVend||q.vendedora===state._fVend)&&(!state._fSearch||q.numero.toLowerCase().indexOf(state._fSearch.toLowerCase())>=0||(q.client&&q.client.nome.toLowerCase().indexOf(state._fSearch.toLowerCase())>=0)); });
+  var list=state.quotes.filter(function(q){ return (!state._fTipo||docTipo(q)===state._fTipo)&&(!state._fStatus||q.status===state._fStatus)&&(!state._fVend||q.vendedora===state._fVend)&&(!state._fSearch||q.numero.toLowerCase().indexOf(state._fSearch.toLowerCase())>=0||(q.client&&q.client.nome.toLowerCase().indexOf(state._fSearch.toLowerCase())>=0)); });
   if(state.qSort==='asc') list=list.slice().sort(function(a,b){return a.total-b.total;});
   else if(state.qSort==='desc') list=list.slice().sort(function(a,b){return b.total-a.total;});
   if(!list.length) return '<p class="muted mt">Nenhum orçamento encontrado.</p>';
   var h='<div class="cardgrid mt">';
   list.forEach(function(q){
     h+='<div class="card pad" data-cardq="'+q.numero+'" style="display:flex;flex-direction:column;cursor:pointer"><div class="between"><span class="serif" style="font-size:20px">'+((q.client&&q.client.nome)?esc(q.client.nome):'Cliente WhatsApp')+'</span><span class="serif" style="font-size:18px;color:var(--gold-dark)">'+money(q.total)+'</span></div>'
-      +'<div class="muted" style="font-size:13px;margin-top:2px">'+q.numero+'</div>'
+      +'<div class="muted" style="font-size:13px;margin-top:4px;display:flex;align-items:center;gap:8px">'+tipoTag(docTipo(q))+'<span>'+q.numero+'</span></div>'
       +'<div class="muted" style="font-size:12px;margin-top:6px">Emitido '+fmtDate(q.criadoEm)+' · válido até '+fmtDate(q.validade)+' · '+q.itens.length+' item(ns)</div>'
       +'<div style="margin-top:auto"><label class="field mt"><span class="lab">Status</span><span class="val"><select data-status="'+q.numero+'" class="inp" style="'+toneCss(STATUS_TONE[q.status]||'gray')+'">'+STATUS.map(function(s){return '<option'+(q.status===s?' selected':'')+' style="'+toneCss(STATUS_TONE[s]||'gray')+'">'+s+'</option>';}).join('')+'</select></span></label>'
       +'<div class="row gap" style="margin-top:10px;flex-wrap:wrap"><button class="btn btn-ghost btn-sm" data-openpdf="'+q.numero+'">Ver / PDF</button>'
@@ -684,6 +686,7 @@ function viewSaved(){
   return '<h1 class="serif" style="font-size:26px">Orçamentos salvos</h1>'
     +'<div class="row gap mt" style="flex-wrap:wrap"><input id="savSearch" class="inp" style="max-width:280px" placeholder="Buscar por número ou cliente…" value="'+esc(state._fSearch||'')+'"/>'
     +'<select id="savStatus" class="inp" style="max-width:200px"><option value="">Todos os status</option>'+STATUS.map(function(s){return '<option'+(state._fStatus===s?' selected':'')+'>'+s+'</option>';}).join('')+'</select>'
+    +'<select id="savTipo" class="inp" style="max-width:170px"><option value="">Todos os tipos</option><option value="alianca"'+(state._fTipo==='alianca'?' selected':'')+'>Só alianças</option><option value="formatura"'+(state._fTipo==='formatura'?' selected':'')+'>Só formatura</option></select>'
     +(state.vendedoras&&state.vendedoras.length?'<select id="savVend" class="inp" style="max-width:200px"><option value="">Todas as vendedoras</option>'+state.vendedoras.map(function(v){return '<option'+(state._fVend===v?' selected':'')+'>'+esc(v)+'</option>';}).join('')+'</select>':'')
     +'<select id="savSort" class="inp" style="max-width:170px"><option value="">Ordenar</option><option value="desc"'+(state.qSort==='desc'?' selected':'')+'>Maior valor</option><option value="asc"'+(state.qSort==='asc'?' selected':'')+'>Menor valor</option></select></div>'
     +'<div id="savList">'+savedListInner()+'</div>';
@@ -699,18 +702,25 @@ function gerarPedido(quoteNum){
 }
 
 /* ---------------- Pedidos ---------------- */
-function viewPedidos(){
-  if(!state.orders.length) return '<h1 class="serif" style="font-size:26px">Pedidos</h1><p class="muted mt">Nenhum pedido ainda. Crie um pedido direto na página da aliança ou a partir de um orçamento.</p><button class="btn btn-ghost mt" data-action="novo">Nova venda</button>';
-  var h='<h1 class="serif" style="font-size:26px">Pedidos de venda</h1><div class="cardgrid mt">';
-  state.orders.forEach(function(o){
+function pedidosCards(){
+  var list=state.orders.filter(function(o){ return (!state._foTipo||docTipo(o)===state._foTipo); });
+  if(!list.length) return '<p class="muted mt">Nenhum pedido encontrado.</p>';
+  var h='<div class="cardgrid mt">';
+  list.forEach(function(o){
     var done=0,tot=0; for(var k in o.checklist){ tot++; if(o.checklist[k]) done++; }
     h+='<div class="card pad" data-cardo="'+o.numero+'" style="display:flex;flex-direction:column;cursor:pointer"><div class="between"><span class="serif" style="font-size:20px">'+(o.client?esc(o.client.nome):'—')+'</span><span class="serif" style="font-size:18px;color:var(--gold-dark)">'+money(o.total)+'</span></div>'
-      +'<div class="muted" style="font-size:13px;margin-top:2px">'+o.numero+'</div>'
+      +'<div class="muted" style="font-size:13px;margin-top:4px;display:flex;align-items:center;gap:8px">'+tipoTag(docTipo(o))+'<span>'+o.numero+'</span></div>'
       +'<div class="muted" style="font-size:12px;margin-top:6px">Origem: '+esc(o.orcamento)+' · promessa '+fmtDate(o.dataPromessa)+' · conferência '+done+'/'+tot+'</div>'
       +'<div style="margin-top:auto"><label class="field mt"><span class="lab">Status</span><span class="val"><select data-ostatus="'+o.numero+'" class="inp" style="'+toneCss(stageTone(o.stage))+'">'+ORDER_STAGES.map(function(s){return '<option'+(o.stage===s?' selected':'')+' style="'+toneCss(stageTone(s))+'">'+s+'</option>';}).join('')+'</select></span></label>'
       +'<div class="row gap" style="margin-top:10px"><button class="btn btn-ghost btn-sm" data-order="'+o.numero+'">Abrir</button><button class="btn btn-ghost btn-sm" data-edito="'+o.numero+'">Editar</button><button class="btn btn-ghost btn-sm" data-delo="'+o.numero+'" style="color:#b23">Excluir</button></div></div></div>';
   });
   return h+'</div>';
+}
+function viewPedidos(){
+  if(!state.orders.length) return '<h1 class="serif" style="font-size:26px">Pedidos</h1><p class="muted mt">Nenhum pedido ainda. Crie um pedido direto na página do modelo ou a partir de um orçamento.</p><button class="btn btn-ghost mt" data-action="novo">Nova venda</button>';
+  return '<h1 class="serif" style="font-size:26px">Pedidos de venda</h1>'
+    +'<div class="row gap mt" style="flex-wrap:wrap"><select id="pedTipo" class="inp" style="max-width:180px"><option value="">Todos os tipos</option><option value="alianca"'+(state._foTipo==='alianca'?' selected':'')+'>Só alianças</option><option value="formatura"'+(state._foTipo==='formatura'?' selected':'')+'>Só formatura</option></select></div>'
+    +'<div id="pedList">'+pedidosCards()+'</div>';
 }
 function fornecedorMsg(o){
   var L=['*Pedido para produção — '+state.store.nome+'*','Ref: '+o.numero,''];
@@ -1064,6 +1074,7 @@ function bind(){
   if(state.screen==='order') bindOrder();
   if(state.screen==='config') bindConfig();
   if(state.screen==='modelos') bindModelos();
+  if(state.screen==='pedidos') bindPedidos();
   if(state.screen==='print') bindPrint();
 }
 function bindGrid(){ document.querySelectorAll('#catalogGrid [data-open]').forEach(function(b){ b.addEventListener('click',function(){ openModel(b.getAttribute('data-open')); }); }); document.querySelectorAll('#catalogGrid [data-fav]').forEach(function(b){ b.addEventListener('click',function(e){ e.stopPropagation(); toggleFav(b.getAttribute('data-fav')); }); }); }
@@ -1115,6 +1126,7 @@ function bindPedidoNew(){
 function bindSaved(){
   var s=document.getElementById('savSearch'); if(s) s.oninput=function(){ state._fSearch=s.value; var l=document.getElementById('savList'); if(l){ l.innerHTML=savedListInner(); bindSavedList(); } };
   var st=document.getElementById('savStatus'); if(st) st.onchange=function(){ state._fStatus=st.value; var l=document.getElementById('savList'); if(l){ l.innerHTML=savedListInner(); bindSavedList(); } };
+  var sty=document.getElementById('savTipo'); if(sty) sty.onchange=function(){ state._fTipo=sty.value; var l=document.getElementById('savList'); if(l){ l.innerHTML=savedListInner(); bindSavedList(); } };
   var sv=document.getElementById('savVend'); if(sv) sv.onchange=function(){ state._fVend=sv.value; var l=document.getElementById('savList'); if(l){ l.innerHTML=savedListInner(); bindSavedList(); } };
   var so=document.getElementById('savSort'); if(so) so.onchange=function(){ state.qSort=so.value; var l=document.getElementById('savList'); if(l){ l.innerHTML=savedListInner(); bindSavedList(); } };
   bindSavedList();
@@ -1157,6 +1169,7 @@ function bindConfig(){
   var lg=document.getElementById('storeLogo'); if(lg) lg.onchange=function(){ var file=lg.files&&lg.files[0]; if(!file) return; var rd=new FileReader(); rd.onload=function(){ state.store.logo=rd.result; var pv=document.getElementById('storeLogoPrev'); if(pv){ pv.src=state.store.logo; pv.style.display='block'; } save(); toast('Logo atualizado.'); render(); }; rd.readAsDataURL(file); };
   var ld=document.getElementById('storeLogoDel'); if(ld) ld.onclick=function(){ state.store.logo=null; save(); render(); };
 }
+function bindPedidos(){ var t=document.getElementById('pedTipo'); if(t) t.onchange=function(){ state._foTipo=t.value; render(); }; }
 function bindModelos(){
   document.querySelectorAll('[data-mtab]').forEach(function(b){ b.onclick=function(){ state.modelosTipo=b.getAttribute('data-mtab'); render(); }; });
   var tp=state.modelosTipo||'alianca';
