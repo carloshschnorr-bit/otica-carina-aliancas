@@ -195,6 +195,7 @@ var STATUS_TONE={'Em aberto':'amber','Virou pedido':'green','Vencido':'red'};
 function stageTone(s){ return s==='Entregue'?'green':(s==='Pronto para entrega'?'blue':'amber'); }
 function toneCss(tone){ var m={green:['#dcfce7','#15803d'],blue:['#e0edff','#1d4ed8'],amber:['#fef3c7','#b45309'],red:['#fee2e2','#b91c1c'],gray:['#eef1f6','#475569']}; var c=m[tone]||m.gray; return 'background:'+c[0]+';color:'+c[1]+';border-color:'+c[0]+';font-weight:600'; }
 var FAIXAS=[{v:'0-2000',nome:'Até R$ 2.000'},{v:'2000-3500',nome:'R$ 2.000 a R$ 3.500'},{v:'3500-5000',nome:'R$ 3.500 a R$ 5.000'},{v:'5000-9999999',nome:'Acima de R$ 5.000'}];
+var FAIXAS_F=[{v:'0-3000',nome:'Até R$ 3.000'},{v:'3000-5000',nome:'R$ 3.000 a R$ 5.000'},{v:'5000-7000',nome:'R$ 5.000 a R$ 7.000'},{v:'7000-10000',nome:'R$ 7.000 a R$ 10.000'},{v:'10000-99999999',nome:'Acima de R$ 10.000'}];
 
 /* ============================================================ ESTADO ============================================================ */
 var state={
@@ -308,6 +309,7 @@ function currentCalc(){ var m=getModel(state.activeModelId); if(!m) return null;
 function hasStone(m){ return (m.zirconiaUSD!=null&&m.zirconiaUSD!=='')||(m.brilhanteUSD!=null&&m.brilhanteUSD!==''); }
 function availMats(m){ var hasZ=(m.zirconiaUSD!=null&&m.zirconiaUSD!==''), hasB=(m.brilhanteUSD!=null&&m.brilhanteUSD!==''); var list=[]; if(hasZ){ list.push(MAT_BY['10kz']); list.push(MAT_BY['18kz']); } if(hasB){ list.push(MAT_BY['18kb']); } if(!hasZ&&!hasB){ list.push(MAT_BY['10k']); list.push(MAT_BY['18k']); } return list; }
 function basePrice(m){ var a=availMats(m); return priceOf(m,a[0].id,0).total; }
+function catBase(m){ if((m.tipo||'alianca')==='formatura'){ var r=state.rates; return (m.indice10k||0)*(r.ouro||0)+(m.zirconiaUSD||0)*(r.dolar||0); } return basePrice(m); }
 
 /* ============================================================ NAVEGAÇÃO / AÇÕES ============================================================ */
 function go(s){ state.screen=s; window.scrollTo(0,0); render(); }
@@ -407,15 +409,15 @@ function catalogCards(){
   if(state.catLargura!=='') list=list.filter(function(m){return String(m.largura)===state.catLargura;});
   if(state.catPedra==='com') list=list.filter(hasStone);
   else if(state.catPedra==='sem') list=list.filter(function(m){return !hasStone(m);});
-  if(state.catFaixa!==''){ var fp=state.catFaixa.split('-'); list=list.filter(function(m){var b=basePrice(m); return b>=+fp[0] && b<+fp[1];}); }
-  if(state.catSort==='asc') list=list.slice().sort(function(a,b){return basePrice(a)-basePrice(b);});
-  else if(state.catSort==='desc') list=list.slice().sort(function(a,b){return basePrice(b)-basePrice(a);});
+  if(state.catFaixa!==''){ var fp=state.catFaixa.split('-'); list=list.filter(function(m){var b=catBase(m); return b>=+fp[0] && b<+fp[1];}); }
+  if(state.catSort==='asc') list=list.slice().sort(function(a,b){return catBase(a)-catBase(b);});
+  else if(state.catSort==='desc') list=list.slice().sort(function(a,b){return catBase(b)-catBase(a);});
   if(!list.length) return '<p class="muted">Nenhum modelo encontrado.</p>';
   var h='';
   list.forEach(function(m){
     h+='<div class="prod"><div class="ph" data-open="'+m.id+'">'+modelImg(m,null,m.foto?150:104)+'<button class="fav" data-fav="'+m.id+'">'+(state.favorites.indexOf(m.id)>=0?'★':'☆')+'</button></div>'
       +'<div class="pad"><div class="code">'+m.modelo+'</div><div class="serif" style="font-size:19px">'+esc(m.nome)+'</div>'
-      +'<div class="muted" style="font-size:12px;margin:2px 0 8px">Largura '+m.largura+'mm · a partir de <b style="color:var(--gold-dark)">'+money(basePrice(m))+'</b></div>'
+      +'<div class="muted" style="font-size:12px;margin:2px 0 8px">'+((m.tipo||'alianca')==='formatura'?'':'Largura '+m.largura+'mm · ')+'a partir de <b style="color:var(--gold-dark)">'+money(catBase(m))+'</b></div>'
       +'<button class="btn btn-subtle w100 btn-sm" data-open="'+m.id+'">Ver preços</button></div></div>';
   });
   return h;
@@ -428,7 +430,10 @@ function viewCatalog(){
       +'<select id="catFaixa" class="inp" style="width:auto"><option value="">Valor: todos</option>'+FAIXAS.map(function(f){return '<option value="'+f.v+'"'+(state.catFaixa===f.v?' selected':'')+'>'+f.nome+'</option>';}).join('')+'</select>'
       +'<select id="catPedra" class="inp" style="width:auto"><option value="">Pedra: todas</option><option value="com"'+(state.catPedra==='com'?' selected':'')+'>Com pedra</option><option value="sem"'+(state.catPedra==='sem'?' selected':'')+'>Sem pedra</option></select>'
       +'<select id="catSort" class="inp" style="width:auto"><option value="">Ordenar</option><option value="asc"'+(state.catSort==='asc'?' selected':'')+'>Menor valor</option><option value="desc"'+(state.catSort==='desc'?' selected':'')+'>Maior valor</option></select>'
-    +'</div>'):'')
+    +'</div>'):('<div class="row gap mt" style="flex-wrap:wrap">'
+      +'<select id="catFaixa" class="inp" style="width:auto"><option value="">Valor: todos</option>'+FAIXAS_F.map(function(f){return '<option value="'+f.v+'"'+(state.catFaixa===f.v?' selected':'')+'>'+f.nome+'</option>';}).join('')+'</select>'
+      +'<select id="catSort" class="inp" style="width:auto"><option value="">Ordenar</option><option value="asc"'+(state.catSort==='asc'?' selected':'')+'>Menor valor</option><option value="desc"'+(state.catSort==='desc'?' selected':'')+'>Maior valor</option></select>'
+    +'</div>'))
     +'<div id="catalogGrid" class="catgrid mt">'+catalogCards()+'</div>';
 }
 
@@ -450,7 +455,7 @@ function fmtPick(s){ return ({'10kz':{karat:'10k',mode:'sintetica'},'18kz':{kara
 function fmtStoneSel(s){ return fmtPick(s).mode==='natural'? (s.pedraNat||'') : (s.corSint||''); }
 function fmtPedraUSD(m,mode,nome){ if(mode!=='natural') return m.zirconiaUSD; var p=(m.pedrasNaturais||[]).filter(function(x){return x.nome===nome;})[0]; return p?p.usd:null; }
 function priceFmt(m,karat,mode,nome){ var r=state.rates,falta=[]; var indice=karat==='10k'?m.indice10k:m.indice18k; if(r.ouro==null) falta.push('cotação do ouro'); if(indice==null||indice==='') falta.push('índice '+karat); var pedraUSD=fmtPedraUSD(m,mode,nome); if(pedraUSD==null||pedraUSD==='') falta.push('valor da pedra'); if(r.dolar==null) falta.push('cotação do dólar'); var valor=(indice||0)*(r.ouro||0)+(pedraUSD||0)*(r.dolar||0); var peso=karat==='10k'?m.pesoAu416:m.pesoAu750; return {valor:valor,total:valor,indice:indice,pedraUSD:pedraUSD,peso:peso,falta:falta}; }
-function pricePanelFmtInner(){ var m=getModel(state.activeModelId); if(!m) return ''; var s=state.selF||{}; var pk=fmtPick(s); var stone=fmtStoneSel(s); var c=priceFmt(m,pk.karat,pk.mode,stone); var karatLbl=pk.karat==='10k'?'Ouro 10k':'Ouro 18k'; var pedraLbl=pk.mode==='natural'?(stone||'pedra natural'):((stone||'zircônia')+' sintética'); return '<div class="between" style="align-items:flex-end"><div><div style="opacity:.85;font-size:13px">Preço do anel</div><div class="price-big">'+money(c.valor)+'</div><div style="opacity:.85;font-size:12px;margin-top:2px">'+karatLbl+' · '+esc(pedraLbl)+'</div></div><div style="text-align:right;font-size:12px;opacity:.9">Peso ~'+(c.peso!=null?c.peso:'—')+' g<br>Prazo '+state.store.prazoDias+' dias</div></div>'+(c.falta.length?'<div class="warn">⚠ A definir no cadastro: '+c.falta.join(', ')+'.</div>':'')+'<div class="mt" style="display:flex;gap:8px"><button class="btn btn-dark" style="flex:1" id="addOrcF">'+((state.cart.length||state.editQuoteNum)?'Adicionar ao orçamento':'Criar orçamento')+'</button><button class="btn btn-white" style="flex:1" id="addPedF">Criar pedido</button></div>'; }
+function pricePanelFmtInner(){ var m=getModel(state.activeModelId); if(!m) return ''; var s=state.selF||{}; var pk=fmtPick(s); var stone=fmtStoneSel(s); var c=priceFmt(m,pk.karat,pk.mode,stone); var karatLbl=pk.karat==='10k'?'Ouro 10k':'Ouro 18k'; var pedraLbl=(pk.mode==='natural'?'Pedra Natural ':'Pedra Sintética ')+(stone||''); return '<div class="between" style="align-items:flex-end"><div><div style="opacity:.85;font-size:13px">Preço do anel</div><div class="price-big">'+money(c.valor)+'</div><div style="opacity:.85;font-size:12px;margin-top:2px">'+karatLbl+' · '+esc(pedraLbl)+'</div></div><div style="text-align:right;font-size:12px;opacity:.9">Peso ~'+(c.peso!=null?c.peso:'—')+' g<br>Prazo '+state.store.prazoDias+' dias</div></div>'+(c.falta.length?'<div class="warn">⚠ A definir no cadastro: '+c.falta.join(', ')+'.</div>':'')+'<div class="mt" style="display:flex;gap:8px"><button class="btn btn-dark" style="flex:1" id="addOrcF">'+((state.cart.length||state.editQuoteNum)?'Adicionar ao orçamento':'Criar orçamento')+'</button><button class="btn btn-white" style="flex:1" id="addPedF">Criar pedido</button></div>'; }
 function viewModelFormatura(m){
   var s=state.selF||(state.selF={pick:'10kz',corSint:'',pedraNat:'',cursoId:'',simboloTipo:'catalogo',simboloObs:''});
   var opts=[{id:'10kz',karat:'10k',mode:'sintetica',nome:'Ouro 10k · Zircônia'},{id:'18kz',karat:'18k',mode:'sintetica',nome:'Ouro 18k · Zircônia'},{id:'18kn',karat:'18k',mode:'natural',nome:'Ouro 18k · Pedra natural'}];
@@ -464,10 +469,11 @@ function viewModelFormatura(m){
   return '<button class="btn btn-ghost btn-sm" data-go="catalog">← Voltar aos modelos</button><div class="prodwrap mt"><div class="card pad center" style="display:flex;flex-direction:column;align-items:center;justify-content:center">'+zoomable(m,modelImg(m,null,300))+'<div class="center mt"><div class="code">'+m.modelo+'</div><h1 class="serif" style="font-size:26px">'+esc(m.nome)+'</h1><div class="muted" style="font-size:12px;display:flex;gap:14px;justify-content:center;margin-top:6px;flex-wrap:wrap"><span>Peso 18k '+(m.pesoAu750!=null?m.pesoAu750:'—')+'g</span><span>Peso 10k '+(m.pesoAu416!=null?m.pesoAu416:'—')+'g</span></div></div></div><div><div class="card pad"><div class="field"><span class="lab">Tipo de ouro e pedra</span></div><div style="margin-top:6px">'+optRows+'</div>'+stoneBlock+cursoBlock+simBlock+'<div class="hint" style="margin-top:8px">Anel unitário. Tamanho do aro e gravação são preenchidos ao fechar o pedido.</div></div><div class="pricebox gold-grad" id="pricePanelF">'+pricePanelFmtInner()+'</div></div></div>';
 }
 function bindModelFormatura(){ document.querySelectorAll('input[name=fmat]').forEach(function(el){ el.onchange=function(){ state.selF.pick=el.value; render(); }; }); var fp=document.getElementById('fPedra'); if(fp) fp.onchange=function(){ state.selF.pedraNat=fp.value; render(); }; var fc=document.getElementById('fCor'); if(fc) fc.onchange=function(){ state.selF.corSint=fc.value; render(); }; var fcu=document.getElementById('fCurso'); if(fcu) fcu.onchange=function(){ state.selF.cursoId=fcu.value; }; document.querySelectorAll('input[name=fsimb]').forEach(function(el){ el.onchange=function(){ state.selF.simboloTipo=el.value; render(); }; }); var so=document.getElementById('fSimbObs'); if(so) so.oninput=function(){ state.selF.simboloObs=so.value; }; var a=document.getElementById('addOrcF'); if(a) a.onclick=addFmtOrcamento; var p=document.getElementById('addPedF'); if(p) p.onclick=criarFmtPedidoDireto; }
-function buildItemFmt(){ var m=getModel(state.activeModelId),s=state.selF||{},pk=fmtPick(s),stone=fmtStoneSel(s),c=priceFmt(m,pk.karat,pk.mode,stone); var cur=(state.store.cursos||[]).filter(function(x){return x.id===s.cursoId;})[0]; var matNome='Ouro '+pk.karat+' · '+(pk.mode==='natural'?(stone||'pedra natural'):((stone||'zircônia')+' sintética')); return { modelId:m.id, tipo:'formatura', karat:pk.karat, pedraMode:pk.mode, pedra:stone||'', pedraUSD:c.pedraUSD, matNome:matNome, modo:'unit', dist:(pk.mode==='natural'?1:0), pontos:null, par:c.valor, total:c.valor, peso:c.peso, cursoId:s.cursoId||'', cursoNome:cur?cur.nome:'', cursoSimbolo:cur?cur.simbolo:'', cursoCor:cur?cur.cor:'', simboloTipo:s.simboloTipo||'catalogo', simboloObs:s.simboloObs||'', aro1:'', aro2:'', grav1:'', grav2:'', pedraAro:1 }; }
+function buildItemFmt(){ var m=getModel(state.activeModelId),s=state.selF||{},pk=fmtPick(s),stone=fmtStoneSel(s),c=priceFmt(m,pk.karat,pk.mode,stone); var cur=(state.store.cursos||[]).filter(function(x){return x.id===s.cursoId;})[0]; var matNome='Ouro '+pk.karat+' · '+(pk.mode==='natural'?'Pedra Natural ':'Pedra Sintética ')+(stone||''); return { modelId:m.id, tipo:'formatura', karat:pk.karat, pedraMode:pk.mode, pedra:stone||'', pedraUSD:c.pedraUSD, matNome:matNome, modo:'unit', dist:(pk.mode==='natural'?1:0), pontos:null, par:c.valor, total:c.valor, peso:c.peso, cursoId:s.cursoId||'', cursoNome:cur?cur.nome:'', cursoSimbolo:cur?cur.simbolo:'', cursoCor:cur?cur.cor:'', simboloTipo:s.simboloTipo||'catalogo', simboloObs:s.simboloObs||'', aro1:'', aro2:'', grav1:'', grav2:'', pedraAro:1 }; }
 function addFmtOrcamento(){ state.cart.push(buildItemFmt()); toast('Adicionado ao orçamento.'); go('quote'); }
 function criarFmtPedidoDireto(){ state.cart.push(buildItemFmt()); state.pedidoFromQuote=null; state.editOrderNum=null; state.pb={forma:'retirada',valorPago:'',comoPago:'',dataPromessa:addDays(state.store.prazoDias),obs:''}; toast('Preencha os dados para fechar o pedido.'); go('pedidoNew'); }
-function itemDesc(it){ if(it.tipo==='formatura'){ var a=[it.matNome]; if(it.cursoNome) a.push('Curso: '+it.cursoNome); a.push(it.simboloTipo==='diferente'?('símbolo diferente'+(it.simboloObs?(': '+it.simboloObs):'')):'símbolo do catálogo'); return esc(a.join(' · ')); } return esc(it.matNome)+' · '+distLabel(it.dist)+' · '+(it.modo==='unit'?'unitário':'par')+(it.pontos?' · brilhante '+it.pontos+'pts':''); }
+function fmtMatLabel(it){ return 'Ouro '+(it.karat==='10k'?'10k':'18k')+' · '+((it.pedraMode==='natural')?'Pedra Natural ':'Pedra Sintética ')+(it.pedra||''); }
+function itemDesc(it){ if(it.tipo==='formatura'){ var a=[fmtMatLabel(it)]; if(it.cursoNome) a.push('Curso: '+it.cursoNome); a.push(it.simboloTipo==='diferente'?('símbolo diferente'+(it.simboloObs?(': '+it.simboloObs):'')):'símbolo do catálogo'); return esc(a.join(' · ')); } return esc(it.matNome)+' · '+distLabel(it.dist)+' · '+(it.modo==='unit'?'unitário':'par')+(it.pontos?' · brilhante '+it.pontos+'pts':''); }
 function waTextFmt(q){ var nome=q.client?(q.client.nome||'').split(' ')[0]:''; var av=pgtoOpcoes(q.subtotal!=null?q.subtotal:q.total,q.pgto).avistaValor; function line(it){ var s='*'+getModel(it.modelId).modelo+'* — '+it.matNome; if(it.cursoNome) s+=' · '+it.cursoNome; return s; } if(q.itens.length>1){ var itens=q.itens.map(function(it){ return line(it)+': '+money(it.total)+' à prazo'; }).join('\n'); return fixGreeting('Olá, '+nome+'! Segue o orçamento dos anéis de formatura solicitados:\n'+itens+'\n\nVálido até '+fmtDate(q.validade)+'. Qualquer dúvida, fico à disposição!'); } var it=q.itens[0]; return fixGreeting('Olá, '+nome+'! Segue o orçamento do anel de formatura solicitado:\n\n'+line(it)+'\n'+money(q.total)+' à prazo ou '+money(av)+' à vista.\n\nVálido até '+fmtDate(q.validade)+'. Qualquer dúvida, fico à disposição!'); }
 function viewModel(){
   var m=getModel(state.activeModelId); if(!m) return viewHome();
@@ -634,7 +640,7 @@ function createPedido(){
   var o={ numero:num, orcamento: state.pedidoFromQuote||'Venda direta', client:state.client, vendedora:state.vendedoraSel, itens:JSON.parse(JSON.stringify(state.cart)),
     total:pc.total, pagamento:pc.label, pago:pc.pago, falta:pc.falta, comoPago:pc.como, pagamentos:pc.pagamentos, forma:state.pb.forma, obs:state.pb.obs||'',
     dataPromessa:state.pb.dataPromessa, stage:'Em aberto', criadoEm:new Date().toISOString(),
-    checklist:{ numeracao:false, material:false, pedra:false } };
+    checklist:((state.cart[0]&&state.cart[0].tipo==='formatura')?{ aro:false, material:false, pedra:false, curso:false, cor:false, simbolo:false }:{ numeracao:false, material:false, pedra:false }) };
   state.orders.unshift(o);
   if(state.client && !state.clients.some(function(x){return x.whatsapp===state.client.whatsapp;})) state.clients.unshift(state.client);
   if(state.pedidoFromQuote){ var q=getQuote(state.pedidoFromQuote); if(q){ q.status='Virou pedido'; q.historico.push({em:new Date().toISOString(),acao:'Convertido no pedido '+num}); } }
@@ -727,10 +733,10 @@ function fornecedorMsg(o){
   o.itens.forEach(function(it){ var m=getModel(it.modelId);
     if(it.tipo==='formatura'){
       var karatF=it.karat==='10k'?'Ouro 10k':'Ouro 18k';
-      var pedraF=it.pedraMode==='natural'?((it.pedra||'pedra')+' (natural)'):((it.pedra||'zircônia')+' (zircônia sintética)');
+      var pedraF=(it.pedraMode==='natural'?'Pedra Natural ':'Pedra Sintética ')+(it.pedra||'');
       L.push('Modelo: *'+m.modelo+'* (anel de formatura)');
       L.push('Material: *'+karatF+'*');
-      L.push('Pedra: *'+pedraF+'*');
+      L.push('*'+pedraF+'*');
       if(it.cursoNome) L.push('Curso: *'+it.cursoNome+'*'+(it.cursoSimbolo?(' — símbolo do curso: '+it.cursoSimbolo):''));
       L.push('Símbolo: *'+(it.simboloTipo==='diferente'?('diferente'+(it.simboloObs?(' — '+it.simboloObs):'')):'conforme catálogo')+'*');
       L.push('*Aro '+(it.aro1||'?')+(it.grav1?(' — gravação: '+it.grav1):'')+'*');
@@ -773,7 +779,7 @@ function viewOrder(){
     var peso=(unit?it.pesoPar/2:it.pesoPar);
     items+='<div class="listrow">'+modelImg(m,it.dist>0?it.pedra:null,44)+'<div style="flex:1"><span class="code">'+m.modelo+'</span> <span style="font-size:14px">'+esc(m.nome)+'</span><div class="muted" style="font-size:12px">'+esc(it.matNome)+' · '+distLabel(it.dist)+' · '+(unit?'unitário':'par')+' · '+aros+' · peso ~'+peso.toFixed(1)+'g'+(it.pontos?' · brilhante '+it.pontos+'pts':'')+'</div>'+(gravs?'<div class="muted" style="font-size:12px">'+gravs+'</div>':'')+'</div><div class="serif">'+money(it.total)+'</div></div>';
   });
-  var CL=[['numeracao','Aros conferidos'],['material','Material (ouro) conferido'],['pedra','Pedra conferida']];
+  var CL=(docTipo(o)==='formatura')?[['aro','Aro conferido'],['material','Material (ouro) conferido'],['pedra','Pedra conferida'],['curso','Curso conferido'],['cor','Cor da pedra conferida'],['simbolo','Símbolos conferidos']]:[['numeracao','Aros conferidos'],['material','Material (ouro) conferido'],['pedra','Pedra conferida']];
   var checks=CL.map(function(c){ return '<label class="check"><input type="checkbox" data-check="'+c[0]+'" '+(o.checklist[c[0]]?'checked':'')+'/> '+c[1]+'</label>'; }).join('');
   return '<button class="btn btn-ghost btn-sm" data-go="pedidos">← Voltar aos pedidos</button>'
     +'<div class="between mt"><h1 class="serif" style="font-size:26px">Pedido '+o.numero+'</h1><div class="row gap"><button class="btn btn-ghost btn-sm" data-edito="'+o.numero+'">Editar pedido</button><span class="badge '+stageTone(o.stage)+'">'+o.stage+'</span></div></div>'
@@ -911,7 +917,7 @@ function viewPrint(){
 function osItems(o){
   var items='';
   o.itens.forEach(function(it){ var m=getModel(it.modelId);
-    if(it.tipo==='formatura'){ var sy=it.simboloTipo==='diferente'?('símbolo diferente'+(it.simboloObs?(': '+esc(it.simboloObs)):'')):'símbolo do catálogo'; items+='<div style="padding:8px 0;border-bottom:1px solid var(--line)"><span class="code">'+m.modelo+'</span> <b style="color:var(--ink)">'+esc(m.nome)+'</b> · '+esc(it.matNome)+'<div style="font-size:13px">Aro <b>'+(it.aro1||'?')+'</b>'+(it.cursoNome?(' · Curso: '+esc(it.cursoNome)):'')+' · '+sy+(it.grav1?(' · gravação: “'+esc(it.grav1)+'”'):'')+'</div></div>'; return; }
+    if(it.tipo==='formatura'){ var sy=it.simboloTipo==='diferente'?('símbolo diferente'+(it.simboloObs?(': '+esc(it.simboloObs)):'')):'símbolo do catálogo'; items+='<div style="padding:8px 0;border-bottom:1px solid var(--line)"><span class="code">'+m.modelo+'</span> <b style="color:var(--ink)">'+esc(m.nome)+'</b> · '+esc(fmtMatLabel(it))+'<div style="font-size:13px">Aro <b>'+(it.aro1||'?')+'</b>'+(it.cursoNome?(' · Curso: '+esc(it.cursoNome)):'')+' · '+sy+(it.grav1?(' · gravação: “'+esc(it.grav1)+'”'):'')+'</div></div>'; return; }
     var karat=it.karat==='10k'?'Ouro 10k':'Ouro 18k';
     var stLabel=it.pedra?(it.pedra+(it.pedra==='Brilhante'&&it.pontos?' '+it.pontos+'pts':'')):null;
     var line=function(aro,com,grav){ return '<div style="font-size:13px">Aro <b>'+(aro||'?')+'</b> — '+(com?('com '+stLabel):'sem pedra')+(grav?(' · gravação: “'+esc(grav)+'”'):'')+'</div>'; };
@@ -1061,7 +1067,7 @@ function bind(){
   document.querySelectorAll('[data-open]').forEach(function(b){ b.addEventListener('click',function(){ openModel(b.getAttribute('data-open')); }); });
   document.querySelectorAll('[data-zoom]').forEach(function(el){ el.addEventListener('click',function(e){ e.stopPropagation(); zoomImg(el.getAttribute('data-zoom')); }); });
   document.querySelectorAll('[data-fav]').forEach(function(b){ b.addEventListener('click',function(e){ e.stopPropagation(); toggleFav(b.getAttribute('data-fav')); }); });
-  document.querySelectorAll('[data-action]').forEach(function(b){ b.addEventListener('click',function(){ var a=b.getAttribute('data-action'); if(a==='novo'||a==='nova_alianca'||a==='nova_formatura'){ if(a==='nova_alianca') state.catTipo='alianca'; if(a==='nova_formatura') state.catTipo='formatura'; state.cart=[]; state.client=null; state.qb={obs:''}; state.editQuoteNum=null; state.editOrderNum=null; state.search=''; go('catalog'); } }); });
+  document.querySelectorAll('[data-action]').forEach(function(b){ b.addEventListener('click',function(){ var a=b.getAttribute('data-action'); if(a==='novo'||a==='nova_alianca'||a==='nova_formatura'){ if(a==='nova_alianca') state.catTipo='alianca'; if(a==='nova_formatura') state.catTipo='formatura'; state.cart=[]; state.client=null; state.qb={obs:''}; state.editQuoteNum=null; state.editOrderNum=null; state.search=''; state.catFaixa=''; state.catSort=''; state.catLargura=''; state.catPedra=''; go('catalog'); } }); });
   document.querySelectorAll('[data-order]').forEach(function(b){ b.addEventListener('click',function(){ state.activeOrderId=b.getAttribute('data-order'); go('order'); }); });
   document.querySelectorAll('[data-cardo]').forEach(function(c){ c.addEventListener('click',function(e){ if(e.target.closest('button,select,option,input,textarea,label,a')) return; state.activeOrderId=c.getAttribute('data-cardo'); go('order'); }); });
   document.querySelectorAll('[data-ostatus]').forEach(function(el){ el.onchange=function(){ var o=getOrder(el.getAttribute('data-ostatus')); if(o) setOrderStage(o, el.value); }; });
