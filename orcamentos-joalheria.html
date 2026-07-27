@@ -777,7 +777,6 @@ function viewOrder(){
   o.itens.forEach(function(it){ var m=getModel(it.modelId);
     var unit=it.modo==='unit';
     var aros=unit?('aro '+(it.aro1||'?')):('aros '+(it.aro1||'?')+' / '+(it.aro2||'?'));
-    var gravs=unit?(it.grav1?('Gravação: “'+esc(it.grav1)+'”'):''):((it.grav1||it.grav2)?('Gravações: “'+esc(it.grav1||'—')+'” / “'+esc(it.grav2||'—')+'”'):'');
     var peso=(unit?it.pesoPar/2:it.pesoPar);
     items+='<div class="listrow">'+modelImg(m,it.dist>0?it.pedra:null,44)+'<div style="flex:1"><span class="code">'+m.modelo+'</span> <span style="font-size:14px">'+esc(m.nome)+'</span><div class="muted" style="font-size:12px">'+esc(it.matNome)+' · '+distLabel(it.dist)+' · '+(unit?'unitário':'par')+' · '+aros+' · peso ~'+peso.toFixed(1)+'g'+(it.pontos?' · brilhante '+it.pontos+'pts':'')+'</div></div><div class="serif">'+money(it.total)+'</div></div>';
   });
