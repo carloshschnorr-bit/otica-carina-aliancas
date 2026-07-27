@@ -217,7 +217,7 @@ var state={
   ],
   clients:[], quotes:[], orders:[], favorites:[], recent:[],
   activeModelId:null,
-  sel:{ matId:'18kz', dist:2, modo:'par', multi:[] },
+  sel:{ matId:'18kz', dist:1, modo:'par', multi:[] },
   cart:[], client:null,
   qb:{ obs:'' },
   pb:null, pedidoFromQuote:null,
@@ -311,7 +311,7 @@ function basePrice(m){ var a=availMats(m); return priceOf(m,a[0].id,0).total; }
 /* ============================================================ NAVEGAÇÃO / AÇÕES ============================================================ */
 function go(s){ state.screen=s; window.scrollTo(0,0); render(); }
 function toast(msg){ var r=document.getElementById('toast-root'); r.innerHTML='<div class="toast">'+esc(msg)+'</div>'; setTimeout(function(){r.innerHTML='';},2600); }
-function openModel(id){ var m=getModel(id); if(!m) return; state.activeModelId=id; var av=availMats(m); var def=av.filter(function(o){return o.id==='10kz';})[0]||av.filter(function(o){return o.id==='10k';})[0]||av[0]; state.sel={matId:def.id,dist:hasStone(m)?2:0,modo:'par',multi:[]}; state.recent=[id].concat(state.recent.filter(function(x){return x!==id;})).slice(0,8); go('model'); }
+function openModel(id){ var m=getModel(id); if(!m) return; state.activeModelId=id; var av=availMats(m); var def=av.filter(function(o){return o.id==='10kz';})[0]||av.filter(function(o){return o.id==='10k';})[0]||av[0]; state.sel={matId:def.id,dist:hasStone(m)?1:0,modo:'par',multi:[]}; state.recent=[id].concat(state.recent.filter(function(x){return x!==id;})).slice(0,8); go('model'); }
 function toggleFav(id){ var i=state.favorites.indexOf(id); if(i>=0) state.favorites.splice(i,1); else state.favorites.push(id); render(); }
 function buildItemFor(matId){
   var m=getModel(state.activeModelId), mat=MAT_BY[matId], c=priceOf(m,matId,state.sel.dist);
@@ -370,10 +370,7 @@ function topBar(){
     +'<button class="brand" data-go="home">'+logoImg(36,false)+'</button>'
     +'<div class="search-wrap"><input id="globalSearch" class="search" placeholder="Buscar modelo por código ou nome…" autocomplete="off"/><div id="searchDrop"></div></div>'
     +'<nav class="nav">'
-      +'<button class="navbtn" data-action="novo">Novo</button>'
-      +'<button class="navbtn" data-go="saved">Orçamentos</button>'
-      +'<button class="navbtn" data-go="pedidos">Pedidos</button>'
-      +'<button class="navbtn" data-go="config">Config</button>'
+      +'<button class="navbtn" data-go="home">Página inicial</button>'
       +'<button class="navbtn" data-logout title="Sair da conta">Sair</button>'
     +'</nav>'
     +'<button class="cartbtn" data-go="quote">🧾<span class="hide-sm"> Orçamento</span>'+(state.cart.length?'<span class="cart-badge">'+state.cart.length+'</span>':'')+'</button>'
@@ -768,7 +765,7 @@ function adminModelosCards(){
     var meta = tp==='formatura'
       ? 'índ. 10k '+(m.indice10k!=null?m.indice10k:'—')+' / 18k '+(m.indice18k!=null?m.indice18k:'—')+'<br>zircônia '+usd(m.zirconiaUSD)+' · '+((m.pedrasNaturais&&m.pedrasNaturais.length)||0)+' pedra(s) natural'
       : 'Largura '+m.largura+'mm · índ. 10k '+(m.indice10k!=null?m.indice10k:'—')+' / 18k '+(m.indice18k!=null?m.indice18k:'—')+'<br>zircônia '+usd(m.zirconiaUSD)+' · brilhante '+usd(m.brilhanteUSD);
-    cards+='<div class="card pad" style="text-align:center"><div class="code">'+m.modelo+'</div><div style="margin:6px 0">'+modelImg(m,null,m.foto?110:80)+'</div><div class="serif" style="font-size:16px">'+esc(m.nome)+'</div><div class="muted" style="font-size:12px;margin-top:2px">'+meta+'</div><button class="btn btn-subtle btn-sm w100 mt" data-editmodel="'+m.id+'">Editar</button></div>';
+    cards+='<div class="card pad" style="text-align:center"><div class="code">'+m.modelo+'</div><div style="margin:6px 0">'+zoomable(m,modelImg(m,null,m.foto?110:80))+'</div><div class="serif" style="font-size:16px">'+esc(m.nome)+'</div><div class="muted" style="font-size:12px;margin-top:2px">'+meta+'</div><button class="btn btn-subtle btn-sm w100 mt" data-editmodel="'+m.id+'">Editar</button></div>';
   });
   return cards;
 }
@@ -1139,7 +1136,7 @@ function bindModelos(){
   bindMEdits();
   var nm=document.getElementById('novoModelo'); if(nm) nm.onclick=function(){ openModelModal(null, tp); };
   var im=document.getElementById('importModelos'); if(im) im.onclick=openImport;
-  var ms=document.getElementById('mSearch'); if(ms) ms.oninput=function(){ state.mSearch=ms.value; var g=document.getElementById('mGrid'); if(g){ g.innerHTML=adminModelosCards(); bindMEdits(); } };
+  var ms=document.getElementById('mSearch'); if(ms) ms.oninput=function(){ state.mSearch=ms.value; var g=document.getElementById('mGrid'); if(g){ g.innerHTML=adminModelosCards(); bindMEdits(); g.querySelectorAll('[data-zoom]').forEach(function(el){ el.addEventListener('click',function(){ zoomImg(el.getAttribute('data-zoom')); }); }); } };
 }
 function bindPrint(){
   var bp=document.getElementById('btnPrint'); if(bp) bp.onclick=function(){ window.print(); };
