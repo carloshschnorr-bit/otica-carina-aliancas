@@ -233,7 +233,13 @@ var SB_KEY='sb_publishable_AHAki5RC0M3Bp_xRTBDEbA_ajPTgrb9';
 var SB_TOKEN=null, SB_REFRESH=null, AUTHLS='ALIANCAS_AUTH_v1';
 function sbHeaders(extra){ var h={apikey:SB_KEY,Authorization:'Bearer '+(SB_TOKEN||SB_KEY),'Content-Type':'application/json'}; if(extra) for(var k in extra) h[k]=extra[k]; return h; }
 function sbGet(path){ return fetch(SB_URL+'/rest/v1/'+path,{headers:sbHeaders()}).then(function(r){ return r.ok?r.json():[]; }).catch(function(){ return []; }); }
-function sbGetX(path){ return fetch(SB_URL+'/rest/v1/'+path,{headers:sbHeaders()}).then(function(r){ if(!r.ok) throw new Error('http '+r.status); return r.json(); }); }
+function sbGetX(path){ return sbGetRetry(path,2); }
+function sbGetRetry(path,tries){ return fetch(SB_URL+'/rest/v1/'+path,{headers:sbHeaders()}).then(function(r){ if(!r.ok) throw new Error('http '+r.status); return r.json(); }).catch(function(e){ if(tries>0) return new Promise(function(res){setTimeout(res,900);}).then(function(){ return sbGetRetry(path,tries-1); }); throw e; }); }
+function sbGetPaged(path,pageSize){ pageSize=pageSize||20; var acc=[];
+  function fetchPage(from,tries){ var to=from+pageSize-1; return fetch(SB_URL+'/rest/v1/'+path,{headers:sbHeaders({'Range-Unit':'items','Range':from+'-'+to})}).then(function(r){ if(r.status>=400) throw new Error('http '+r.status); return r.json(); }).catch(function(e){ if(tries>0) return new Promise(function(res){setTimeout(res,900);}).then(function(){ return fetchPage(from,tries-1); }); throw e; }); }
+  function loop(from){ return fetchPage(from,3).then(function(chunk){ if(!chunk||!chunk.length) return acc; acc=acc.concat(chunk); if(chunk.length<pageSize) return acc; return loop(from+pageSize); }); }
+  return loop(0);
+}
 function sbUpsert(table,row){ return fetch(SB_URL+'/rest/v1/'+table,{method:'POST',headers:sbHeaders({Prefer:'resolution=merge-duplicates,return=minimal'}),body:JSON.stringify(row)}).catch(function(){}); }
 function sbPatch(qs,row){ return fetch(SB_URL+'/rest/v1/'+qs,{method:'PATCH',headers:sbHeaders({Prefer:'return=minimal'}),body:JSON.stringify(row)}).catch(function(){}); }
 function sbDel(table,col,val){ return fetch(SB_URL+'/rest/v1/'+table+'?'+col+'=eq.'+encodeURIComponent(val),{method:'DELETE',headers:sbHeaders({Prefer:'return=minimal'})}).catch(function(){}); }
@@ -254,7 +260,7 @@ function cloudSync(){ if(!SB_TOKEN) return;
   syncColl('orders','numero',state.orders,_shadow.orders,function(o){return {numero:o.numero,data:o};});
 }
 function syncColl(table,key,arr,shadow,toRow){ var seen={}; arr.forEach(function(it){ var k=it[key]; seen[k]=1; var s=JSON.stringify(it); if(shadow[k]!==s){ sbUpsert(table,toRow(it)); shadow[k]=s; } }); Object.keys(shadow).forEach(function(k){ if(!seen[k]){ sbDel(table,key,k); delete shadow[k]; } }); }
-function loadCloud(){ return Promise.all([sbGetX('config?select=*'),sbGetX('models?select=*'),sbGetX('quotes?select=*'),sbGetX('orders?select=*')]).then(function(res){ var cfg=res[0]&&res[0][0]; if(cfg){ _cfgRow=true; if(cfg.store) state.store=Object.assign({},state.store,cfg.store); if(cfg.templates&&cfg.templates.length) state.templates=cfg.templates; if(cfg.vendedoras) state.vendedoras=cfg.vendedoras; if(cfg.rates) state.rates=Object.assign({},state.rates,cfg.rates); } state.models=res[1].map(function(r){return r.data;}); state.quotes=res[2].map(function(r){return r.data;}); state.orders=res[3].map(function(r){return r.data;}); shadowInit(); if(!cfg){ sbUpsert('config',{id:1,store:state.store,templates:state.templates,vendedoras:state.vendedoras,rates:state.rates}); _cfgRow=true; } }); }
+function loadCloud(){ return Promise.all([sbGetX('config?select=*'),sbGetPaged('models?select=*',20),sbGetX('quotes?select=*'),sbGetX('orders?select=*')]).then(function(res){ var cfg=res[0]&&res[0][0]; if(cfg){ _cfgRow=true; if(cfg.store) state.store=Object.assign({},state.store,cfg.store); if(cfg.templates&&cfg.templates.length) state.templates=cfg.templates; if(cfg.vendedoras) state.vendedoras=cfg.vendedoras; if(cfg.rates) state.rates=Object.assign({},state.rates,cfg.rates); } state.models=res[1].map(function(r){return r.data;}); state.quotes=res[2].map(function(r){return r.data;}); state.orders=res[3].map(function(r){return r.data;}); shadowInit(); if(!cfg){ sbUpsert('config',{id:1,store:state.store,templates:state.templates,vendedoras:state.vendedoras,rates:state.rates}); _cfgRow=true; } }); }
 /* Login e inicialização */
 var _loginMode='login';
 function showLogin(err){ var root=document.getElementById('app'); if(!root) return; root.innerHTML='<div style="min-height:82vh;display:flex;align-items:center;justify-content:center;padding:20px"><div class="card pad" style="width:100%;max-width:380px">'
