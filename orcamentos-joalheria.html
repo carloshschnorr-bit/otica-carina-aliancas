@@ -783,7 +783,7 @@ function fornecedorMsg(o){
       L.push('Material: *'+karatF+'*');
       L.push('*'+pedraF+'*');
       if(it.cursoNome) L.push('Curso: *'+it.cursoNome+'*'+(it.cursoSimbolo?(' — símbolo do curso: '+it.cursoSimbolo):''));
-      L.push('Símbolo: *'+(it.simboloTipo==='diferente'?('diferente'+(it.simboloObs?(' — '+it.simboloObs):'')):'conforme catálogo')+'*');
+      L.push('Símbolo: *'+(it.simboloTipo==='diferente'?(it.simboloObs||'(especificar símbolo)'):'conforme catálogo')+'*');
       L.push('Formato do símbolo: *'+formatoLabel(it.simboloFormato)+'*');
       L.push('*Aro '+(it.aro1||'?')+'*');
       L.push('');
