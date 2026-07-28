@@ -229,7 +229,7 @@ function INFO(key){
     +'</div><div class="infonote">Imagem meramente ilustrativa. O tamanho da placa e o formato podem variar conforme o modelo.</div>'};
   return null;
 }
-function showInfo(key){ var c=INFO(key); if(!c) return; var d=document.createElement('div'); d.className='modal-bg'; d.style.cssText='z-index:9999;padding:16px'; d.innerHTML='<div class="infomodal"><div class="infohead"><h3 class="serif" style="font-size:20px;margin:0">'+c.title+'</h3><button class="x" id="infoX" type="button">✕</button></div><div class="infobody">'+c.html+'</div></div>'; d.addEventListener('click',function(e){ if(e.target===d||(e.target.closest&&e.target.closest('#infoX'))){ if(d.parentNode) d.parentNode.removeChild(d); } }); document.body.appendChild(d); }
+function showInfo(key){ var c=INFO(key); if(!c) return; var im=(state.store.infoImgs&&state.store.infoImgs[key])?'<img src="'+state.store.infoImgs[key]+'" data-infozoom="1" style="width:100%;border-radius:12px;margin-bottom:14px;display:block;cursor:zoom-in"/>':''; var d=document.createElement('div'); d.className='modal-bg'; d.style.cssText='z-index:9999;padding:16px'; d.innerHTML='<div class="infomodal"><div class="infohead"><h3 class="serif" style="font-size:20px;margin:0">'+c.title+'</h3><button class="x" id="infoX" type="button">✕</button></div><div class="infobody">'+im+c.html+'</div></div>'; d.addEventListener('click',function(e){ if(e.target.getAttribute&&e.target.getAttribute('data-infozoom')){ zoomImg(e.target.src); return; } if(e.target===d||(e.target.closest&&e.target.closest('#infoX'))){ if(d.parentNode) d.parentNode.removeChild(d); } }); document.body.appendChild(d); }
 function imgResize(dataURL,maxD,q,cb){ try{ if(!dataURL||(''+dataURL).indexOf('data:')!==0){ cb(dataURL); return; } var img=new Image(); img.onload=function(){ var w=img.width,h=img.height; if(w>maxD||h>maxD){ if(w>=h){ h=Math.round(h*maxD/w); w=maxD; } else { w=Math.round(w*maxD/h); h=maxD; } } var c=document.createElement('canvas'); c.width=w; c.height=h; var ctx=c.getContext('2d'); ctx.fillStyle='#fff'; ctx.fillRect(0,0,w,h); ctx.drawImage(img,0,0,w,h); var out; try{ out=c.toDataURL('image/jpeg',q||0.72); }catch(e){ out=dataURL; } cb((out&&out.length<(''+dataURL).length)?out:dataURL); }; img.onerror=function(){ cb(dataURL); }; img.src=dataURL; }catch(e){ cb(dataURL); } }
 function logoImg(size,onDark){ if(state.store.logo){ if(onDark) return '<span style="height:'+size+'px;display:inline-flex;align-items:center;padding:4px 10px;border-radius:10px;background:#fff"><img src="'+state.store.logo+'" style="height:'+(size-10)+'px;max-width:220px;object-fit:contain;display:block"/></span>'; return '<img src="'+state.store.logo+'" style="height:'+size+'px;max-width:180px;object-fit:contain;display:block"/>'; } return '<span class="brand-badge"'+(onDark?' style="background:rgba(255,255,255,.2)"':'')+'>A</span>'; }
 
@@ -277,7 +277,7 @@ var state={
   cart:[], client:null,
   qb:{ obs:'' },
   pb:null, pedidoFromQuote:null,
-  printQuoteNum:null, printOrderNum:null, activeOrderId:null, adminTab:'cotacao', catTipo:'alianca', catSort:'', qSort:'', catLargura:'', catFaixa:'', catPedra:'', editQuoteNum:null, editOrderNum:null,
+  printQuoteNum:null, printOrderNum:null, activeOrderId:null, adminTab:'cotacao', catTipo:'alianca', catSort:'', qSort:'', catLargura:'', catFaixa:'', catPedra:'', mSort:'', editQuoteNum:null, editOrderNum:null,
   vendedoras:[], vendedoraSel:''
 };
 
@@ -449,7 +449,7 @@ function topBar(){
 function lcard(icon,bg,fg,title,desc,go2,act){ return '<button class="lcard" '+(act?('data-action="'+act+'"'):('data-go="'+go2+'"'))+'><div class="licon" style="background:'+bg+';color:'+fg+'">'+icon+'</div><div class="serif" style="font-size:17px">'+title+'</div><div class="muted" style="font-size:12px;margin-top:4px">'+desc+'</div></button>'; }
 function viewHome(){
   var favs=state.favorites.map(getModel).filter(Boolean), rec=state.recent.map(getModel).filter(Boolean);
-  return '<div class="hero"><div class="eyebrow">ATENDIMENTO</div><h1 class="hero-title">Novo orçamento</h1><p class="muted">Escolha o tipo, encontre o modelo e feche a venda em segundos.</p></div>'
+  return '<div class="hero"><div class="eyebrow">ATENDIMENTO</div><h1 class="hero-title">Novo orçamento</h1></div>'
     +'<div class="launch">'
       +lcard('💍','#e0edff','#2563eb','Alianças','Orçamento de alianças','',"nova_alianca")
       +lcard('🎓','#fce7f3','#db2777','Anéis de formatura','Orçamento de formatura','',"nova_formatura")
@@ -887,8 +887,8 @@ function viewOrder(){
 /* ---------------- Configurações ---------------- */
 function viewConfig(){
   if(state.adminTab==='modelos') state.adminTab='cotacao';
-  var tabs=[['cotacao','Cotações'],['cursos','Cursos'],['pagamento','Pagamento'],['loja','Loja'],['mensagens','Mensagens']];
-  var body= state.adminTab==='cursos'?adminCursos(): state.adminTab==='pagamento'?adminPagamento(): state.adminTab==='loja'?adminLoja(): state.adminTab==='mensagens'?adminMensagens(): adminCotacao();
+  var tabs=[['cotacao','Cotações'],['cursos','Cursos'],['pagamento','Pagamento'],['loja','Loja'],['mensagens','Mensagens'],['info','Cards informativos']];
+  var body= state.adminTab==='cursos'?adminCursos(): state.adminTab==='pagamento'?adminPagamento(): state.adminTab==='loja'?adminLoja(): state.adminTab==='mensagens'?adminMensagens(): state.adminTab==='info'?adminInfo(): adminCotacao();
   return '<h1 class="serif" style="font-size:26px">Configurações</h1><div class="tabs mt">'+tabs.map(function(t){return '<button class="tab '+(state.adminTab===t[0]?'on':'')+'" data-atab="'+t[0]+'">'+t[1]+'</button>';}).join('')+'</div><div class="mt">'+body+'</div>';
 }
 function adminCotacao(){
@@ -901,23 +901,52 @@ function adminCotacao(){
     +'<label class="field mt"><span class="lab">Dólar (R$) — opcional</span><span class="val"><input id="mDolar" type="number" step="0.01" class="inp" value="" placeholder="Automático: '+(r.dolar!=null?money(r.dolar):'—')+'"/></span></label>'
     +'<button class="btn btn-primary gold-grad mt" id="rateManual">Salvar cotações</button></div></div>';
 }
-function adminModelosCards(){
+function adminModelosList(){
   var q=(state.mSearch||'').trim().toLowerCase();
   var tp=state.modelosTipo||'alianca';
   var list=state.models.filter(function(m){ return (m.tipo||'alianca')===tp && (!q||m.modelo.toLowerCase().indexOf(q)>=0||m.nome.toLowerCase().indexOf(q)>=0); });
+  var s=state.mSort;
+  if(s==='asc') list=list.slice().sort(function(a,b){return catBase(a)-catBase(b);});
+  else if(s==='desc') list=list.slice().sort(function(a,b){return catBase(b)-catBase(a);});
+  else if(s==='wasc') list=list.slice().sort(function(a,b){return (a.largura||0)-(b.largura||0);});
+  else if(s==='wdesc') list=list.slice().sort(function(a,b){return (b.largura||0)-(a.largura||0);});
+  return list;
+}
+function adminModelosCards(){
+  var tp=state.modelosTipo||'alianca';
+  var list=adminModelosList();
   if(!list.length) return '<p class="muted">Nenhum '+(tp==='formatura'?'anel de formatura':'modelo de aliança')+' cadastrado ainda.</p>';
   var cards='';
   list.forEach(function(m){
     var meta = tp==='formatura'
       ? 'índ. 10k '+(m.indice10k!=null?m.indice10k:'—')+' / 18k '+(m.indice18k!=null?m.indice18k:'—')+'<br>zircônia '+usd(m.zirconiaUSD)+' · '+((m.pedrasNaturais&&m.pedrasNaturais.length)||0)+' pedra(s) natural'
       : 'Largura '+m.largura+'mm · índ. 10k '+(m.indice10k!=null?m.indice10k:'—')+' / 18k '+(m.indice18k!=null?m.indice18k:'—')+'<br>zircônia '+usd(m.zirconiaUSD)+' · brilhante '+usd(m.brilhanteUSD);
-    cards+='<div class="card pad" style="text-align:center"><div class="code">'+m.modelo+'</div><div style="margin:6px 0">'+zoomable(m,modelImg(m,null,m.foto?150:120))+'</div><div class="serif" style="font-size:16px">'+esc(m.nome)+'</div><div class="muted" style="font-size:12px;margin-top:2px">'+meta+'</div><button class="btn btn-subtle btn-sm w100 mt" data-editmodel="'+m.id+'">Editar</button></div>';
+    cards+='<div class="card pad" style="text-align:center"><div class="code">'+m.modelo+'</div><div style="margin:6px 0">'+zoomable(m,modelImg(m,null,m.foto?150:120))+'</div><div class="serif" style="font-size:16px">'+esc(m.nome)+'</div><div class="muted" style="font-size:12px;margin-top:2px">'+meta+'</div><div class="row gap mt"><button class="btn btn-subtle btn-sm" style="flex:1" data-editmodel="'+m.id+'">Editar</button><button class="btn btn-subtle btn-sm" data-etiq="'+m.id+'" title="Imprimir etiqueta desta peça">🏷</button></div></div>';
   });
   return cards;
 }
+function espLabel(m){ return (m.largura!=null&&m.largura!=='')?(String(m.largura).replace('.',',')+' mm'):''; }
+function printEtiquetas(list){
+  if(!list||!list.length){ toast('Nenhum modelo para imprimir.'); return; }
+  var w=window.open('','_blank'); if(!w){ toast('Permita pop-ups para imprimir as etiquetas.'); return; }
+  var css='@page{size:95mm 10mm;margin:0}html,body{margin:0;padding:0}.lab{width:95mm;height:10mm;box-sizing:border-box;padding:0.3mm 2.5mm 0.3mm 3mm;display:flex;flex-direction:column;justify-content:center;overflow:hidden;page-break-after:always;font-family:Arial,Helvetica,sans-serif;color:#000}.lab:last-child{page-break-after:auto}.c{font-size:5.2mm;font-weight:800;line-height:1.02;letter-spacing:.2px}.e{font-size:2.9mm;line-height:1;margin-top:.5mm}';
+  var body=list.map(function(m){ var e=espLabel(m); return '<div class="lab"><div class="c">'+esc(m.modelo)+'</div>'+(e?'<div class="e">'+esc(e)+'</div>':'')+'</div>'; }).join('');
+  w.document.write('<!DOCTYPE html><html><head><meta charset="utf-8"><title>Etiquetas</title><style>'+css+'</style></head><body>'+body+'<scr'+'ipt>window.onload=function(){setTimeout(function(){window.print();},250);};<\/scr'+'ipt></body></html>');
+  w.document.close();
+}
+function adminInfo(){
+  if(!state.store.infoImgs) state.store.infoImgs={};
+  var im=state.store.infoImgs;
+  var slots=[['ouro','Ouro 10k × 18k'],['zcbril','Zircônia × Brilhante'],['zcnat','Zircônia × Pedra natural'],['simbolo','Formato do símbolo (placa × desenho)']];
+  var cards=slots.map(function(s){ var k=s[0]; var has=!!im[k]; return '<div class="card pad"><div class="between" style="align-items:center;gap:10px;flex-wrap:wrap"><div><div class="serif" style="font-size:16px">'+s[1]+'</div><div class="hint">Aparece no topo do card ⓘ correspondente.</div></div>'+(has?'<img src="'+im[k]+'" data-zoom="'+esc(im[k])+'" style="width:130px;height:76px;object-fit:cover;border-radius:10px;border:1px solid var(--line);cursor:zoom-in"/>':'<div style="width:130px;height:76px;border-radius:10px;border:1px dashed var(--line);display:flex;align-items:center;justify-content:center;color:var(--muted);font-size:12px">sem foto</div>')+'</div><div class="row gap mt" style="align-items:center"><input type="file" accept="image/*" data-infoup="'+k+'"/>'+(has?'<button class="btn btn-ghost btn-sm" data-infodel="'+k+'" style="color:#b23">Remover</button>':'')+'</div></div>'; }).join('');
+  return '<div class="hint" style="margin-bottom:10px">Envie uma foto para ilustrar cada comparativo. Ela aparece no topo do card de informação (botão ⓘ) que o cliente vê no orçamento.</div><div class="cardgrid">'+cards+'</div>';
+}
 function adminModelos(){
   var tp=state.modelosTipo||'alianca';
-  return '<div class="between" style="margin-bottom:10px;flex-wrap:wrap;gap:8px"><input id="mSearch" class="inp" style="max-width:280px" placeholder="Buscar por código ou nome…" value="'+esc(state.mSearch||'')+'"/><div class="row gap" style="flex-wrap:wrap">'
+  var n=adminModelosList().length;
+  return '<div class="between" style="margin-bottom:10px;flex-wrap:wrap;gap:8px"><input id="mSearch" class="inp" style="max-width:240px" placeholder="Buscar por código ou nome…" value="'+esc(state.mSearch||'')+'"/><div class="row gap" style="flex-wrap:wrap">'
+    +'<select id="mSort" class="inp" style="width:auto"><option value="">Ordenar</option><option value="asc"'+(state.mSort==='asc'?' selected':'')+'>Menor valor</option><option value="desc"'+(state.mSort==='desc'?' selected':'')+'>Maior valor</option>'+(tp==='alianca'?'<option value="wasc"'+(state.mSort==='wasc'?' selected':'')+'>Menor largura</option><option value="wdesc"'+(state.mSort==='wdesc'?' selected':'')+'>Maior largura</option>':'')+'</select>'
+    +'<button class="btn btn-subtle btn-sm" id="printEtiq" title="Imprimir etiquetas na ordem atual">🏷 Etiquetas ('+n+')</button>'
     +(tp==='alianca'?'<button class="btn btn-subtle btn-sm" id="importModelos">📥 Importar planilha</button>':'')
     +'<button class="btn btn-primary gold-grad btn-sm" id="novoModelo">+ Novo '+(tp==='formatura'?'anel':'modelo')+'</button></div></div>'
     +'<div id="mGrid" class="cardgrid">'+adminModelosCards()+'</div>'
@@ -1290,16 +1319,20 @@ function bindConfig(){
   var ms=document.getElementById('mSearch'); if(ms) ms.oninput=function(){ state.mSearch=ms.value; var g=document.getElementById('mGrid'); if(g){ g.innerHTML=adminModelosCards(); bindMEdits(); } };
   var lg=document.getElementById('storeLogo'); if(lg) lg.onchange=function(){ var file=lg.files&&lg.files[0]; if(!file) return; var rd=new FileReader(); rd.onload=function(){ imgResize(rd.result,400,0.82,function(small){ state.store.logo=small; var pv=document.getElementById('storeLogoPrev'); if(pv){ pv.src=state.store.logo; pv.style.display='block'; } save(); toast('Logo atualizado.'); render(); }); }; rd.readAsDataURL(file); };
   var ld=document.getElementById('storeLogoDel'); if(ld) ld.onclick=function(){ state.store.logo=null; save(); render(); };
+  document.querySelectorAll('[data-infoup]').forEach(function(el){ el.onchange=function(){ var k=el.getAttribute('data-infoup'); var file=el.files&&el.files[0]; if(!file) return; var rd=new FileReader(); rd.onload=function(){ imgResize(rd.result,1000,0.82,function(small){ if(!state.store.infoImgs) state.store.infoImgs={}; state.store.infoImgs[k]=small; save(); toast('Foto do card atualizada.'); render(); }); }; rd.readAsDataURL(file); }; });
+  document.querySelectorAll('[data-infodel]').forEach(function(b){ b.onclick=function(){ var k=b.getAttribute('data-infodel'); if(state.store.infoImgs) delete state.store.infoImgs[k]; save(); toast('Foto removida.'); render(); }; });
 }
 function bindPedidos(){ var t=document.getElementById('pedTipo'); if(t) t.onchange=function(){ state._foTipo=t.value; render(); }; }
 function bindModelos(){
   document.querySelectorAll('[data-mtab]').forEach(function(b){ b.onclick=function(){ state.modelosTipo=b.getAttribute('data-mtab'); render(); }; });
   var tp=state.modelosTipo||'alianca';
-  function bindMEdits(){ document.querySelectorAll('[data-editmodel]').forEach(function(b){ b.onclick=function(){ openModelModal(b.getAttribute('data-editmodel')); }; }); }
-  bindMEdits();
+  function bindCards(){ document.querySelectorAll('#mGrid [data-editmodel]').forEach(function(b){ b.onclick=function(){ openModelModal(b.getAttribute('data-editmodel')); }; }); document.querySelectorAll('#mGrid [data-etiq]').forEach(function(b){ b.onclick=function(e){ e.stopPropagation(); var m=getModel(b.getAttribute('data-etiq')); if(m) printEtiquetas([m]); }; }); }
+  bindCards();
   var nm=document.getElementById('novoModelo'); if(nm) nm.onclick=function(){ openModelModal(null, tp); };
   var im=document.getElementById('importModelos'); if(im) im.onclick=openImport;
-  var ms=document.getElementById('mSearch'); if(ms) ms.oninput=function(){ state.mSearch=ms.value; var g=document.getElementById('mGrid'); if(g){ g.innerHTML=adminModelosCards(); bindMEdits(); g.querySelectorAll('[data-zoom]').forEach(function(el){ el.addEventListener('click',function(){ zoomImg(el.getAttribute('data-zoom')); }); }); } };
+  var so=document.getElementById('mSort'); if(so) so.onchange=function(){ state.mSort=so.value; render(); };
+  var pe=document.getElementById('printEtiq'); if(pe) pe.onclick=function(){ printEtiquetas(adminModelosList()); };
+  var ms=document.getElementById('mSearch'); if(ms) ms.oninput=function(){ state.mSearch=ms.value; var g=document.getElementById('mGrid'); if(g){ g.innerHTML=adminModelosCards(); bindCards(); g.querySelectorAll('[data-zoom]').forEach(function(el){ el.addEventListener('click',function(){ zoomImg(el.getAttribute('data-zoom')); }); }); } var pe2=document.getElementById('printEtiq'); if(pe2) pe2.textContent='🏷 Etiquetas ('+adminModelosList().length+')'; };
 }
 function bindPrint(){
   var bp=document.getElementById('btnPrint'); if(bp) bp.onclick=function(){ window.print(); };
