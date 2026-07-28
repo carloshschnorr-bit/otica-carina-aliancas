@@ -54,7 +54,7 @@ em{font-style:normal;color:var(--gold)}
 .brand{display:flex;align-items:center;gap:9px;background:none;border:0;color:var(--ink)}
 .brand-badge{width:36px;height:36px;border-radius:11px;display:inline-flex;align-items:center;justify-content:center;font-weight:800;font-size:18px;color:#fff;background:linear-gradient(135deg,#3b82f6,#2563eb)}
 .brand-name{font-weight:800;font-size:20px;letter-spacing:-.01em}
-.search-wrap{position:relative;flex:1;max-width:280px}
+.search-wrap{position:relative;flex:1;max-width:210px}
 .search{width:100%;border-radius:12px;background:#f1f4fa;border:1px solid var(--line);padding:9px 14px;color:var(--ink);font-size:14px}
 .search::placeholder{color:#94a3b8}
 .search:focus{outline:0;background:#fff;border-color:var(--gold);box-shadow:0 0 0 3px rgba(37,99,235,.12)}
@@ -114,7 +114,7 @@ em{font-style:normal;color:var(--gold)}
 .listrow:last-child{border:0}
 .cardgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:16px}
 .mcard{display:flex;flex-direction:column}
-.mcard>*:last-child{margin-top:auto}
+.mcard>*:last-child{margin-top:auto;padding-top:14px}
 .curso-drop{position:absolute;left:0;right:0;top:100%;margin-top:4px;background:#fff;border:1px solid var(--line);border-radius:10px;box-shadow:0 14px 34px -10px rgba(15,23,42,.28);max-height:170px;overflow-y:auto;z-index:35}
 .curso-item{padding:9px 12px;cursor:pointer;font-size:14px;border-bottom:1px solid #f1f4fa}
 .curso-item:last-child{border-bottom:0}
@@ -211,6 +211,13 @@ function zoomable(m,inner){ return (m&&m.foto)?'<span data-zoom="'+esc(m.foto)+'
 function zoomImg(src){ if(!src) return; var d=document.createElement('div'); d.className='modal-bg'; d.style.cssText='cursor:zoom-out;padding:16px;z-index:9999'; d.innerHTML='<img src="'+src+'" style="max-width:92vw;max-height:88vh;border-radius:12px;box-shadow:0 24px 60px rgba(0,0,0,.55)"/>'; d.addEventListener('click',function(){ if(d.parentNode) d.parentNode.removeChild(d); }); document.body.appendChild(d); }
 /* ---- Cards de informação (dúvidas do cliente) ---- */
 function infoBtn(key,label){ return '<button class="infobtn" data-info="'+key+'" type="button">ⓘ '+label+'</button>'; }
+function novoOrcamento(tipo){ state.catTipo=tipo; state.cart=[]; state.client=null; state.qb={obs:''}; state.editQuoteNum=null; state.editOrderNum=null; state.search=''; state.catFaixa=''; state.catSort=''; state.catLargura=''; state.catPedra=''; go('catalog'); }
+function showNovoChooser(){
+  var d=document.createElement('div'); d.className='modal-bg'; d.style.cssText='z-index:9999;padding:16px';
+  d.innerHTML='<div class="infomodal" style="max-width:480px"><div class="infohead"><h3 class="serif" style="font-size:20px;margin:0">Novo orçamento</h3><button class="x" id="novoX" type="button">✕</button></div><div class="infobody"><div class="muted" style="font-size:13px;margin-bottom:12px">O que você quer orçar?</div><div class="grid g2" style="gap:12px"><button class="lcard" data-novo="alianca"><div class="licon" style="background:#e0edff;color:#2563eb">💍</div><div class="serif" style="font-size:17px">Aliança</div><div class="muted" style="font-size:12px;margin-top:4px">Orçamento de alianças</div></button><button class="lcard" data-novo="formatura"><div class="licon" style="background:#fce7f3;color:#db2777">🎓</div><div class="serif" style="font-size:17px">Anel de formatura</div><div class="muted" style="font-size:12px;margin-top:4px">Orçamento de formatura</div></button></div></div></div>';
+  d.addEventListener('click',function(e){ var t=e.target.closest&&e.target.closest('[data-novo]'); if(t){ if(d.parentNode) d.parentNode.removeChild(d); novoOrcamento(t.getAttribute('data-novo')); return; } if(e.target===d||(e.target.closest&&e.target.closest('#novoX'))){ if(d.parentNode) d.parentNode.removeChild(d); } });
+  document.body.appendChild(d);
+}
 function infoImg(k){ var s=(state.store.infoImgs||{})[k]; return s?'<img src="'+s+'" data-infozoom="1" style="width:100%;border-radius:10px;margin-bottom:12px;display:block;cursor:zoom-in"/>':''; }
 function infoCol(cls,head,sub,rows,imgKey){ return '<div class="infocol '+cls+'">'+(imgKey?infoImg(imgKey):'')+'<div class="infoh">'+head+'</div><div class="infosub">'+sub+'</div>'+rows.map(function(r){ return '<div class="inforow"><b>'+r[0]+'</b><div class="d">'+r[1]+'</div></div>'; }).join('')+'</div>'; }
 var STAR='70,22 76.6,40.6 96.7,41.1 80.6,53.2 86.3,72.5 70,61 53.7,72.5 59.4,53.2 43.3,41.1 63.4,40.6';
@@ -440,6 +447,7 @@ function topBar(){
     +'<div class="search-wrap"><input id="globalSearch" class="search" placeholder="Buscar modelo por código ou nome…" autocomplete="off"/><div id="searchDrop"></div></div>'
     +'<nav class="nav">'
       +'<button class="navbtn" data-go="home">Página inicial</button>'
+      +'<button class="navbtn" id="navNovo" style="background:#fff7e6;color:var(--gold-dark);font-weight:700">+ Novo</button>'
       +'<button class="navbtn" data-go="modelos">Modelos</button>'
       +'<button class="navbtn" data-go="saved">Orçamentos</button>'
       +'<button class="navbtn" data-go="pedidos">Pedidos</button>'
@@ -1211,6 +1219,7 @@ function bind(){
   document.querySelectorAll('[data-open]').forEach(function(b){ b.addEventListener('click',function(){ openModel(b.getAttribute('data-open')); }); });
   document.querySelectorAll('[data-zoom]').forEach(function(el){ el.addEventListener('click',function(e){ e.stopPropagation(); zoomImg(el.getAttribute('data-zoom')); }); });
   document.querySelectorAll('[data-info]').forEach(function(el){ el.addEventListener('click',function(e){ e.preventDefault(); e.stopPropagation(); showInfo(el.getAttribute('data-info')); }); });
+  var nvn=document.getElementById('navNovo'); if(nvn) nvn.addEventListener('click',showNovoChooser);
   document.querySelectorAll('[data-fav]').forEach(function(b){ b.addEventListener('click',function(e){ e.stopPropagation(); toggleFav(b.getAttribute('data-fav')); }); });
   document.querySelectorAll('[data-action]').forEach(function(b){ b.addEventListener('click',function(){ var a=b.getAttribute('data-action'); if(a==='novo'||a==='nova_alianca'||a==='nova_formatura'){ if(a==='nova_alianca') state.catTipo='alianca'; if(a==='nova_formatura') state.catTipo='formatura'; state.cart=[]; state.client=null; state.qb={obs:''}; state.editQuoteNum=null; state.editOrderNum=null; state.search=''; state.catFaixa=''; state.catSort=''; state.catLargura=''; state.catPedra=''; go('catalog'); } }); });
   document.querySelectorAll('[data-order]').forEach(function(b){ b.addEventListener('click',function(){ state.activeOrderId=b.getAttribute('data-order'); go('order'); }); });
