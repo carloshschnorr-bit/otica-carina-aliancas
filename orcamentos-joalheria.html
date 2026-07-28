@@ -435,6 +435,8 @@ function catalogCards(){
   if(state.catFaixa!==''){ var fp=state.catFaixa.split('-'); list=list.filter(function(m){var b=catBase(m); return b>=+fp[0] && b<+fp[1];}); }
   if(state.catSort==='asc') list=list.slice().sort(function(a,b){return catBase(a)-catBase(b);});
   else if(state.catSort==='desc') list=list.slice().sort(function(a,b){return catBase(b)-catBase(a);});
+  else if(state.catSort==='wasc') list=list.slice().sort(function(a,b){return (a.largura||0)-(b.largura||0);});
+  else if(state.catSort==='wdesc') list=list.slice().sort(function(a,b){return (b.largura||0)-(a.largura||0);});
   if(!list.length) return '<p class="muted">Nenhum modelo encontrado.</p>';
   var h='';
   list.forEach(function(m){
@@ -452,7 +454,7 @@ function viewCatalog(){
       +'<select id="catLargura" class="inp" style="width:auto"><option value="">Largura: todas</option>'+larguras.map(function(w){return '<option value="'+w+'"'+(state.catLargura===String(w)?' selected':'')+'>Largura '+w+'mm</option>';}).join('')+'</select>'
       +'<select id="catFaixa" class="inp" style="width:auto"><option value="">Valor: todos</option>'+FAIXAS.map(function(f){return '<option value="'+f.v+'"'+(state.catFaixa===f.v?' selected':'')+'>'+f.nome+'</option>';}).join('')+'</select>'
       +'<select id="catPedra" class="inp" style="width:auto"><option value="">Pedra: todas</option><option value="com"'+(state.catPedra==='com'?' selected':'')+'>Com pedra</option><option value="sem"'+(state.catPedra==='sem'?' selected':'')+'>Sem pedra</option></select>'
-      +'<select id="catSort" class="inp" style="width:auto"><option value="">Ordenar</option><option value="asc"'+(state.catSort==='asc'?' selected':'')+'>Menor valor</option><option value="desc"'+(state.catSort==='desc'?' selected':'')+'>Maior valor</option></select>'
+      +'<select id="catSort" class="inp" style="width:auto"><option value="">Ordenar</option><option value="asc"'+(state.catSort==='asc'?' selected':'')+'>Menor valor</option><option value="desc"'+(state.catSort==='desc'?' selected':'')+'>Maior valor</option><option value="wasc"'+(state.catSort==='wasc'?' selected':'')+'>Menor largura</option><option value="wdesc"'+(state.catSort==='wdesc'?' selected':'')+'>Maior largura</option></select>'
     +'</div>'):('<div class="row gap mt" style="flex-wrap:wrap">'
       +'<select id="catFaixa" class="inp" style="width:auto"><option value="">Valor: todos</option>'+FAIXAS_F.map(function(f){return '<option value="'+f.v+'"'+(state.catFaixa===f.v?' selected':'')+'>'+f.nome+'</option>';}).join('')+'</select>'
       +'<select id="catSort" class="inp" style="width:auto"><option value="">Ordenar</option><option value="asc"'+(state.catSort==='asc'?' selected':'')+'>Menor valor</option><option value="desc"'+(state.catSort==='desc'?' selected':'')+'>Maior valor</option></select>'
