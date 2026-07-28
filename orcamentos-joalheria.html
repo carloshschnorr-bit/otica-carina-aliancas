@@ -867,7 +867,7 @@ function adminModelosCards(){
     var meta = tp==='formatura'
       ? 'índ. 10k '+(m.indice10k!=null?m.indice10k:'—')+' / 18k '+(m.indice18k!=null?m.indice18k:'—')+'<br>zircônia '+usd(m.zirconiaUSD)+' · '+((m.pedrasNaturais&&m.pedrasNaturais.length)||0)+' pedra(s) natural'
       : 'Largura '+m.largura+'mm · índ. 10k '+(m.indice10k!=null?m.indice10k:'—')+' / 18k '+(m.indice18k!=null?m.indice18k:'—')+'<br>zircônia '+usd(m.zirconiaUSD)+' · brilhante '+usd(m.brilhanteUSD);
-    cards+='<div class="card pad" style="text-align:center"><div class="code">'+m.modelo+'</div><div style="margin:6px 0">'+zoomable(m,modelImg(m,null,m.foto?110:80))+'</div><div class="serif" style="font-size:16px">'+esc(m.nome)+'</div><div class="muted" style="font-size:12px;margin-top:2px">'+meta+'</div><button class="btn btn-subtle btn-sm w100 mt" data-editmodel="'+m.id+'">Editar</button></div>';
+    cards+='<div class="card pad" style="text-align:center"><div class="code">'+m.modelo+'</div><div style="margin:6px 0">'+zoomable(m,modelImg(m,null,m.foto?150:120))+'</div><div class="serif" style="font-size:16px">'+esc(m.nome)+'</div><div class="muted" style="font-size:12px;margin-top:2px">'+meta+'</div><button class="btn btn-subtle btn-sm w100 mt" data-editmodel="'+m.id+'">Editar</button></div>';
   });
   return cards;
 }
