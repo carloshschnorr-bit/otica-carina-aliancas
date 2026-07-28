@@ -54,7 +54,7 @@ em{font-style:normal;color:var(--gold)}
 .brand{display:flex;align-items:center;gap:9px;background:none;border:0;color:var(--ink)}
 .brand-badge{width:36px;height:36px;border-radius:11px;display:inline-flex;align-items:center;justify-content:center;font-weight:800;font-size:18px;color:#fff;background:linear-gradient(135deg,#3b82f6,#2563eb)}
 .brand-name{font-weight:800;font-size:20px;letter-spacing:-.01em}
-.search-wrap{position:relative;flex:1;max-width:440px}
+.search-wrap{position:relative;flex:1;max-width:280px}
 .search{width:100%;border-radius:12px;background:#f1f4fa;border:1px solid var(--line);padding:9px 14px;color:var(--ink);font-size:14px}
 .search::placeholder{color:#94a3b8}
 .search:focus{outline:0;background:#fff;border-color:var(--gold);box-shadow:0 0 0 3px rgba(37,99,235,.12)}
@@ -62,7 +62,7 @@ em{font-style:normal;color:var(--gold)}
 .search-drop button{display:flex;align-items:center;gap:10px;width:100%;background:none;border:0;padding:8px 12px;text-align:left}
 .search-drop button:hover{background:var(--cream)}
 .nav{display:flex;gap:2px;margin-left:auto}
-.navbtn{background:none;border:0;color:#475569;padding:7px 11px;border-radius:9px;font-size:14px;font-weight:500}
+.navbtn{background:none;border:0;color:#475569;padding:7px 9px;border-radius:9px;font-size:13px;font-weight:500;white-space:nowrap}
 .navbtn:hover{background:var(--cream);color:var(--ink)}
 .cartbtn{position:relative;background:#f1f4fa;border:1px solid var(--line);color:var(--ink);border-radius:12px;padding:8px 12px;font-size:14px}
 .cartbtn:hover{border-color:var(--gold)}
@@ -86,11 +86,12 @@ em{font-style:normal;color:var(--gold)}
 .tabs{display:inline-flex;background:#e9edf6;border-radius:12px;padding:4px;flex-wrap:wrap}
 .tab{background:none;border:0;padding:9px 15px;border-radius:9px;font-size:14px;font-weight:600;color:var(--muted)}
 .tab.on{background:#fff;color:var(--gold-dark);box-shadow:0 4px 12px -6px rgba(30,41,59,.25)}
-.catgrid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px}
+.catgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:20px}
 @media(max-width:900px){.catgrid{grid-template-columns:repeat(2,1fr)}}
 .prod{background:var(--ivory);border:1px solid var(--line);border-radius:18px;overflow:hidden;box-shadow:0 10px 26px -18px rgba(30,41,59,.22);transition:.15s}
 .prod:hover{border-color:#c9d6f5}
-.prod .ph{position:relative;background:linear-gradient(#f4f7fd,#fff);display:flex;justify-content:center;align-items:center;padding:18px 0;cursor:pointer;min-height:150px}
+.prod .ph{position:relative;background:linear-gradient(#f4f7fd,#fff);display:flex;justify-content:center;align-items:center;padding:0;cursor:pointer;min-height:240px}
+.pimg-cat{width:100%;height:240px;object-fit:cover;border-radius:0;display:block}
 .fav{position:absolute;top:8px;right:10px;background:rgba(255,255,255,.7);border:0;font-size:18px;color:#f59e0b;border-radius:999px;width:30px;height:30px}
 .prodwrap{display:grid;grid-template-columns:1fr 1fr;gap:30px}
 .optrow{display:flex;align-items:center;gap:10px;border:1px solid var(--line);border-radius:12px;padding:10px 12px;margin-bottom:8px;cursor:pointer;transition:.12s}
@@ -392,8 +393,10 @@ function topBar(){
     +'<div class="search-wrap"><input id="globalSearch" class="search" placeholder="Buscar modelo por código ou nome…" autocomplete="off"/><div id="searchDrop"></div></div>'
     +'<nav class="nav">'
       +'<button class="navbtn" data-go="home">Página inicial</button>'
+      +'<button class="navbtn" data-go="modelos">Modelos</button>'
       +'<button class="navbtn" data-go="saved">Orçamentos</button>'
       +'<button class="navbtn" data-go="pedidos">Pedidos</button>'
+      +'<button class="navbtn" data-go="config">Configurações</button>'
       +'<button class="navbtn" data-logout title="Sair da conta">Sair</button>'
     +'</nav>'
     +'<button class="cartbtn" data-go="quote">🧾<span class="hide-sm"> Orçamento</span>'+(state.cart.length?'<span class="cart-badge">'+state.cart.length+'</span>':'')+'</button>'
@@ -435,7 +438,7 @@ function catalogCards(){
   if(!list.length) return '<p class="muted">Nenhum modelo encontrado.</p>';
   var h='';
   list.forEach(function(m){
-    h+='<div class="prod"><div class="ph" data-open="'+m.id+'">'+modelImg(m,null,m.foto?150:104)+'<button class="fav" data-fav="'+m.id+'">'+(state.favorites.indexOf(m.id)>=0?'★':'☆')+'</button></div>'
+    h+='<div class="prod"><div class="ph" data-open="'+m.id+'">'+(m.foto?'<img class="pimg pimg-cat" src="'+m.foto+'" alt=""/>':ring(m.tone,null,170))+'<button class="fav" data-fav="'+m.id+'">'+(state.favorites.indexOf(m.id)>=0?'★':'☆')+'</button></div>'
       +'<div class="pad"><div class="code">'+m.modelo+'</div><div class="serif" style="font-size:19px">'+esc(m.nome)+'</div>'
       +'<div class="muted" style="font-size:12px;margin:2px 0 8px">'+((m.tipo||'alianca')==='formatura'?'':'Largura '+m.largura+'mm · ')+'a partir de <b style="color:var(--gold-dark)">'+money(catBase(m))+'</b></div>'
       +'<button class="btn btn-subtle w100 btn-sm" data-open="'+m.id+'">Ver preços</button></div></div>';
