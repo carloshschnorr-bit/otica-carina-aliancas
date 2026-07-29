@@ -292,7 +292,7 @@ var state={
   cart:[], client:null,
   qb:{ obs:'' },
   pb:null, pedidoFromQuote:null,
-  printQuoteNum:null, printOrderNum:null, activeOrderId:null, adminTab:'cotacao', catTipo:'alianca', catSort:'', qSort:'', catLargura:'', catFaixa:'', catPedra:'', mSort:'', editQuoteNum:null, editOrderNum:null,
+  printQuoteNum:null, printOrderNum:null, activeOrderId:null, adminTab:'cotacao', catTipo:'alianca', catSort:'', qSort:'', catLargura:'', catFaixa:'', catPedra:'', mSort:'', role:'admin', userEmail:'', editQuoteNum:null, editOrderNum:null,
   vendedoras:[], vendedoraSel:''
 };
 
@@ -300,6 +300,10 @@ var state={
 var SB_URL='https://hfrrrsnuwcyqznbxgqcq.supabase.co';
 var SB_KEY='sb_publishable_AHAki5RC0M3Bp_xRTBDEbA_ajPTgrb9';
 var SB_TOKEN=null, SB_REFRESH=null, AUTHLS='ALIANCAS_AUTH_v1';
+var ADMIN_EMAILS=['carinajoias@hotmail.com'];
+function jwtEmail(t){ try{ var p=(t||'').split('.')[1]; if(!p) return ''; p=p.replace(/-/g,'+').replace(/_/g,'/'); while(p.length%4) p+='='; var j=JSON.parse(decodeURIComponent(escape(atob(p)))); return (j.email||'').toLowerCase(); }catch(e){ return ''; } }
+function applyRole(){ var em=jwtEmail(SB_TOKEN); state.userEmail=em; state.role=(em&&ADMIN_EMAILS.indexOf(em)<0)?'vendedor':'admin'; }
+function isAdmin(){ return state.role!=='vendedor'; }
 function sbHeaders(extra){ var h={apikey:SB_KEY,Authorization:'Bearer '+(SB_TOKEN||SB_KEY),'Content-Type':'application/json'}; if(extra) for(var k in extra) h[k]=extra[k]; return h; }
 function sbGet(path){ return fetch(SB_URL+'/rest/v1/'+path,{headers:sbHeaders()}).then(function(r){ return r.ok?r.json():[]; }).catch(function(){ return []; }); }
 function sbGetX(path){ return sbGetRetry(path,2); }
@@ -348,7 +352,7 @@ function showLogin(err){ var root=document.getElementById('app'); if(!root) retu
   var pass=document.getElementById('lgPass'); if(pass) pass.onkeydown=function(e){ if(e.key==='Enter') run(); };
   var tog=document.getElementById('lgToggle'); if(tog) tog.onclick=function(e){ e.preventDefault(); _loginMode=(_loginMode==='signup'?'login':'signup'); showLogin(); };
 }
-function startApp(){ var root=document.getElementById('app'); if(root) root.innerHTML='<div style="min-height:60vh;display:flex;align-items:center;justify-content:center" class="muted">Carregando…</div>'; loadCloud().then(function(){ render(); fetchRates(); if(!window._refT) window._refT=setInterval(sbRefresh,2400000); }).catch(function(){ showLogin('Falha ao carregar os dados. Tente novamente.'); }); }
+function startApp(){ applyRole(); var root=document.getElementById('app'); if(root) root.innerHTML='<div style="min-height:60vh;display:flex;align-items:center;justify-content:center" class="muted">Carregando…</div>'; loadCloud().then(function(){ applyRole(); render(); fetchRates(); if(!window._refT) window._refT=setInterval(sbRefresh,2400000); }).catch(function(){ showLogin('Falha ao carregar os dados. Tente novamente.'); }); }
 function boot(){ var root=document.getElementById('app'); if(root) root.innerHTML='<div style="min-height:60vh;display:flex;align-items:center;justify-content:center" class="muted">Carregando…</div>'; try{ var a=JSON.parse(localStorage.getItem(AUTHLS)||'null'); if(a&&a.refresh_token){ SB_TOKEN=a.access_token; SB_REFRESH=a.refresh_token; sbRefresh().then(function(ok){ if(ok) startApp(); else { _loginMode='login'; showLogin(); } }); return; } }catch(e){} showLogin(); }
 function migrateTemplates(){
   try{
@@ -387,7 +391,7 @@ function basePrice(m){ var a=availMats(m); return priceOf(m,a[0].id,0).total; }
 function catBase(m){ if((m.tipo||'alianca')==='formatura'){ var r=state.rates; return (m.indice10k||0)*(r.ouro||0)+(m.zirconiaUSD||0)*(r.dolar||0); } return basePrice(m); }
 
 /* ============================================================ NAVEGAÇÃO / AÇÕES ============================================================ */
-function go(s){ state.screen=s; window.scrollTo(0,0); render(); }
+function go(s){ if(!isAdmin() && (s==='modelos'||s==='config')){ toast('Acesso restrito ao administrador.'); s='home'; } state.screen=s; window.scrollTo(0,0); render(); }
 function toast(msg){ var r=document.getElementById('toast-root'); r.innerHTML='<div class="toast">'+esc(msg)+'</div>'; setTimeout(function(){r.innerHTML='';},2600); }
 function openModel(id){ var m=getModel(id); if(!m) return; state.activeModelId=id; state.recent=[id].concat(state.recent.filter(function(x){return x!==id;})).slice(0,8); if((m.tipo||'alianca')==='formatura'){ var fp=(m.pedrasNaturais&&m.pedrasNaturais[0])?m.pedrasNaturais[0].nome:''; state.selF={pick:'10kz',corSint:fp,pedraNat:fp,cursoNome:'',simboloTipo:'catalogo',simboloObs:''}; go('model'); return; } var av=availMats(m); var def=av.filter(function(o){return o.id==='10kz';})[0]||av.filter(function(o){return o.id==='10k';})[0]||av[0]; state.sel={matId:def.id,dist:hasStone(m)?1:0,modo:'par',multi:[]}; state.recent=[id].concat(state.recent.filter(function(x){return x!==id;})).slice(0,8); go('model'); }
 function toggleFav(id){ var i=state.favorites.indexOf(id); if(i>=0) state.favorites.splice(i,1); else state.favorites.push(id); render(); }
@@ -419,6 +423,7 @@ function fetchRates(){
 /* ============================================================ RENDER ============================================================ */
 function render(){
   var root=document.getElementById('app'), body; autoLost();
+  if(!isAdmin() && (state.screen==='modelos'||state.screen==='config')) state.screen='home';
   switch(state.screen){
     case 'home': body=viewHome(); break;
     case 'catalog': body=viewCatalog(); break;
@@ -450,10 +455,10 @@ function topBar(){
     +'<nav class="nav">'
       +'<button class="navbtn" data-go="home">Página inicial</button>'
       +'<button class="navbtn" id="navNovo" style="background:#fff7e6;color:var(--gold-dark);font-weight:700">+ Novo</button>'
-      +'<button class="navbtn" data-go="modelos">Modelos</button>'
+      +(isAdmin()?'<button class="navbtn" data-go="modelos">Modelos</button>':'')
       +'<button class="navbtn" data-go="saved">Orçamentos</button>'
       +'<button class="navbtn" data-go="pedidos">Pedidos</button>'
-      +'<button class="navbtn" data-go="config">Configurações</button>'
+      +(isAdmin()?'<button class="navbtn" data-go="config">Configurações</button>':'')
       +'<button class="navbtn" data-logout title="Sair da conta">Sair</button>'
     +'</nav>'
     +'<button class="cartbtn" data-go="quote">🧾<span class="hide-sm"> Orçamento</span>'+(state.cart.length?'<span class="cart-badge">'+state.cart.length+'</span>':'')+'</button>'
@@ -469,10 +474,10 @@ function viewHome(){
     +'<div class="launch">'
       +lcard('💍','#e0edff','#2563eb','Alianças','Orçamento de alianças','',"nova_alianca")
       +lcard('🎓','#fce7f3','#db2777','Anéis de formatura','Orçamento de formatura','',"nova_formatura")
-      +lcard('📐','#e0e7ff','#4f46e5','Modelos','Cadastrar e importar','modelos')
+      +(isAdmin()?lcard('📐','#e0e7ff','#4f46e5','Modelos','Cadastrar e importar','modelos'):'')
       +lcard('🧾','#dcfce7','#16a34a','Orçamentos','Ver e gerenciar salvos','saved')
       +lcard('📦','#fef3c7','#d97706','Pedidos','Acompanhar produção','pedidos')
-      +lcard('⚙️','#f3e8ff','#9333ea','Configurações','Cotações e loja','config')
+      +(isAdmin()?lcard('⚙️','#f3e8ff','#9333ea','Configurações','Cotações e loja','config'):'')
     +'</div>'
     +(favs.length?shelf('Favoritos',favs):'');
 }
