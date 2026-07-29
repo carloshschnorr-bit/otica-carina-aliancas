@@ -301,6 +301,8 @@ var SB_URL='https://hfrrrsnuwcyqznbxgqcq.supabase.co';
 var SB_KEY='sb_publishable_AHAki5RC0M3Bp_xRTBDEbA_ajPTgrb9';
 var SB_TOKEN=null, SB_REFRESH=null, AUTHLS='ALIANCAS_AUTH_v1';
 var ADMIN_EMAILS=['carinajoias@hotmail.com'];
+var USER_DOMAIN='carina-vendedor.com';
+function toEmail(u){ u=(''+(u||'')).trim(); if(!u) return u; return u.indexOf('@')>=0 ? u.toLowerCase() : (u.toLowerCase().replace(/\s+/g,'')+'@'+USER_DOMAIN); }
 function jwtEmail(t){ try{ var p=(t||'').split('.')[1]; if(!p) return ''; p=p.replace(/-/g,'+').replace(/_/g,'/'); while(p.length%4) p+='='; var j=JSON.parse(decodeURIComponent(escape(atob(p)))); return (j.email||'').toLowerCase(); }catch(e){ return ''; } }
 function applyRole(){ var em=jwtEmail(SB_TOKEN); state.userEmail=em; state.role=(em&&ADMIN_EMAILS.indexOf(em)<0)?'vendedor':'admin'; }
 function isAdmin(){ return state.role!=='vendedor'; }
@@ -341,13 +343,13 @@ function showLogin(err){ var root=document.getElementById('app'); if(!root) retu
   +'<h1 class="serif" style="font-size:22px;text-align:center;margin:6px 0 2px">Alianças — Ótica Carina</h1>'
   +'<p class="muted" style="text-align:center;margin-bottom:16px">'+(_loginMode==='signup'?'Criar a conta da loja':'Entre para acessar o sistema')+'</p>'
   +(err?'<div class="warn" style="background:#fee2e2;color:#b91c1c;margin-bottom:10px">'+esc(err)+'</div>':'')
-  +'<label class="field"><span class="lab">E-mail</span><span class="val"><input id="lgEmail" type="email" class="inp" autocomplete="username"/></span></label>'
+  +'<label class="field"><span class="lab">Usuário</span><span class="val"><input id="lgEmail" type="text" class="inp" autocomplete="username" placeholder="usuário do vendedor (ou e-mail do admin)"/></span></label>'
   +'<label class="field mt"><span class="lab">Senha</span><span class="val"><input id="lgPass" type="password" class="inp" autocomplete="current-password"/></span></label>'
   +'<button class="btn btn-primary gold-grad w100 mt" id="lgBtn">'+(_loginMode==='signup'?'Criar conta':'Entrar')+'</button>'
   +'<div style="text-align:center;margin-top:12px"><a href="#" id="lgToggle" style="font-size:13px;color:var(--muted)">'+(_loginMode==='signup'?'Já tenho conta — entrar':'Primeira vez? Criar a conta da loja')+'</a></div>'
   +'</div></div>';
   var btn=document.getElementById('lgBtn');
-  var run=function(){ var em=(document.getElementById('lgEmail').value||'').trim(); var pw=document.getElementById('lgPass').value||''; if(!em||!pw){ showLogin('Preencha e-mail e senha.'); return; } btn.textContent='Aguarde…'; btn.disabled=true; var p=_loginMode==='signup'?sbSignup(em,pw):sbLogin(em,pw); p.then(function(d){ if(d&&d.access_token){ SB_TOKEN=d.access_token; SB_REFRESH=d.refresh_token; saveAuth(); startApp(); } else { showLogin((d&&(d.error_description||d.msg||d.message))||(_loginMode==='signup'?'Não foi possível criar a conta.':'E-mail ou senha inválidos.')); } }).catch(function(){ showLogin('Falha de conexão. Tente novamente.'); }); };
+  var run=function(){ var em=toEmail(document.getElementById('lgEmail').value); var pw=document.getElementById('lgPass').value||''; if(!em||!pw){ showLogin('Preencha usuário e senha.'); return; } btn.textContent='Aguarde…'; btn.disabled=true; var p=_loginMode==='signup'?sbSignup(em,pw):sbLogin(em,pw); p.then(function(d){ if(d&&d.access_token){ SB_TOKEN=d.access_token; SB_REFRESH=d.refresh_token; saveAuth(); startApp(); } else { showLogin((d&&(d.error_description||d.msg||d.message))||(_loginMode==='signup'?'Não foi possível criar a conta.':'Usuário ou senha inválidos.')); } }).catch(function(){ showLogin('Falha de conexão. Tente novamente.'); }); };
   if(btn) btn.onclick=run;
   var pass=document.getElementById('lgPass'); if(pass) pass.onkeydown=function(e){ if(e.key==='Enter') run(); };
   var tog=document.getElementById('lgToggle'); if(tog) tog.onclick=function(e){ e.preventDefault(); _loginMode=(_loginMode==='signup'?'login':'signup'); showLogin(); };
