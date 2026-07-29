@@ -368,12 +368,15 @@ function publicHTML(d){
   var isForm=(d.tipo==='formatura');
   var opts=(d.options||[]).map(function(o){ var p=+o.price;
     var lbl=esc(o.label).replace('(o par)','<b style="color:var(--gold-dark)">(o par)</b>');
-    var note=(!isForm&&o.stone)?'<div style="font-size:12px;color:var(--muted);margin-top:2px">Uma unidade com pedra e outra unidade sem pedra</div>':'';
+    var note='';
+    if(!isForm&&o.stone) note='<div style="font-size:12px;color:var(--muted);margin-top:2px">Uma unidade com pedra e outra unidade sem pedra</div>';
+    else if(isForm && /natural/i.test(o.label)) note='<div style="font-size:12px;color:var(--muted);margin-top:2px">O valor varia conforme a pedra escolhida (safira, rubi, esmeralda, etc.). Para o valor exato, fale com a loja.</div>';
     return '<div style="padding:13px 0;border-bottom:1px solid var(--line)"><div class="between" style="align-items:flex-start;gap:12px"><div style="flex:1"><div style="font-size:14px;line-height:1.35">'+lbl+'</div>'+note+'</div><span style="text-align:right;white-space:nowrap"><span style="display:block;font-size:10.5px;color:var(--muted);margin-bottom:1px">à prazo</span><b class="serif" style="font-size:18px;color:var(--gold-dark)">'+money(p)+'</b></span></div></div>'; }).join('');
   var infos=[infoBtn(isForm?'ourof':'ouro','Ouro 10k ou 18k?')];
   if(!isForm && (d.options||[]).some(function(o){return /brilhante/i.test(o.label);})) infos.push(infoBtn('zcbril','Zircônia ou brilhante?'));
   if(isForm && (d.options||[]).some(function(o){return /natural/i.test(o.label);})) infos.push(infoBtn('zcnat','Zircônia ou pedra natural?'));
   var infoRow='<div style="margin-top:16px"><div style="font-size:12px;color:var(--muted);margin-bottom:7px">Ficou em dúvida? Toque para entender:</div><div style="display:flex;flex-wrap:wrap;gap:8px">'+infos.join('')+'</div></div>';
+  var formNote=isForm?'<div style="margin-top:14px;background:var(--cream);border-radius:12px;padding:12px 14px;font-size:12.5px;color:var(--charcoal);line-height:1.55">A foto é um <b>exemplo do design</b> do anel. O curso, a cor da pedra e o tamanho são feitos sob encomenda, conforme a necessidade do cliente — são <b>mais de 150 símbolos de cursos</b> e diversas cores de pedra disponíveis.</div>':'';
   var prz=[]; if(cp>1) prz.push('até '+cp+'× sem juros no cartão'); if(cr>1) prz.push(cr+'× sem juros no crediário');
   var pgtoRows=''; if(av>0) pgtoRows+='<div style="font-size:12.5px;color:var(--charcoal);line-height:1.55"><b>À vista:</b> −'+av+'% de desconto</div>'; if(prz.length) pgtoRows+='<div style="font-size:12.5px;color:var(--charcoal);line-height:1.55"><b>A prazo:</b> em '+prz.join(' ou ')+'</div>';
   var pgtoCard=pgtoRows?('<div style="margin-top:18px;background:var(--soft);border-radius:12px;padding:12px 14px"><div style="font-weight:700;font-size:13px;color:var(--gold-dark);margin-bottom:5px">Condições de pagamento</div>'+pgtoRows+'</div>'):'';
@@ -388,6 +391,7 @@ function publicHTML(d){
     +'<h1 class="serif" style="font-size:24px;margin:3px 0 4px">'+esc(d.nome||(d.tipo==='formatura'?'Anel de formatura':'Aliança'))+'</h1>'
     +((d.largura&&d.tipo!=='formatura')?'<div class="muted" style="font-size:13px;margin-bottom:6px">Largura '+esc(d.largura)+'mm</div>':'')
     +'<div class="mt">'+opts+'</div>'
+    +formNote
     +infoRow
     +pgtoCard
     +'<div class="hint" style="margin-top:12px">Valores de referência, sujeitos à variação diária do ouro. Outras combinações de pedra sob consulta. Confirme a disponibilidade e o valor final com a loja.</div>'
