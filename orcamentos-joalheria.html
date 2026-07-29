@@ -356,7 +356,39 @@ function showLogin(err){ var root=document.getElementById('app'); if(!root) retu
   var tog=document.getElementById('lgToggle'); if(tog) tog.onclick=function(e){ e.preventDefault(); _loginMode=(_loginMode==='signup'?'login':'signup'); showLogin(); };
 }
 function startApp(){ applyRole(); var root=document.getElementById('app'); if(root) root.innerHTML='<div style="min-height:60vh;display:flex;align-items:center;justify-content:center" class="muted">Carregando…</div>'; loadCloud().then(function(){ applyRole(); render(); fetchRates(); if(!window._refT) window._refT=setInterval(sbRefresh,2400000); }).catch(function(){ showLogin('Falha ao carregar os dados. Tente novamente.'); }); }
-function boot(){ var root=document.getElementById('app'); if(root) root.innerHTML='<div style="min-height:60vh;display:flex;align-items:center;justify-content:center" class="muted">Carregando…</div>'; try{ var a=JSON.parse(localStorage.getItem(AUTHLS)||'null'); if(a&&a.refresh_token){ SB_TOKEN=a.access_token; SB_REFRESH=a.refresh_token; sbRefresh().then(function(ok){ if(ok) startApp(); else { _loginMode='login'; showLogin(); } }); return; } }catch(e){} showLogin(); }
+function publicLink(m){ return location.origin+location.pathname+'?ver='+encodeURIComponent((m.modelo||'').replace(/\s+/g,'')); }
+function publicError(msg){ return '<div style="max-width:460px;margin:60px auto;text-align:center;padding:24px"><div class="serif" style="font-size:22px;margin-bottom:8px">Ótica Carina</div><div class="muted">'+(msg||'Modelo não encontrado ou link indisponível.')+'</div></div>'; }
+function publicHTML(d){
+  if(!d || d.ok===false || !d.modelo) return publicError();
+  var img=d.foto?'<img src="'+d.foto+'" alt="" style="width:100%;max-width:320px;border-radius:16px;object-fit:cover;background:#f4f7fd"/>':'';
+  var logo=d.logo?'<img src="'+d.logo+'" alt="" style="height:48px;object-fit:contain"/>':('<div class="serif" style="font-size:22px">'+esc(d.loja||'Ótica Carina')+'</div>');
+  var opts=(d.options||[]).map(function(o){ return '<div class="between" style="padding:11px 0;border-bottom:1px solid var(--line)"><span style="font-size:14px">'+esc(o.label)+'</span><b class="serif" style="font-size:17px;color:var(--gold-dark)">'+money(+o.price)+'</b></div>'; }).join('');
+  var whats=(''+(d.whats||'')).replace(/\D/g,''); if(whats&&whats.length<=11) whats='55'+whats;
+  var msg='Olá! Vi o modelo '+d.modelo+(d.nome?(' ('+d.nome+')'):'')+' e gostaria de saber mais.';
+  var wa=whats?'<a class="btn btn-primary gold-grad w100" href="https://wa.me/'+whats+'?text='+encodeURIComponent(msg)+'" target="_blank" rel="noreferrer" style="margin-top:16px">💬 Saber mais / Falar com a loja</a>':'';
+  return '<div style="max-width:520px;margin:0 auto;padding:26px 16px 44px">'
+    +'<div style="text-align:center;margin-bottom:18px">'+logo+'</div>'
+    +'<div class="card pad">'
+    +(img?'<div class="center" style="margin-bottom:14px">'+img+'</div>':'')
+    +'<div class="code">'+esc(d.modelo)+'</div>'
+    +'<h1 class="serif" style="font-size:24px;margin:2px 0 4px">'+esc(d.nome||(d.tipo==='formatura'?'Anel de formatura':'Aliança'))+'</h1>'
+    +((d.largura&&d.tipo!=='formatura')?'<div class="muted" style="font-size:13px;margin-bottom:6px">Largura '+esc(d.largura)+'mm</div>':'')
+    +'<div class="mt">'+opts+'</div>'
+    +'<div class="hint" style="margin-top:10px">Valores de referência, sujeitos à variação diária do ouro. Confirme a disponibilidade e o valor final com a loja.</div>'
+    +wa
+    +'</div>'
+    +'<div class="center muted" style="font-size:11px;margin-top:16px">'+esc(d.loja||'Ótica Carina')+(d.atualizado?(' · valores de '+fmtDate(d.atualizado)):'')+'</div>'
+    +'</div>';
+}
+function renderPublic(code){
+  var root=document.getElementById('app'); if(!root) return;
+  root.innerHTML='<div style="min-height:60vh;display:flex;align-items:center;justify-content:center" class="muted">Carregando…</div>';
+  fetch(SB_URL+'/rest/v1/rpc/public_model',{method:'POST',headers:{apikey:SB_KEY,Authorization:'Bearer '+SB_KEY,'Content-Type':'application/json'},body:JSON.stringify({p_code:code})})
+   .then(function(r){ return r.json(); })
+   .then(function(d){ root.innerHTML=publicHTML(d); })
+   .catch(function(){ root.innerHTML=publicError('Não foi possível carregar agora. Tente novamente mais tarde.'); });
+}
+function boot(){ var ver=null; try{ ver=new URLSearchParams(location.search).get('ver'); }catch(e){} if(ver){ renderPublic(ver); return; } var root=document.getElementById('app'); if(root) root.innerHTML='<div style="min-height:60vh;display:flex;align-items:center;justify-content:center" class="muted">Carregando…</div>'; try{ var a=JSON.parse(localStorage.getItem(AUTHLS)||'null'); if(a&&a.refresh_token){ SB_TOKEN=a.access_token; SB_REFRESH=a.refresh_token; sbRefresh().then(function(ok){ if(ok) startApp(); else { _loginMode='login'; showLogin(); } }); return; } }catch(e){} showLogin(); }
 function migrateTemplates(){
   try{
     if(!localStorage.getItem('AL_MIG_tmpl2')){ var t=state.templates.filter(function(x){return x.tipo==='Primeiro contato';})[0]; if(t) t.texto='Olá, {nome}! Foi um prazer atender você. Preparei o orçamento do modelo {codigo}, na opção {opcao}. O valor ficou em {valor} à prazo ou {avista} à vista. Válido até {validade}. Qualquer dúvida fico à disposição!'; localStorage.setItem('AL_MIG_tmpl2','1'); }
@@ -956,7 +988,7 @@ function adminModelosCards(){
     var meta = tp==='formatura'
       ? 'índ. 10k '+(m.indice10k!=null?m.indice10k:'—')+' / 18k '+(m.indice18k!=null?m.indice18k:'—')+'<br>zircônia '+usd(m.zirconiaUSD)+' · '+((m.pedrasNaturais&&m.pedrasNaturais.length)||0)+' pedra(s) natural'
       : 'Largura '+m.largura+'mm · índ. 10k '+(m.indice10k!=null?m.indice10k:'—')+' / 18k '+(m.indice18k!=null?m.indice18k:'—')+'<br>zircônia '+usd(m.zirconiaUSD)+' · brilhante '+usd(m.brilhanteUSD);
-    cards+='<div class="card pad mcard" style="text-align:center"><div class="code">'+m.modelo+'</div><div style="margin:6px 0">'+zoomable(m,modelImg(m,null,m.foto?150:120))+'</div><div class="serif" style="font-size:16px">'+esc(m.nome)+'</div><div class="muted" style="font-size:12px;margin-top:2px">'+meta+'</div><div class="row gap mt"><button class="btn btn-subtle btn-sm" style="flex:1" data-editmodel="'+m.id+'">Editar</button><button class="btn btn-subtle btn-sm" data-etiq="'+m.id+'" title="Imprimir etiqueta desta peça">🏷</button></div></div>';
+    cards+='<div class="card pad mcard" style="text-align:center"><div class="code">'+m.modelo+'</div><div style="margin:6px 0">'+zoomable(m,modelImg(m,null,m.foto?150:120))+'</div><div class="serif" style="font-size:16px">'+esc(m.nome)+'</div><div class="muted" style="font-size:12px;margin-top:2px">'+meta+'</div><div class="row gap mt"><button class="btn btn-subtle btn-sm" style="flex:1" data-editmodel="'+m.id+'">Editar</button><button class="btn btn-subtle btn-sm" data-etiq="'+m.id+'" title="Imprimir etiqueta desta peça">🏷</button><button class="btn btn-subtle btn-sm" data-plink="'+m.id+'" title="Copiar link público deste modelo">🔗</button></div></div>';
   });
   return cards;
 }
@@ -1385,7 +1417,7 @@ function bindPedidos(){ var t=document.getElementById('pedTipo'); if(t) t.onchan
 function bindModelos(){
   document.querySelectorAll('[data-mtab]').forEach(function(b){ b.onclick=function(){ state.modelosTipo=b.getAttribute('data-mtab'); render(); }; });
   var tp=state.modelosTipo||'alianca';
-  function bindCards(){ document.querySelectorAll('#mGrid [data-editmodel]').forEach(function(b){ b.onclick=function(){ openModelModal(b.getAttribute('data-editmodel')); }; }); document.querySelectorAll('#mGrid [data-etiq]').forEach(function(b){ b.onclick=function(e){ e.stopPropagation(); var m=getModel(b.getAttribute('data-etiq')); if(m) printEtiquetas([m]); }; }); }
+  function bindCards(){ document.querySelectorAll('#mGrid [data-editmodel]').forEach(function(b){ b.onclick=function(){ openModelModal(b.getAttribute('data-editmodel')); }; }); document.querySelectorAll('#mGrid [data-etiq]').forEach(function(b){ b.onclick=function(e){ e.stopPropagation(); var m=getModel(b.getAttribute('data-etiq')); if(m) printEtiquetas([m]); }; }); document.querySelectorAll('#mGrid [data-plink]').forEach(function(b){ b.onclick=function(e){ e.stopPropagation(); var m=getModel(b.getAttribute('data-plink')); if(m){ var lk=publicLink(m); copyText(lk); toast('Link público copiado: '+lk); } }; }); }
   bindCards();
   var nm=document.getElementById('novoModelo'); if(nm) nm.onclick=function(){ openModelModal(null, tp); };
   var im=document.getElementById('importModelos'); if(im) im.onclick=openImport;
