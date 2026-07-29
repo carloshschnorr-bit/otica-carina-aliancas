@@ -368,8 +368,8 @@ function publicHTML(d){
   var isForm=(d.tipo==='formatura');
   var opts=(d.options||[]).map(function(o){ var p=+o.price;
     var lbl=esc(o.label).replace('(o par)','<b style="color:var(--gold-dark)">(o par)</b>');
-    var note=(!isForm&&o.stone)?'<div style="font-size:12px;color:var(--muted);margin-top:5px">Uma unidade com pedra e outra unidade sem pedra</div>':'';
-    return '<div style="padding:13px 0;border-bottom:1px solid var(--line)"><div class="between" style="align-items:flex-start;gap:12px"><span style="font-size:14px;line-height:1.35">'+lbl+'</span><span style="text-align:right;white-space:nowrap"><span style="display:block;font-size:10.5px;color:var(--muted);margin-bottom:1px">à prazo</span><b class="serif" style="font-size:18px;color:var(--gold-dark)">'+money(p)+'</b></span></div>'+note+'</div>'; }).join('');
+    var note=(!isForm&&o.stone)?'<div style="font-size:12px;color:var(--muted);margin-top:2px">Uma unidade com pedra e outra unidade sem pedra</div>':'';
+    return '<div style="padding:13px 0;border-bottom:1px solid var(--line)"><div class="between" style="align-items:flex-start;gap:12px"><div style="flex:1"><div style="font-size:14px;line-height:1.35">'+lbl+'</div>'+note+'</div><span style="text-align:right;white-space:nowrap"><span style="display:block;font-size:10.5px;color:var(--muted);margin-bottom:1px">à prazo</span><b class="serif" style="font-size:18px;color:var(--gold-dark)">'+money(p)+'</b></span></div></div>'; }).join('');
   var infos=[infoBtn(isForm?'ourof':'ouro','Ouro 10k ou 18k?')];
   if(!isForm && (d.options||[]).some(function(o){return /brilhante/i.test(o.label);})) infos.push(infoBtn('zcbril','Zircônia ou brilhante?'));
   if(isForm && (d.options||[]).some(function(o){return /natural/i.test(o.label);})) infos.push(infoBtn('zcnat','Zircônia ou pedra natural?'));
