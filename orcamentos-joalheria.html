@@ -1078,10 +1078,35 @@ function adminLoja(){
   function f(lab,key,type){ return '<label class="field"><span class="lab">'+lab+'</span><span class="val"><input class="inp" data-store="'+key+'" type="'+(type||'text')+'" value="'+esc(s[key])+'"/></span></label>'; }
   return '<div class="card pad" style="max-width:760px"><div class="field" style="margin-bottom:12px"><span class="lab">Logo da loja (aparece no topo e no PDF)</span><span class="val row gap" style="margin-top:6px;flex-wrap:wrap;align-items:center"><img id="storeLogoPrev" src="'+(s.logo||'')+'" style="width:64px;height:64px;border-radius:12px;object-fit:contain;background:#f4f7fd;border:1px solid var(--line);'+(s.logo?'':'display:none')+'"/><input type="file" accept="image/*" id="storeLogo"/>'+(s.logo?'<button class="btn btn-ghost btn-sm" id="storeLogoDel">Remover</button>':'')+'</span></div><div class="grid g2">'+f('Nome da empresa','nome')+f('CNPJ','cnpj')+f('Endereço','endereco')+f('WhatsApp','whatsapp')+f('Instagram','instagram')+f('Chave PIX','pix')+'</div><label class="field mt"><span class="lab">Texto padrão do orçamento</span><span class="val"><textarea class="inp" data-store="textoPadrao" rows="2">'+esc(s.textoPadrao)+'</textarea></span></label><label class="field mt"><span class="lab">Vendedoras (uma por linha)</span><span class="val"><textarea class="inp" id="vendList" rows="3" placeholder="Ana&#10;Helena&#10;Maria">'+esc(state.vendedoras.join('\n'))+'</textarea></span></label></div>';
 }
+function normCurso(s){ return (''+(s||'')).normalize('NFD').replace(/\p{M}/gu,'').toLowerCase().replace(/[^a-z0-9]+/g,' ').trim().replace(/\s+/g,' '); }
+function bulkImportEmblemas(files){
+  files=Array.prototype.slice.call(files||[]); if(!files.length) return;
+  var cursos=state.store.cursos||[];
+  var byNorm={}; cursos.forEach(function(c,i){ var k=normCurso(c.nome); if(k && !(k in byNorm)) byNorm[k]=i; });
+  var rep=document.getElementById('embBulkReport'); if(rep) rep.innerHTML='<div class="muted" style="margin-top:8px">Processando '+files.length+' arquivo(s)…</div>';
+  var matched=[], unmatched=[], pending=files.length;
+  function done(){ pending--; if(pending>0) return; save(); render(); showEmblemaReport(matched, unmatched); }
+  files.forEach(function(f){
+    var base=(''+f.name).replace(/\.[^.]+$/,''); var k=normCurso(base); var idx=(k in byNorm)?byNorm[k]:-1;
+    if(idx<0 && k){ var hits=Object.keys(byNorm).filter(function(nk){ return nk===k || nk.indexOf(k)===0 || k.indexOf(nk)===0; }); if(hits.length===1) idx=byNorm[hits[0]]; }
+    if(idx<0){ unmatched.push(f.name); done(); return; }
+    var rd=new FileReader();
+    rd.onload=function(){ imgResize(rd.result,240,0.82,function(small){ state.store.cursos[idx].emblema=small; matched.push({file:f.name,curso:cursos[idx].nome}); done(); }); };
+    rd.onerror=function(){ unmatched.push(f.name+' (erro ao ler)'); done(); };
+    rd.readAsDataURL(f);
+  });
+}
+function showEmblemaReport(matched, unmatched){
+  var d=document.createElement('div'); d.className='modal-bg'; d.style.cssText='z-index:9999;padding:16px';
+  var un=unmatched.length?('<div style="margin-top:12px"><b style="color:#b45309">Não casaram ('+unmatched.length+'):</b><div class="hint" style="max-height:200px;overflow:auto;margin-top:4px">'+unmatched.map(esc).join('<br>')+'</div><div class="hint" style="margin-top:6px">Renomeie esses arquivos com o nome exato do curso e importe de novo.</div></div>'):'';
+  d.innerHTML='<div class="infomodal" style="max-width:440px"><div class="infohead"><h3 class="serif" style="font-size:19px;margin:0">Importação de emblemas</h3><button class="x" id="embRepX" type="button">✕</button></div><div class="infobody"><div style="font-size:15px"><b style="color:#15803d">'+matched.length+'</b> emblema(s) associado(s) ao curso com sucesso.</div>'+un+'</div></div>';
+  d.addEventListener('click',function(e){ if(e.target===d||(e.target.closest&&e.target.closest('#embRepX'))){ if(d.parentNode) d.parentNode.removeChild(d); } });
+  document.body.appendChild(d);
+}
 function adminCursos(){
   var cs=state.store.cursos||[];
   var rows=cs.length? cs.map(function(c,i){ return '<div class="row gap" style="align-items:center;margin-top:8px;flex-wrap:wrap"><input class="inp" data-cnome="'+i+'" placeholder="Curso (ex.: Medicina)" value="'+esc(c.nome||'')+'" style="flex:2;min-width:130px"/><div class="row gap" style="align-items:center;gap:6px">'+(c.emblema?'<img src="'+c.emblema+'" data-zoom="'+esc(c.emblema)+'" style="width:38px;height:38px;object-fit:contain;border:1px solid var(--line);border-radius:8px;background:#fff;cursor:zoom-in"/>':'<div style="width:38px;height:38px;border:1px dashed var(--line);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:16px">🎓</div>')+'<label class="btn btn-ghost btn-sm" style="cursor:pointer;margin:0">'+(c.emblema?'Trocar':'Emblema')+'<input type="file" accept="image/*" data-cemb="'+i+'" style="display:none"/></label>'+(c.emblema?'<button class="btn btn-ghost btn-sm" data-cembrm="'+i+'" style="color:#b23" title="Remover emblema">✕</button>':'')+'</div><input class="inp" data-ccor="'+i+'" placeholder="Cor da pedra" value="'+esc(c.cor||'')+'" style="flex:1;min-width:100px"/><button class="btn btn-ghost btn-sm" data-crm="'+i+'" style="color:#b23" title="Remover curso">✕</button></div>'; }).join('') : '<div class="muted" style="font-size:14px;margin-top:10px">Nenhum curso cadastrado ainda.</div>';
-  return '<div class="card pad" style="max-width:760px"><h3 class="serif" style="font-size:18px">Cursos de formatura</h3><div class="hint">Nome, emblema (imagem) e cor da pedra (zircônia) de cada curso. O emblema aparece no orçamento e no pedido quando o curso é selecionado.</div>'+rows+'<button class="btn btn-subtle btn-sm mt" id="cursoAdd">+ Adicionar curso</button></div>';
+  return '<div class="card pad" style="max-width:760px"><h3 class="serif" style="font-size:18px">Cursos de formatura</h3><div class="hint">Nome, emblema (imagem) e cor da pedra (zircônia) de cada curso. O emblema aparece no orçamento e no pedido quando o curso é selecionado.</div>'+rows+'<div class="mt"><button class="btn btn-subtle btn-sm" id="cursoAdd">+ Adicionar curso</button><label class="btn btn-subtle btn-sm" style="cursor:pointer;margin-left:8px">📥 Importar emblemas em massa<input type="file" accept="image/*" multiple id="embBulk" style="display:none"/></label></div><div class="hint" style="margin-top:6px">Selecione vários arquivos de uma vez — cada um é casado ao curso pelo <b>nome do arquivo</b> (ex.: "Medicina.png" → curso Medicina). Acentos e maiúsculas não importam.</div><div id="embBulkReport"></div></div>';
 }
 function adminMensagens(){
   var h='<div style="max-width:760px">';
@@ -1430,6 +1455,7 @@ function bindConfig(){
   document.querySelectorAll('[data-ccor]').forEach(function(el){ el.oninput=function(){ var i=+el.getAttribute('data-ccor'); if(state.store.cursos[i]) state.store.cursos[i].cor=el.value; save(); }; });
   document.querySelectorAll('[data-crm]').forEach(function(b){ b.onclick=function(){ state.store.cursos.splice(+b.getAttribute('data-crm'),1); save(); render(); }; });
   var ca=document.getElementById('cursoAdd'); if(ca) ca.onclick=function(){ if(!state.store.cursos) state.store.cursos=[]; state.store.cursos.push({id:'c'+Date.now(),nome:'',simbolo:'',cor:''}); render(); };
+  var eb=document.getElementById('embBulk'); if(eb) eb.onchange=function(){ bulkImportEmblemas(eb.files); };
   var ms=document.getElementById('mSearch'); if(ms) ms.oninput=function(){ state.mSearch=ms.value; var g=document.getElementById('mGrid'); if(g){ g.innerHTML=adminModelosCards(); bindMEdits(); } };
   var lg=document.getElementById('storeLogo'); if(lg) lg.onchange=function(){ var file=lg.files&&lg.files[0]; if(!file) return; var rd=new FileReader(); rd.onload=function(){ imgResize(rd.result,400,0.82,function(small){ state.store.logo=small; var pv=document.getElementById('storeLogoPrev'); if(pv){ pv.src=state.store.logo; pv.style.display='block'; } save(); toast('Logo atualizado.'); render(); }); }; rd.readAsDataURL(file); };
   var ld=document.getElementById('storeLogoDel'); if(ld) ld.onclick=function(){ state.store.logo=null; save(); render(); };
