@@ -286,7 +286,8 @@ var state={
   templates:[
     {id:'t1',tipo:'Primeiro contato',texto:'Olá, {nome}! Segue o orçamento do modelo de aliança solicitado:\n\n*{codigo}* — {opcao}\n{valor} à prazo ou {avista} à vista.\n\nVálido até {validade}. Qualquer dúvida, fico à disposição!'},
     {id:'t5',tipo:'Peça pronta',texto:'Olá, {nome}! Boa notícia, suas alianças chegaram e estão prontas para retirada.'},
-    {id:'t7',tipo:'Orçamento com várias alianças',texto:'Olá, {nome}! Segue o orçamento das alianças solicitadas:\n{itens}\n\nVálido até {validade}. Qualquer dúvida, fico à disposição!'}
+    {id:'t7',tipo:'Orçamento com várias alianças',texto:'Olá, {nome}! Segue o orçamento das alianças solicitadas:\n{itens}\n\nVálido até {validade}. Qualquer dúvida, fico à disposição!'},
+    {id:'t8',tipo:'Peça pronta — formatura',texto:'Olá, {nome}! Boa notícia, seu anel de formatura ficou pronto e está disponível para retirada.'}
   ],
   clients:[], quotes:[], orders:[], favorites:[], recent:[],
   activeModelId:null,
@@ -417,8 +418,9 @@ function boot(){ var ver=null; try{ ver=new URLSearchParams(location.search).get
 function migrateTemplates(){
   try{
     if(!localStorage.getItem('AL_MIG_tmpl2')){ var t=state.templates.filter(function(x){return x.tipo==='Primeiro contato';})[0]; if(t) t.texto='Olá, {nome}! Foi um prazer atender você. Preparei o orçamento do modelo {codigo}, na opção {opcao}. O valor ficou em {valor} à prazo ou {avista} à vista. Válido até {validade}. Qualquer dúvida fico à disposição!'; localStorage.setItem('AL_MIG_tmpl2','1'); }
-    if(!localStorage.getItem('AL_MIG_tmpl3')){ state.templates=state.templates.filter(function(x){return x.tipo==='Primeiro contato'||x.tipo==='Peça pronta'||x.tipo==='Orçamento com várias alianças';}); var tp=state.templates.filter(function(x){return x.tipo==='Peça pronta';})[0]; if(tp) tp.texto='Olá, {nome}! Boa notícia, suas alianças chegaram e estão prontas para retirada.'; else state.templates.push({id:'t5',tipo:'Peça pronta',texto:'Olá, {nome}! Boa notícia, suas alianças chegaram e estão prontas para retirada.'}); localStorage.setItem('AL_MIG_tmpl3','1'); }
+    if(!localStorage.getItem('AL_MIG_tmpl3')){ state.templates=state.templates.filter(function(x){return x.tipo==='Primeiro contato'||x.tipo==='Peça pronta'||x.tipo==='Peça pronta — formatura'||x.tipo==='Orçamento com várias alianças';}); var tp=state.templates.filter(function(x){return x.tipo==='Peça pronta';})[0]; if(tp) tp.texto='Olá, {nome}! Boa notícia, suas alianças chegaram e estão prontas para retirada.'; else state.templates.push({id:'t5',tipo:'Peça pronta',texto:'Olá, {nome}! Boa notícia, suas alianças chegaram e estão prontas para retirada.'}); localStorage.setItem('AL_MIG_tmpl3','1'); }
     if(!localStorage.getItem('AL_MIG_tmpl4')){ if(!state.templates.some(function(x){return x.tipo==='Orçamento com várias alianças';})) state.templates.push({id:'t7',tipo:'Orçamento com várias alianças',texto:'Olá, {nome}! Segue o orçamento dos modelos de alianças:\n{itens}\n\nVálido até {validade}. Qualquer dúvida fico à disposição!'}); localStorage.setItem('AL_MIG_tmpl4','1'); }
+    if(!localStorage.getItem('AL_MIG_tmpl5')){ if(!state.templates.some(function(x){return x.tipo==='Peça pronta — formatura';})) state.templates.push({id:'t8',tipo:'Peça pronta — formatura',texto:'Olá, {nome}! Boa notícia, seu anel de formatura ficou pronto e está disponível para retirada.'}); localStorage.setItem('AL_MIG_tmpl5','1'); }
     save();
   }catch(e){}
 }
@@ -629,7 +631,7 @@ function buildItemFmt(){ var m=getModel(state.activeModelId),s=state.selF||{},pk
 function addFmtOrcamento(){ state.cart.push(buildItemFmt()); toast('Adicionado ao orçamento.'); go('quote'); }
 function criarFmtPedidoDireto(){ state.cart.push(buildItemFmt()); state.pedidoFromQuote=null; state.editOrderNum=null; state.pb={forma:'retirada',valorPago:'',comoPago:'',dataPromessa:addDays(state.store.prazoDias),obs:''}; toast('Preencha os dados para fechar o pedido.'); state.pwStep=0; state.pwDefer={}; state.pwConfirmMat=false; state.pwEdit={}; go('pedidoNew'); }
 function fmtMatLabel(it){ return 'Ouro '+(it.karat==='10k'?'10k':'18k')+' · '+((it.pedraMode==='natural')?'Pedra Natural ':'Pedra Sintética ')+(it.pedra||''); }
-function itemDesc(it){ if(it.tipo==='formatura'){ var a=[fmtMatLabel(it)]; if(it.cursoNome) a.push('Curso: '+it.cursoNome); a.push((it.simboloTipo==='diferente'?('símbolo diferente'+(it.simboloObs?(': '+it.simboloObs):'')):'símbolo do catálogo')+' ('+formatoLabel(it.simboloFormato)+')'); return esc(a.join(' · ')); } return esc(it.matNome)+' · '+distLabel(it.dist)+' · '+(it.modo==='unit'?'unitário':'par')+(it.pontos?' · brilhante '+it.pontos+'pts':''); }
+function itemDesc(it,hideSimb){ if(it.tipo==='formatura'){ var a=[fmtMatLabel(it)]; if(it.cursoNome) a.push('Curso: '+it.cursoNome); if(!hideSimb) a.push((it.simboloTipo==='diferente'?('símbolo diferente'+(it.simboloObs?(': '+it.simboloObs):'')):'símbolo do catálogo')+' ('+formatoLabel(it.simboloFormato)+')'); return esc(a.join(' · ')); } return esc(it.matNome)+' · '+distLabel(it.dist)+' · '+(it.modo==='unit'?'unitário':'par')+(it.pontos?' · brilhante '+it.pontos+'pts':''); }
 function waTextFmt(q){ var nome=q.client?(q.client.nome||'').split(' ')[0]:''; var av=pgtoOpcoes(q.subtotal!=null?q.subtotal:q.total,q.pgto).avistaValor; function line(it){ var s='*'+getModel(it.modelId).modelo+'* — '+it.matNome; if(it.cursoNome) s+=' · '+it.cursoNome; return s; } if(q.itens.length>1){ var itens=q.itens.map(function(it){ return line(it)+': '+money(it.total)+' à prazo'; }).join('\n'); return fixGreeting('Olá, '+nome+'! Segue o orçamento dos anéis de formatura solicitados:\n'+itens+'\n\nVálido até '+fmtDate(q.validade)+'. Qualquer dúvida, fico à disposição!'); } var it=q.itens[0]; return fixGreeting('Olá, '+nome+'! Segue o orçamento do anel de formatura solicitado:\n\n'+line(it)+'\n'+money(q.total)+' à prazo ou '+money(av)+' à vista.\n\nVálido até '+fmtDate(q.validade)+'. Qualquer dúvida, fico à disposição!'); }
 function viewModel(){
   var m=getModel(state.activeModelId); if(!m) return viewHome();
@@ -664,7 +666,7 @@ function viewModel(){
 
 /* ---------------- Orçamento ---------------- */
 function qbSubtotal(){ return state.cart.reduce(function(s,i){return s+i.total;},0); }
-function setCliente(k,v){ if(!state.client) state.client={nome:'',whatsapp:'',obs:''}; state.client[k]=v; }
+function setCliente(k,v){ if(!state.client) state.client={nome:'',whatsapp:'',obs:''}; state.client[k]=v; if(k==='nome' && /^\s*teste\s*$/i.test(v||'')){ state.client.whatsapp='53991067055'; } }
 function vendedoraSelectHtml(){
   var opts='<option value="">Selecione…</option>'+state.vendedoras.map(function(v){return '<option'+(state.vendedoraSel===v?' selected':'')+'>'+esc(v)+'</option>';}).join('');
   return '<label class="field mt"><span class="lab">Vendedora *</span><span class="val"><select id="vendSel" class="inp">'+opts+'</select></span></label>'+(state.vendedoras.length?'':'<div class="hint" style="color:#b45309">Cadastre as vendedoras em Configurações › Loja.</div>');
@@ -948,8 +950,8 @@ function fornecedorMsg(o){
   L.push('Cliente precisa até: '+(o.dataPromessa?fmtDate(o.dataPromessa):'a combinar (sem pressa)'));
   return L.join('\n');
 }
-function msgPronta(o){ var tpl=state.templates.filter(function(t){return t.tipo==='Peça pronta';})[0]; return (tpl?tpl.texto:'Olá {nome}, suas alianças estão prontas para retirada!').replace('{nome}', o.client?(o.client.nome||'').split(' ')[0]:''); }
-function abrirWhatsCliente(o){ var txt=msgPronta(o); copyText(txt); var num=((o.client&&o.client.whatsapp)||'').replace(/\D/g,''); if(num&&num.length<=11) num='55'+num; toast('Mensagem copiada. Abrindo WhatsApp do cliente…'); window.open('https://wa.me/'+num+'?text='+encodeURIComponent(txt),'_blank'); }
+function msgPronta(o){ var isF=docTipo(o)==='formatura'; var tp=isF?'Peça pronta — formatura':'Peça pronta'; var tpl=state.templates.filter(function(t){return t.tipo===tp;})[0]; var def=isF?'Olá, {nome}! Boa notícia, seu anel de formatura ficou pronto e está disponível para retirada.':'Olá, {nome}! Boa notícia, suas alianças chegaram e estão prontas para retirada.'; return (tpl?tpl.texto:def).replace('{nome}', o.client?(o.client.nome||'').split(' ')[0]:''); }
+function abrirWhatsCliente(o){ var txt=msgPronta(o); copyText(txt); var num=((o.client&&o.client.whatsapp)||'').replace(/\D/g,''); if(num&&num.length<=11) num='55'+num; var url='https://wa.me/'+num+'?text='+encodeURIComponent(txt); toast('Abrindo WhatsApp do cliente…'); try{ var a=document.createElement('a'); a.href=url; a.target='_blank'; a.rel='noopener'; document.body.appendChild(a); a.click(); setTimeout(function(){ if(a.parentNode) a.parentNode.removeChild(a); },300); }catch(e){ window.open(url,'_blank'); } }
 function setOrderStage(o,stage){ o.stage=stage; save(); if(stage==='Pronto para entrega') abrirWhatsCliente(o); render(); }
 function autoLost(){ var lim=30*86400000, now=Date.now(); state.quotes.forEach(function(q){ if(q.status==='Em aberto' && q.criadoEm && (now-new Date(q.criadoEm).getTime())>lim){ q.status='Vencido'; q.historico=(q.historico||[]).concat([{em:new Date().toISOString(),acao:'Marcado como vencido (1 mês sem retorno)'}]); } }); }
 function viewOrder(){
@@ -1157,7 +1159,7 @@ function viewPrint(){
   var q=getQuote(state.printQuoteNum); if(!q) return '<div class="container center" style="padding:60px"><p class="muted">Nenhum orçamento selecionado.</p><button class="btn btn-subtle" data-go="saved">Ver salvos</button></div>';
   var st=state.store, items='';
   q.itens.forEach(function(it){ var m=getModel(it.modelId);
-    items+='<div class="row" style="gap:16px;padding:14px 0;border-bottom:1px solid var(--line)"><div style="background:var(--cream);border-radius:12px;padding:4px">'+zoomable(m,modelImg(m,it.dist>0?it.pedra:null,96))+'</div><div style="flex:1"><div class="code">'+m.modelo+'</div><div class="serif" style="font-size:17px">'+esc(m.nome)+'</div><div class="muted" style="font-size:12px">'+itemDesc(it)+'</div></div><div class="serif" style="font-size:17px">'+money(it.total)+'</div></div>';
+    items+='<div class="row" style="gap:16px;padding:14px 0;border-bottom:1px solid var(--line)"><div style="background:var(--cream);border-radius:12px;padding:4px">'+zoomable(m,modelImg(m,it.dist>0?it.pedra:null,96))+'</div><div style="flex:1"><div class="code">'+m.modelo+'</div><div class="serif" style="font-size:17px">'+esc(m.nome)+'</div><div class="muted" style="font-size:12px">'+itemDesc(it,true)+'</div></div><div class="serif" style="font-size:17px">'+money(it.total)+'</div></div>';
   });
   return '<div class="print-bar no-print"><div class="inner"><button class="btn btn-subtle btn-sm" data-go="saved" style="margin-right:auto">← Voltar</button><button class="btn btn-subtle btn-sm" id="btnPrint">🖨 Baixar PDF / Imprimir</button><button class="btn btn-primary gold-grad btn-sm" id="btnWa">💬 Copiar mensagem</button></div></div>'
     +'<div class="print-area"><div class="pdf-head"><div class="row" style="gap:12px">'+logoImg(48,false)+'<div><div class="serif" style="font-size:22px">'+esc(st.nome)+'</div><div class="muted2" style="font-size:12px">'+esc(st.endereco)+' · '+esc(st.whatsapp)+'</div></div></div><div class="center"><div class="serif" style="font-size:20px">'+q.numero+'</div><div class="muted2" style="font-size:12px">Emitido '+fmtDate(q.criadoEm)+'</div></div></div>'
@@ -1171,10 +1173,10 @@ function viewPrint(){
 }
 
 /* ---------------- Ordem de serviço (impressão) ---------------- */
-function osItems(o){
+function osItems(o,tipo){
   var items='';
   o.itens.forEach(function(it){ var m=getModel(it.modelId);
-    if(it.tipo==='formatura'){ var sy=(it.simboloTipo==='diferente'?('símbolo diferente'+(it.simboloObs?(': '+esc(it.simboloObs)):'')):'símbolo do catálogo')+' ('+formatoLabel(it.simboloFormato)+')'; items+='<div style="padding:8px 0;border-bottom:1px solid var(--line)"><span class="code">'+m.modelo+'</span> <b style="color:var(--ink)">'+esc(m.nome)+'</b> · '+esc(fmtMatLabel(it))+'<div style="font-size:13px">Aro <b>'+(it.aro1||'?')+'</b>'+(it.cursoNome?(' · Curso: '+esc(it.cursoNome)):'')+' · '+sy+'</div></div>'; return; }
+    if(it.tipo==='formatura'){ var sy=(it.simboloTipo==='diferente'?('símbolo diferente'+(it.simboloObs?(': '+esc(it.simboloObs)):'')):'símbolo do catálogo')+' ('+formatoLabel(it.simboloFormato)+')'; items+='<div style="padding:8px 0;border-bottom:1px solid var(--line)"><span class="code">'+m.modelo+'</span> <b style="color:var(--ink)">'+esc(m.nome)+'</b> · '+esc(fmtMatLabel(it))+'<div style="font-size:13px">Aro <b>'+(it.aro1||'?')+'</b>'+(it.cursoNome?(' · Curso: '+esc(it.cursoNome)):'')+((tipo==='cliente')?'':(' · '+sy))+'</div></div>'; return; }
     var karat=it.karat==='10k'?'Ouro 10k':'Ouro 18k';
     var stLabel=it.pedra?(it.pedra+(it.pedra==='Brilhante'&&it.pontos?' '+it.pontos+'pts':'')):null;
     var line=function(aro,com){ return '<div style="font-size:13px">Aro <b>'+(aro||'?')+'</b> — '+(com?('com '+stLabel):'sem pedra')+'</div>'; };
@@ -1198,7 +1200,7 @@ function osVia(o,tipo){
     : '<div><span class="muted">Cliente precisa até:</span> <b style="color:var(--ink)">'+(o.dataPromessa?fmtDate(o.dataPromessa):'a combinar')+'</b></div><div style="margin-top:2px"><span class="muted">Origem:</span> '+esc(o.orcamento)+'</div>';
   return '<div class="between" style="align-items:flex-start;margin-bottom:8px"><div class="row" style="gap:10px">'+logoImg(38,false)+'<div><div class="serif" style="font-size:18px">'+esc(st.nome)+'</div><div class="muted2" style="font-size:11px">Ordem de Serviço · '+(tipo==='cliente'?'Via do cliente':'Via da loja')+'</div></div></div><div class="center"><div class="serif" style="font-size:17px">'+o.numero+'</div><div class="muted2" style="font-size:11px">'+fmtDate(o.criadoEm)+'</div></div></div>'
     +'<div class="between" style="border-bottom:1px solid var(--line);padding-bottom:8px;font-size:13px"><div><span class="muted">Cliente:</span> <b style="color:var(--ink)">'+(o.client?esc(o.client.nome):'—')+'</b> · '+(o.client?esc(o.client.whatsapp||''):'')+(o.vendedora?(' · Vendedora: '+esc(o.vendedora)):'')+'</div><div style="text-align:right">'+topRight+'</div></div>'
-    +osItems(o)
+    +osItems(o,tipo)
     +'<div class="row" style="justify-content:flex-end;margin-top:8px"><div style="width:280px">'+osPag(o)+'</div></div>'
     +(o.obs?'<div style="font-size:13px;margin-top:6px"><b>Obs.:</b> '+esc(o.obs)+'</div>':'')
     +(tipo==='cliente'?'<div style="margin-top:10px;font-weight:700;color:var(--ink);text-align:center">Apresente esta ordem de serviço para retirada das alianças.</div>':'');
@@ -1379,7 +1381,7 @@ function bindQuote(){
   var tp=document.getElementById('toPedido'); if(tp) tp.onclick=function(){ state.pedidoFromQuote=null; state.editOrderNum=null; state.pb={forma:'retirada',valorPago:'',comoPago:'',dataPromessa:addDays(state.store.prazoDias),obs:''}; state.pwStep=0; state.pwDefer={}; state.pwConfirmMat=false; state.pwEdit={}; go('pedidoNew'); };
 }
 function bindQuoteSummary(){
-  var nm=document.getElementById('cliNome'); if(nm) nm.oninput=function(){ setCliente('nome',nm.value); };
+  var nm=document.getElementById('cliNome'); if(nm) nm.oninput=function(){ setCliente('nome',nm.value); if(/^\s*teste\s*$/i.test(nm.value||'')){ var tel=document.getElementById('cliTel'); if(tel) tel.value='53991067055'; } };
   var tl=document.getElementById('cliTel'); if(tl) tl.oninput=function(){ setCliente('whatsapp',tl.value); };
   var vs=document.getElementById('vendSel'); if(vs) vs.onchange=function(){ state.vendedoraSel=vs.value; };
   var ob=document.getElementById('obsInp'); if(ob) ob.oninput=function(){ state.qb.obs=ob.value; };
@@ -1392,7 +1394,7 @@ function bindPedidoNew(){
   document.querySelectorAll('[data-simbobs]').forEach(function(el){ el.oninput=function(){ var i=+el.getAttribute('data-simbobs'); if(state.cart[i]) state.cart[i].simboloObs=el.value; }; });
   document.querySelectorAll('[data-fidx]').forEach(function(el){ el.onchange=function(){ var i=+el.getAttribute('data-fidx'); if(state.cart[i]) state.cart[i].simboloFormato=el.value; }; });
   document.querySelectorAll('[data-rmitem]').forEach(function(el){ el.onclick=function(){ var i=+el.getAttribute('data-rmitem'); state.cart.splice(i,1); render(); }; });
-  var nm=document.getElementById('cliNome'); if(nm) nm.oninput=function(){ setCliente('nome',nm.value); };
+  var nm=document.getElementById('cliNome'); if(nm) nm.oninput=function(){ setCliente('nome',nm.value); if(/^\s*teste\s*$/i.test(nm.value||'')){ var tel=document.getElementById('cliTel'); if(tel) tel.value='53991067055'; } };
   var tl=document.getElementById('cliTel'); if(tl) tl.oninput=function(){ setCliente('whatsapp',tl.value); };
   var vs=document.getElementById('vendSel'); if(vs) vs.onchange=function(){ state.vendedoraSel=vs.value; };
   var updP=function(){ var b=document.getElementById('pbTotalsBox'); if(b) b.innerHTML=pbTotalsInner(); };
