@@ -500,6 +500,7 @@ function render(){
     case 'quote': body=viewQuote(); break;
     case 'pedidoNew': body=viewPedidoNew(); break;
     case 'pickItem': body=viewPickItem(); break;
+    case 'payEdit': body=viewPayEdit(); break;
     case 'saved': body=viewSaved(); break;
     case 'clients': body=viewClients(); break;
     case 'pedidos': body=viewPedidos(); break;
@@ -640,7 +641,7 @@ function addFmtOrcamento(){ state.cart.push(buildItemFmt()); toast('Adicionado a
 function addFmtOrcamentoMore(){ state.cart.push(buildItemFmt()); toast('Adicionado ('+state.cart.length+'). Escolha outro ouro/pedra e adicione mais, ou finalize em "Adicionar ao orçamento".'); render(); }
 function criarFmtPedidoDireto(){ state.cart.push(buildItemFmt()); state.pedidoFromQuote=null; state.editOrderNum=null; state.pb={forma:'retirada',valorPago:'',comoPago:'',dataPromessa:addDays(state.store.prazoDias),obs:''}; toast('Preencha os dados para fechar o pedido.'); state.pwStep=0; state.pwDefer={}; state.pwConfirmMat=false; state.pwEdit={}; go('pedidoNew'); }
 function fmtMatLabel(it){ return 'Ouro '+(it.karat==='10k'?'10k':'18k')+' · '+((it.pedraMode==='natural')?'Pedra Natural ':'Pedra Sintética ')+(it.pedra||''); }
-function itemDesc(it,hideSimb){ if(it.tipo==='formatura'){ var a=[fmtMatLabel(it)]; if(it.cursoNome) a.push('Curso: '+it.cursoNome); if(!hideSimb) a.push((it.simboloTipo==='diferente'?('símbolo diferente'+(it.simboloObs?(': '+it.simboloObs):'')):'símbolo do catálogo')+' ('+formatoLabel(it.simboloFormato)+')'); return esc(a.join(' · ')); } return esc(it.matNome)+' · '+distLabel(it.dist)+' · '+(it.modo==='unit'?'unitário':'par')+(it.pontos?' · brilhante '+it.pontos+'pts':''); }
+function itemDesc(it,hideSimb){ if(it.tipo==='formatura'){ var a=[fmtMatLabel(it)]; if(it.cursoNome) a.push('Curso: '+it.cursoNome); return esc(a.join(' · ')); } return esc(it.matNome)+' · '+distLabel(it.dist)+' · '+(it.modo==='unit'?'unitário':'par')+(it.pontos?' · brilhante '+it.pontos+'pts':''); }
 function waTextFmt(q){ var nome=q.client?(q.client.nome||'').split(' ')[0]:''; var av=pgtoOpcoes(q.subtotal!=null?q.subtotal:q.total,q.pgto).avistaValor; function line(it){ var s='*'+getModel(it.modelId).modelo+'* — '+it.matNome; if(it.cursoNome) s+=' · '+it.cursoNome; return s; } if(q.itens.length>1){ var itens=q.itens.map(function(it){ return line(it)+': '+money(it.total)+' à prazo'; }).join('\n'); return fixGreeting('Olá, '+nome+'! Segue o orçamento dos anéis de formatura solicitados:\n'+itens+'\n\nVálido até '+fmtDate(q.validade)+'. Qualquer dúvida, fico à disposição!'); } var it=q.itens[0]; return fixGreeting('Olá, '+nome+'! Segue o orçamento do anel de formatura solicitado:\n\n'+line(it)+'\n'+money(q.total)+' à prazo ou '+money(av)+' à vista.\n\nVálido até '+fmtDate(q.validade)+'. Qualquer dúvida, fico à disposição!'); }
 function viewModel(){
   var m=getModel(state.activeModelId); if(!m) return viewHome();
@@ -745,7 +746,7 @@ function saveQuote(){
 }
 
 /* ---------------- Fechar pedido (aros + gravação) ---------------- */
-function pbSubtotal(){ return state.cart.reduce(function(s,i){return s+i.total;},0); }
+function pbSubtotal(){ if(state.editPayNum && state.screen==='payEdit'){ var eo=getOrder(state.editPayNum); return eo?eo.total:0; } return state.cart.reduce(function(s,i){return s+i.total;},0); }
 function pbCalc(){
   var total=pbSubtotal(), f=state.pb.forma;
   if(f==='pago') return {total:total, pago:total, falta:0, label:'Pago', como:'', pagamentos:[]};
@@ -767,7 +768,7 @@ function pbTotalsInner(){
   else { h+='<div class="sumrow"><span>A receber na retirada</span><span>'+money(c.total)+'</span></div>'; }
   return h+'</div>';
 }
-function pwSteps(){ var f=state.cart[0]&&state.cart[0].tipo==='formatura'; return f?[['cliente','Cliente'],['cursosimb','Curso'],['aro','Aro'],['pagamento','Pagamento'],['confirma','Confirmação'],['resumo','Resumo']]:[['cliente','Cliente'],['aros','Aros'],['pagamento','Pagamento'],['confirma','Confirmação'],['resumo','Resumo']]; }
+function pwSteps(){ var f=state.cart[0]&&state.cart[0].tipo==='formatura'; return f?[['cliente','Cliente'],['cursosimb','Curso'],['aro','Aro'],['confirma','Confirmação'],['resumo','Resumo'],['pagamento','Pagamento']]:[['cliente','Cliente'],['aros','Aros'],['confirma','Confirmação'],['resumo','Resumo'],['pagamento','Pagamento']]; }
 function pedItemHead(it){ var m=getModel(it.modelId); return '<div class="row gap" style="align-items:center">'+modelImg(m,it.dist>0?it.pedra:null,44)+'<div style="flex:1"><span class="code">'+m.modelo+'</span> <b style="color:var(--ink)">'+esc(m.nome)+'</b><div class="muted" style="font-size:12px">'+itemDesc(it)+'</div></div><div class="serif">'+money(it.total)+'</div></div>'; }
 function recalcFmt(it,pick,stoneName){ var m=getModel(it.modelId); var pk=({'10kz':{karat:'10k',mode:'sintetica'},'18kz':{karat:'18k',mode:'sintetica'},'18kn':{karat:'18k',mode:'natural'}})[pick]||{karat:'10k',mode:'sintetica'}; var c=priceFmt(m,pk.karat,pk.mode,stoneName); it.karat=pk.karat; it.pedraMode=pk.mode; it.pedra=stoneName||''; it.pedraUSD=c.pedraUSD; it.dist=(pk.mode==='natural'?1:0); it.total=c.valor; it.par=c.valor; it.peso=c.peso; it.matNome='Ouro '+pk.karat+' · '+(pk.mode==='natural'?'Pedra Natural ':'Pedra Sintética ')+(stoneName||''); }
 function recalcAli(it,matId,dist){ var m=getModel(it.modelId); var mat=MAT_BY[matId]; if(!mat) return; var c=priceOf(m,matId,dist); it.matId=matId; it.matNome=mat.nome; it.karat=mat.karat; it.pedra=mat.pedra; it.pontos=(mat.pedra==='Brilhante'?m.pontosBrilhante:null); it.dist=dist; it.pesoPar=c.pesoPar; it.par=c.par; it.total=valorModo(c.par,it.modo); }
@@ -783,7 +784,7 @@ function pwBody(step){
   if(step==='confirma'){ return '<h3 class="serif" style="font-size:18px;margin-bottom:6px">Confirme o material e a pedra</h3><div class="hint" style="margin-bottom:12px">Confira com atenção — é o que foi escolhido no orçamento. Se algo estiver errado, toque em "Alterar" e corrija aqui mesmo.</div>'+state.cart.map(function(it,idx){ return confItemHtml(it,idx); }).join('')+'<label class="check" style="border:0;padding:8px 0;margin-top:2px"><input type="checkbox" id="pwConfMat"'+(state.pwConfirmMat?' checked':'')+'/> <b style="color:var(--ink)">Confirmo o material e a pedra acima.</b></label>'; }
   var cli='<div class="sumrow"><span>Cliente</span><span>'+((state.client&&state.client.nome)?esc(state.client.nome):'—')+'</span></div><div class="sumrow"><span>Telefone</span><span>'+esc((state.client&&state.client.whatsapp)||'—')+'</span></div><div class="sumrow"><span>Vendedora</span><span>'+esc(state.vendedoraSel||'—')+'</span></div>';
   var itens=state.cart.map(function(it){ var m=getModel(it.modelId); var ex=[]; if(it.aro1) ex.push('aro '+it.aro1); if(it.modo!=='unit'&&it.aro2) ex.push('aro2 '+it.aro2); return '<div style="padding:8px 0;border-bottom:1px solid var(--line)"><b style="color:var(--ink)">'+m.modelo+'</b> '+esc(m.nome)+'<div class="muted" style="font-size:12px">'+itemDesc(it)+(ex.length?(' · '+ex.join(' / ')):'')+'</div></div>'; }).join('');
-  return '<h3 class="serif" style="font-size:18px;margin-bottom:12px">Resumo do pedido</h3>'+cli+'<div class="mt">'+itens+'</div><div class="mt">'+pbTotalsInner()+'</div><div class="hint" style="margin-top:8px">Confira tudo e clique em '+(state.editOrderNum?'Salvar pedido':'Criar pedido de venda')+'.</div>';
+  return '<h3 class="serif" style="font-size:18px;margin-bottom:6px">Resumo do pedido</h3><div class="hint" style="margin-bottom:12px">Repasse com o cliente se está tudo certo. Depois clique em <b>Avançar</b> para registrar o pagamento.</div>'+cli+'<div class="mt">'+itens+'</div><div class="divider mt" style="padding-top:10px"><div class="sumrow st"><span>Total do pedido</span><span>'+money(pbSubtotal())+'</span></div></div>';
 }
 function viewPedidoNew(){
   if(!state.cart.length) return '<h1 class="serif" style="font-size:26px">Novo pedido</h1><div class="card pad center mt" style="padding:44px"><span class="muted">Nenhum modelo selecionado.</span> <button class="btn btn-subtle btn-sm" data-action="novo">Escolher um modelo</button></div>';
@@ -848,6 +849,22 @@ function editarPedido(num){
   state.pedidoFromQuote=(o.orcamento&&o.orcamento!=='Venda direta')?o.orcamento:null;
   state.editOrderNum=num; state.editQuoteNum=null; toast('Editando '+num); state.pwStep=0; state.pwDefer={}; state.pwConfirmMat=false; state.pwEdit={}; go('pedidoNew');
 }
+function editarPagamento(num){ var o=getOrder(num); if(!o) return; state.editPayNum=num; state.activeOrderId=num; state.pb={forma:(o.forma||(o.pagamento==='Pago'?'pago':(o.pagamento==='Pago parcialmente'?'parcial':'retirada'))), pagamentos:(o.pagamentos&&o.pagamentos.length?JSON.parse(JSON.stringify(o.pagamentos)):(o.pago?[{valor:o.pago,forma:o.comoPago||''}]:[{valor:'',forma:''}])), comoPago:(o.comoPago||''), dataPromessa:o.dataPromessa, obs:o.obs||''}; go('payEdit'); }
+function viewPayEdit(){ var o=getOrder(state.editPayNum); if(!o) return viewPedidos(); return '<div style="max-width:640px;margin:0 auto"><button class="btn btn-ghost btn-sm" data-payback="1">← Voltar ao pedido</button><h1 class="serif" style="font-size:24px;margin-top:8px">Atualizar pagamento — '+o.numero+'</h1><div class="hint" style="margin-top:2px">Cliente: '+(o.client?esc(o.client.nome):'—')+' · Total do pedido '+money(o.total)+'</div><div class="card pad mt">'+pwBody('pagamento')+'</div><div class="between mt2"><button class="btn btn-subtle" data-payback="1">Cancelar</button><button class="btn btn-primary gold-grad" id="paySave">Salvar pagamento</button></div></div>'; }
+function savePayEdit(){ var o=getOrder(state.editPayNum); if(!o) return; var c=pbCalc(); o.total=c.total; o.pagamento=c.label; o.pago=c.pago; o.falta=c.falta; o.comoPago=c.como; o.pagamentos=c.pagamentos; o.forma=state.pb.forma; o.obs=state.pb.obs||''; o.dataPromessa=state.pb.dataPromessa; var n=o.numero; state.editPayNum=null; state.pb=null; state.activeOrderId=n; save(); toast('Pagamento atualizado.'); go('order'); }
+function cancelPayEdit(){ state.editPayNum=null; state.pb=null; go('order'); }
+function bindPayInputs(){
+  var updP=function(){ var b=document.getElementById('pbTotalsBox'); if(b) b.innerHTML=pbTotalsInner(); };
+  var fo=document.getElementById('pbForma'); if(fo) fo.onchange=function(){ state.pb.forma=fo.value; if(fo.value==='parcial' && (!state.pb.pagamentos||!state.pb.pagamentos.length)) state.pb.pagamentos=[{valor:'',forma:''}]; render(); };
+  document.querySelectorAll('[data-pgv]').forEach(function(el){ el.oninput=function(){ var i=+el.getAttribute('data-pgv'); if(state.pb.pagamentos[i]) state.pb.pagamentos[i].valor=el.value; updP(); }; });
+  document.querySelectorAll('[data-pgf]').forEach(function(el){ el.oninput=function(){ var i=+el.getAttribute('data-pgf'); if(state.pb.pagamentos[i]) state.pb.pagamentos[i].forma=el.value; updP(); }; });
+  document.querySelectorAll('[data-pgrm]').forEach(function(el){ el.onclick=function(){ var i=+el.getAttribute('data-pgrm'); state.pb.pagamentos.splice(i,1); if(!state.pb.pagamentos.length) state.pb.pagamentos=[{valor:'',forma:''}]; render(); }; });
+  var pgA=document.getElementById('pgAdd'); if(pgA) pgA.onclick=function(){ if(!state.pb.pagamentos) state.pb.pagamentos=[]; state.pb.pagamentos.push({valor:'',forma:''}); render(); };
+  var da=document.getElementById('pbData'); if(da) da.onchange=function(){ state.pb.dataPromessa=da.value; };
+  var sd=document.getElementById('pbSemData'); if(sd) sd.onchange=function(){ state.pb.dataPromessa = sd.checked ? '' : addDays(state.store.prazoDias); render(); };
+  var ob=document.getElementById('pbObs'); if(ob) ob.oninput=function(){ state.pb.obs=ob.value; };
+}
+function bindPayEdit(){ bindPayInputs(); var s=document.getElementById('paySave'); if(s) s.onclick=savePayEdit; document.querySelectorAll('[data-payback]').forEach(function(el){ el.onclick=cancelPayEdit; }); }
 
 /* ---------------- Clientes ---------------- */
 function viewClients(){
@@ -1009,6 +1026,7 @@ function viewOrder(){
       +'<div class="card pad mt"><div class="between"><h3 class="serif" style="font-size:18px">Mensagem para o fornecedor</h3><div class="row gap"><button class="btn btn-ghost btn-sm" id="fornCopy">Copiar</button><a class="btn btn-primary gold-grad btn-sm" id="fornWa" target="_blank" rel="noreferrer">WhatsApp</a></div></div><div class="hint" style="margin:4px 0 6px">Copie e envie ao seu fornecedor para fazer o pedido.</div><pre style="white-space:pre-wrap;font-family:inherit;font-size:13px;background:var(--cream);border-radius:10px;padding:12px;color:var(--charcoal)">'+esc(fornecedorMsg(o))+'</pre></div>'
       +'</div>'
       +'<div class="card pad" style="height:fit-content"><div class="sumrow"><span>Cliente</span><span>'+(o.client?esc(o.client.nome):'—')+'</span></div><div class="sumrow"><span>Telefone</span><span>'+(o.client?esc(o.client.whatsapp||'—'):'—')+'</span></div><div class="sumrow"><span>Vendedora</span><span>'+esc(o.vendedora||'—')+'</span></div><div class="sumrow st"><span>Total</span><span>'+money(o.total)+'</span></div><div class="sumrow"><span>Pagamento</span><span>'+esc(o.pagamento||'—')+'</span></div>'+((o.pago||0)>0?'<div class="sumrow"><span>Já pago</span><span>'+money(o.pago)+'</span></div>'+(o.comoPago?'<div class="hint" style="text-align:right">'+esc(o.comoPago)+'</div>':''):'')+(((o.falta||0)>0&&o.pagamento!=='Pago')?'<div class="sumrow st"><span>Falta</span><span>'+money(o.falta)+'</span></div>':'')+(o.obs?'<div class="divider" style="padding-top:8px;margin-top:4px"><div class="hint">Observações</div><div style="font-size:13px">'+esc(o.obs)+'</div></div>':'')
+      +'<button class="btn btn-white w100 mt" data-editpay="'+o.numero+'" style="border:1px solid var(--line)">💳 Atualizar pagamento</button>'
       +'<label class="field mt"><span class="lab">Data prometida</span><span class="val"><input id="oData" type="date" class="inp" value="'+o.dataPromessa+'"/></span></label>'
       +'<label class="field mt"><span class="lab">Status do pedido</span><span class="val"><select id="oStage" class="inp" style="'+toneCss(stageTone(o.stage))+'">'+ORDER_STAGES.map(function(s){return '<option'+(o.stage===s?' selected':'')+' style="'+toneCss(stageTone(s))+'">'+s+'</option>';}).join('')+'</select></span></label><button class="btn btn-primary gold-grad w100 mt" data-printos="'+o.numero+'">🖨 Imprimir ordem de serviço</button></div></div>';
 }
@@ -1441,6 +1459,7 @@ function bind(){
   document.querySelectorAll('[data-delo]').forEach(function(b){ b.addEventListener('click',function(){ var n=b.getAttribute('data-delo'); if(window.confirm('Excluir o pedido '+n+'? Esta ação não pode ser desfeita.')){ state.orders=state.orders.filter(function(x){return x.numero!==n;}); save(); render(); } }); });
   document.querySelectorAll('[data-printos]').forEach(function(b){ b.addEventListener('click',function(){ state.printOrderNum=b.getAttribute('data-printos'); go('printos'); }); });
   document.querySelectorAll('[data-edito]').forEach(function(b){ b.addEventListener('click',function(){ editarPedido(b.getAttribute('data-edito')); }); });
+  document.querySelectorAll('[data-editpay]').forEach(function(b){ b.addEventListener('click',function(){ editarPagamento(b.getAttribute('data-editpay')); }); });
   var bpo=document.getElementById('btnPrintOS'); if(bpo) bpo.onclick=function(){ window.print(); };
   var gs=document.getElementById('globalSearch'); if(gs){ gs.value=state.search; gs.oninput=function(){ state.search=gs.value; renderSearchDrop(); }; gs.onblur=function(){ setTimeout(function(){ var d=document.getElementById('searchDrop'); if(d) d.innerHTML=''; },150); }; }
   var rf=document.getElementById('rateRefresh'); if(rf) rf.onclick=fetchRates;
@@ -1456,6 +1475,7 @@ function bind(){
   if(state.screen==='quote') bindQuote();
   if(state.screen==='pedidoNew') bindPedidoNew();
   if(state.screen==='pickItem') bindPickItem();
+  if(state.screen==='payEdit') bindPayEdit();
   if(state.screen==='saved') bindSaved();
   if(state.screen==='order') bindOrder();
   if(state.screen==='config') bindConfig();
@@ -1507,17 +1527,13 @@ function bindPedidoNew(){
   var fo=document.getElementById('pbForma'); if(fo) fo.onchange=function(){ state.pb.forma=fo.value; if(fo.value==='parcial' && (!state.pb.pagamentos||!state.pb.pagamentos.length)) state.pb.pagamentos=[{valor:'',forma:''}]; render(); };
   document.querySelectorAll('[data-pgv]').forEach(function(el){ el.oninput=function(){ var i=+el.getAttribute('data-pgv'); if(state.pb.pagamentos[i]) state.pb.pagamentos[i].valor=el.value; updP(); }; });
   document.querySelectorAll('[data-pgf]').forEach(function(el){ el.oninput=function(){ var i=+el.getAttribute('data-pgf'); if(state.pb.pagamentos[i]) state.pb.pagamentos[i].forma=el.value; updP(); }; });
-  document.querySelectorAll('[data-pgrm]').forEach(function(el){ el.onclick=function(){ var i=+el.getAttribute('data-pgrm'); state.pb.pagamentos.splice(i,1); if(!state.pb.pagamentos.length) state.pb.pagamentos=[{valor:'',forma:''}]; render(); }; });
-  var pgA=document.getElementById('pgAdd'); if(pgA) pgA.onclick=function(){ if(!state.pb.pagamentos) state.pb.pagamentos=[]; state.pb.pagamentos.push({valor:'',forma:''}); render(); };
-  var da=document.getElementById('pbData'); if(da) da.onchange=function(){ state.pb.dataPromessa=da.value; };
-  var sd=document.getElementById('pbSemData'); if(sd) sd.onchange=function(){ state.pb.dataPromessa = sd.checked ? '' : addDays(state.store.prazoDias); render(); };
+  bindPayInputs();
   var cm=document.getElementById('pwConfMat'); if(cm) cm.onchange=function(){ state.pwConfirmMat=cm.checked; };
   document.querySelectorAll('[data-confedit]').forEach(function(b){ b.onclick=function(){ var i=+b.getAttribute('data-confedit'); if(!state.pwEdit) state.pwEdit={}; state.pwEdit[i]=!state.pwEdit[i]; render(); }; });
   document.querySelectorAll('[data-cfmat]').forEach(function(el){ el.onchange=function(){ var i=+el.getAttribute('data-cfmat'); var it=state.cart[i]; if(!it) return; var pick=el.value; var m=getModel(it.modelId); var nat=(m.pedrasNaturais||[]); var stone=it.pedra; if(!stone||!nat.some(function(p){return p.nome===stone;})) stone=nat[0]?nat[0].nome:''; recalcFmt(it,pick,stone); state.pwConfirmMat=false; render(); }; });
   document.querySelectorAll('[data-cfstone]').forEach(function(el){ el.onchange=function(){ var i=+el.getAttribute('data-cfstone'); var it=state.cart[i]; if(!it) return; var pick=(it.pedraMode==='natural')?'18kn':(it.karat==='10k'?'10kz':'18kz'); recalcFmt(it,pick,el.value); state.pwConfirmMat=false; render(); }; });
   document.querySelectorAll('[data-camat]').forEach(function(el){ el.onchange=function(){ var i=+el.getAttribute('data-camat'); var it=state.cart[i]; if(!it) return; recalcAli(it,el.value,it.dist); state.pwConfirmMat=false; render(); }; });
   document.querySelectorAll('[data-cadist]').forEach(function(el){ el.onchange=function(){ var i=+el.getAttribute('data-cadist'); var it=state.cart[i]; if(!it) return; recalcAli(it,it.matId,+el.value); state.pwConfirmMat=false; render(); }; });
-  var ob=document.getElementById('pbObs'); if(ob) ob.oninput=function(){ state.pb.obs=ob.value; };
   var cr=document.getElementById('pbCreate'); if(cr) cr.onclick=createPedido;
   var pbk=document.getElementById('pwBack'); if(pbk) pbk.onclick=function(){ if(state.pwStep>0){ state.pwStep--; render(); } };
   if(!state.pwDefer) state.pwDefer={};
