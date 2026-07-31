@@ -991,7 +991,8 @@ function fornecedorMsg(o){
       if(it.pedraTrocar && it.pedraCliente){ L.push('*Pedra: '+it.pedraCliente+'*  (⚠ escolha do cliente — orçado como '+(it.pedra||'—')+')'); }
       else { L.push('*'+pedraF+'*'); }
       if(it.cursoNome) L.push('Curso: *'+it.cursoNome+'*'+(it.cursoSimbolo?(' — símbolo do curso: '+it.cursoSimbolo):''));
-      if(it.simboloTipo==='diferente'){ L.push('*Símbolo diferente do catálogo:* '+(it.simboloObs||'(especificar com o cliente)')); }
+      if(it.simboloTipo==='diferente'){ L.push('Símbolo: *'+(it.simboloObs||'(especificar com o cliente)')+'* (diferente do catálogo)'); }
+      else { L.push('Símbolo: *Conforme o catálogo*'); }
       L.push('*Aro '+(it.aro1||'?')+'*');
       L.push('');
       return;
